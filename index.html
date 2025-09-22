@@ -1,78 +1,327 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Under Development</title>
-  <style>
-    body {
-      margin: 0;
-      padding: 0;
-      height: 100vh;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      font-family: "Poppins", sans-serif;
-      background: linear-gradient(135deg, #1e3c72, #2a5298);
-      color: #fff;
-      text-align: center;
-    }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Profile UI - Dark Theme</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@700&display=swap');
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #1e1e1e; /* A very dark gray */
+            color: #e2e8f0; /* Light text */
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            align-items: center;
+            min-height: 100vh;
+            padding: 2rem 1rem;
+        }
 
-    .card {
-      background: #ffffff10;
-      backdrop-filter: blur(12px);
-      padding: 2rem;
-      border-radius: 1.5rem;
-      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.25);
-      max-width: 400px;
-      width: 90%;
-      animation: fadeIn 1.2s ease-in-out;
-    }
+        header {
+            width: 100%;
+            max-width: 900px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 1rem 0;
+            margin-bottom: 3rem;
+        }
+        
+        @media (min-width: 768px) {
+            header {
+                flex-direction: row;
+                justify-content: space-between;
+            }
+        }
 
-    h1 {
-      font-size: 1.8rem;
-      margin-bottom: 0.8rem;
-    }
+        .header-title {
+            font-family: 'Poppins', sans-serif; /* Changed font */
+            font-size: 2rem; /* Increased size */
+            font-weight: 700;
+            color: #f7fafc;
+        }
 
-    p {
-      font-size: 1rem;
-      font-weight: 300;
-      line-height: 1.4;
-      margin-bottom: 1.5rem;
-    }
+        .header-join-button {
+            background-color: #4a90e2;
+            color: white;
+            padding: 0.75rem 2rem;
+            border-radius: 9999px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease-in-out;
+            margin-top: 1rem;
+        }
+        
+        .header-join-button:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
 
-    .loader {
-      margin: auto;
-      width: 45px;
-      height: 45px;
-      border: 4px solid rgba(255, 255, 255, 0.4);
-      border-top: 4px solid #fff;
-      border-radius: 50%;
-      animation: spin 1.2s linear infinite;
-    }
+        @media (min-width: 768px) {
+            .header-join-button {
+                margin-top: 0;
+            }
+        }
 
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(20px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
+        .container {
+            display: flex;
+            flex-direction: column;
+            gap: 4rem;
+            align-items: center;
+            width: 100%;
+            max-width: 900px;
+        }
 
-    @keyframes spin {
-      100% { transform: rotate(360deg); }
-    }
+        @media (min-width: 768px) {
+            .container {
+                flex-direction: row;
+                justify-content: center;
+            }
+        }
 
-    /* Mobile adjustments */
-    @media (max-width: 480px) {
-      h1 { font-size: 1.5rem; }
-      p { font-size: 0.95rem; }
-      .card { padding: 1.5rem; }
-    }
-  </style>
+        .profile-section {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 1rem;
+            text-align: center;
+            transition: all 0.3s ease-in-out;
+            border: 2px solid transparent;
+            padding: 1rem;
+            border-radius: 1rem;
+            cursor: pointer;
+            position: relative;
+        }
+
+        .profile-section:hover {
+            transform: scale(1.05);
+            border-color: #4a5568;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .profile-image-container {
+            width: 8rem;
+            height: 8rem;
+            border-radius: 50%;
+            background-color: #2d3748; /* Darker background for image container */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            border: 3px solid #4a5568; /* Subtle border */
+        }
+
+        .profile-image-container img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 50%;
+        }
+        
+        .profile-image-container svg {
+            width: 4.5rem;
+            height: 4.5rem;
+            fill: #718096; /* Lighter fill for the icon */
+        }
+
+
+        .profile-name {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #f7fafc; /* Very light text for name */
+        }
+
+        .profile-title {
+            font-size: 1.125rem;
+            font-weight: 500;
+            color: #a0aec0; /* Lighter gray for title */
+        }
+
+        .tag-container {
+            background-color: #2d3748;
+            border-radius: 9999px;
+            padding: 0.5rem 1.5rem;
+            color: #cbd5e0;
+            font-size: 0.875rem;
+            font-weight: 500;
+            margin-top: 0.5rem;
+        }
+
+        .divider {
+            width: 2px;
+            height: 250px;
+            background-color: #4a5568;
+            display: none;
+        }
+
+        @media (min-width: 768px) {
+            .divider {
+                display: block;
+            }
+        }
+
+        .feature-card {
+            width: 100%;
+            max-width: 800px;
+            background: linear-gradient(135deg, #1a2980, #26d0ce);
+            border-radius: 1rem;
+            padding: 2.5rem;
+            margin-top: 2rem;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+            transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+        }
+        
+        .feature-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.4);
+        }
+        
+        .feature-card h2 {
+            font-size: 1.8rem;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+            color: #fff;
+        }
+        
+        .feature-list {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem; /* Reduced gap */
+            margin-bottom: 1rem; /* Reduced margin */
+        }
+
+        .feature-item {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.75rem;
+            font-size: 1.1rem;
+            line-height: 1.6;
+            color: #e2e8f0;
+        }
+        
+        .feature-card-join-button {
+            background-color: #f56565;
+            color: white;
+            padding: 0.75rem 2rem;
+            border-radius: 9999px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease-in-out;
+            margin-top: 1rem;
+            box-shadow: 0 4px 15px rgba(245, 101, 101, 0.3);
+        }
+
+        .feature-card-join-button:hover {
+            transform: scale(1.1);
+            background-color: #e53e3e;
+            box-shadow: 0 6px 20px rgba(245, 101, 101, 0.4);
+        }
+
+        .message-section {
+            width: 100%;
+            max-width: 800px;
+            background-color: #2a2a2a;
+            border-radius: 1rem;
+            padding: 2rem;
+            margin-top: 4rem;
+            text-align: center;
+        }
+
+        .message-section h2, .about-us-section h2 {
+            font-size: 1.8rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            color: #f7fafc;
+        }
+
+        .message-section p, .about-us-section p {
+            font-size: 1rem;
+            line-height: 1.6;
+            color: #a0aec0;
+        }
+
+        .about-us-section {
+            width: 100%;
+            max-width: 800px;
+            background-color: #2a2a2a;
+            border-radius: 1rem;
+            padding: 2rem;
+            margin-top: 2rem;
+            text-align: center;
+        }
+    </style>
 </head>
 <body>
-  <div class="card">
-    <h1>🚧 Under Development 🚧</h1>
-    <p>This website is being developed by <b>Harshit</b> and <b>Shubham Singh</b>.</p>
-    <div class="loader"></div>
-  </div>
+    <header>
+        <div class="header-title">Codely.fun</div>
+        <button class="header-join-button">Join</button>
+    </header>
+
+    <div class="container">
+        <!-- Harshit Singh Profile Section -->
+        <a href="https://codely.fun/harshit_profile.html" style="text-decoration: none; color: inherit;">
+            <div class="profile-section">
+                <div class="profile-image-container">
+                    <img src="https://i.ibb.co/d0c0p0Cz/01.jpg" alt="Harshit Singh Profile" onerror="this.src='https://placehold.co/128x128/2d3748/e2e8f0?text=Image+Not+Found'" />
+                </div>
+                <div class="profile-name">Harshit Singh</div>
+                <div class="profile-title">Web-App Dev</div>
+                <div class="tag-container">Team Member</div>
+            </div>
+        </a>
+        
+        <!-- Divider Line -->
+        <div class="divider"></div>
+        
+        <!-- Shubham Singh Profile Section -->
+        <a href="https://shubhamsingh-silk.vercel.app/" style="text-decoration: none; color: inherit;">
+            <div class="profile-section">
+                <div class="profile-image-container">
+                    <img src="https://i.ibb.co/XZ0PhjZz/1000007199-1.jpg" alt="Shubham Singh Profile" onerror="this.src='https://placehold.co/128x128/2d3748/e2e8f0?text=Image+Not+Found'" />
+                </div>
+                <div class="profile-name">Shubham Singh</div>
+                <div class="profile-title">Full Stack Developer</div>
+                <div class="tag-container">Team Member</div>
+            </div>
+        </a>
+    </div>
+
+    <!-- Join Codely.fun Card -->
+    <div class="feature-card">
+        <h2>Join Codely.fun</h2>
+        <div class="feature-list">
+            <div class="feature-item">
+                AI-made interview questions
+            </div>
+            <div class="feature-item">
+                Solve DSA problems according to your semester
+            </div>
+        </div>
+        <button class="feature-card-join-button">Join</button>
+    </div>
+
+    <!-- Message Section -->
+    <div class="message-section">
+        <h2>Message from Us</h2>
+        <p>This is a custom message section. You can use this space to add important updates, announcements, or any other content you wish to share with your audience.</p>
+    </div>
+
+    <!-- About Us Section -->
+    <div class="about-us-section">
+        <h2>About Us</h2>
+        <p>We are a dedicated team of developers passionate about creating beautiful and functional web applications. Our mission is to build innovative solutions that enhance the user experience and solve real-world problems. We believe in continuous learning and collaboration to deliver the best possible results.</p>
+    </div>
+
+    <!-- Copyright -->
+    <footer class="text-center text-sm text-gray-400 mt-8">
+        © 2025 Codely.fun
+    </footer>
 </body>
 </html>
