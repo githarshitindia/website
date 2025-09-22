@@ -1,0 +1,730 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Harshit Singh - Portfolio</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&family=Montserrat:wght@400;600;700&display=swap');
+
+        :root {
+            --primary-color: #4A90E2;
+            --secondary-color: #F8F9FA;
+            --dark-color: #212529;
+            --light-text-color: #6C757D;
+            --accent-color: #00C49F;
+            --card-bg: #FFFFFF;
+            --font-main: 'Roboto', sans-serif;
+            --font-heading: 'Montserrat', sans-serif;
+        }
+
+        .dark-mode {
+            --primary-color: #00C49F;
+            --secondary-color: #121212;
+            --dark-color: #E0E0E0;
+            --light-text-color: #A0A0A0;
+            --card-bg: #1e1e1e;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: var(--font-main);
+            background-color: var(--secondary-color);
+            color: var(--dark-color);
+            line-height: 1.6;
+            scroll-behavior: smooth;
+            transition: background-color 0.8s ease, color 0.8s ease;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        .background-shapes {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: -1;
+            opacity: 0;
+            transition: opacity 1s ease;
+        }
+        .background-shapes.active {
+            opacity: 1;
+        }
+        .shape {
+            position: absolute;
+            background: rgba(0, 196, 159, 0.1);
+            border-radius: 50%;
+            animation: move-shapes 15s linear infinite;
+        }
+        .shape-1 { width: 80px; height: 80px; top: 10%; left: 10%; animation-delay: 0s; }
+        .shape-2 { width: 120px; height: 120px; bottom: 15%; right: 5%; animation-delay: 2s; }
+        .shape-3 { width: 60px; height: 60px; top: 50%; right: 20%; animation-delay: 4s; }
+        .shape-4 { width: 90px; height: 90px; bottom: 30%; left: 25%; animation-delay: 6s; }
+        .shape-5 { width: 70px; height: 70px; top: 25%; left: 40%; animation-delay: 8s; }
+        .shape-6 { width: 100px; height: 100px; bottom: 5%; left: 50%; animation-delay: 10s; }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 25px;
+        }
+
+        .navbar {
+            background-color: transparent;
+            box-shadow: none;
+            position: fixed;
+            width: 100%;
+            top: 0;
+            z-index: 1000;
+            transition: background-color 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .navbar .container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 25px;
+        }
+
+        .logo {
+            font-family: var(--font-heading);
+            font-weight: 700;
+            font-size: 1.8rem;
+            color: var(--primary-color);
+            text-decoration: none;
+        }
+        .logo span {
+            color: var(--dark-color);
+        }
+
+        .nav-links {
+            display: flex;
+            list-style: none;
+            gap: 2rem;
+        }
+
+        .nav-links a {
+            color: var(--dark-color);
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 1rem;
+            transition: color 0.3s ease;
+        }
+
+        .nav-links a:hover {
+            color: var(--primary-color);
+        }
+
+        .navbar.scrolled {
+            background-color: rgba(255, 255, 255, 0.9);
+            box-shadow: 0 2px 15px rgba(0, 0, 0, 0.1);
+        }
+        .dark-mode .navbar.scrolled {
+            background-color: rgba(30, 30, 30, 0.9);
+            box-shadow: 0 2px 15px rgba(0, 0, 0, 0.3);
+        }
+        .navbar.scrolled .nav-links a,
+        .navbar.scrolled .logo {
+            color: var(--dark-color);
+        }
+        .navbar.scrolled .logo span {
+            color: var(--primary-color);
+        }
+
+        .hero {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            text-align: center;
+            padding-top: 80px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero-content {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            max-width: 800px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .hero-content h1 {
+            font-family: var(--font-heading);
+            font-size: 3.5rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            color: var(--primary-color);
+            transition: transform 0.3s ease, color 0.5s ease;
+        }
+        .hero-content h1 span {
+            color: var(--dark-color);
+        }
+
+        .hero-content h2 {
+            font-size: 1.5rem;
+            font-weight: 400;
+            color: var(--light-text-color);
+            margin-bottom: 2rem;
+            animation: fadeIn 2s ease-in-out;
+        }
+
+        .hero-image-container {
+            position: relative;
+            width: 200px;
+            height: 200px;
+            border-radius: 50%;
+            box-shadow: 0 0 0 8px var(--primary-color);
+            margin-bottom: 2rem;
+            transition: transform 0.3s ease, box-shadow 0.8s ease;
+            animation: pulse 2s infinite;
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .hero-image-container:hover {
+            animation: none;
+            transform: scale(1.05);
+        }
+        .hero-image-container.spinning-vibe {
+            animation: spin 6s linear infinite;
+        }
+
+        .hero-image-container img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 50%;
+        }
+
+        .vibe-guide {
+            position: absolute;
+            bottom: -35px;
+            font-family: var(--font-heading);
+            font-weight: 600;
+            color: var(--primary-color);
+            font-size: 1rem;
+            text-align: center;
+            white-space: nowrap;
+            opacity: 1;
+            transition: opacity 0.5s ease;
+            animation: pulse-text 2s infinite;
+        }
+
+        .vibe-guide.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .hero-buttons {
+            display: flex;
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border-radius: 50px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            animation: slideInUp 1s ease-in-out;
+        }
+        .dark-mode .hero-buttons .btn {
+            animation: button-pulse 1.5s infinite;
+        }
+
+        .btn.primary {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        .btn.secondary {
+            background-color: transparent;
+            color: var(--primary-color);
+            border: 2px solid var(--primary-color);
+        }
+
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        }
+        .btn.primary:hover {
+            background-color: #3878c2;
+        }
+        .btn.secondary:hover {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        .social-icons {
+            display: flex;
+            gap: 1.5rem;
+            animation: fadeIn 2.5s ease-in-out;
+        }
+        .dark-mode .social-icons a {
+            animation: icon-fade 2s infinite;
+        }
+
+        .social-icons a {
+            color: var(--light-text-color);
+            font-size: 1.5rem;
+            transition: color 0.3s ease, transform 0.2s ease;
+        }
+        .social-icons a:hover {
+            color: var(--primary-color);
+            transform: translateY(-3px) scale(1.1);
+        }
+
+        /* Animations */
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        @keyframes slideInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 var(--primary-color); }
+            70% { box-shadow: 0 0 0 15px rgba(74, 144, 226, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(74, 144, 226, 0); }
+        }
+        @keyframes pulse-text {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        @keyframes button-pulse {
+            0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(0, 196, 159, 0.7); }
+            70% { transform: scale(1.02); box-shadow: 0 0 0 10px rgba(0, 196, 159, 0); }
+            100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(0, 196, 159, 0); }
+        }
+        @keyframes icon-fade {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        @keyframes move-shapes {
+            0% { transform: translateY(0); }
+            100% { transform: translateY(-100vh); }
+        }
+
+        section {
+            padding: 80px 0;
+            position: relative;
+        }
+        .section-heading {
+            text-align: center;
+            margin-bottom: 50px;
+            font-family: var(--font-heading);
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--dark-color);
+            position: relative;
+            /* Animation for headings */
+            opacity: 0;
+            transform: translateY(20px);
+            transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+        }
+        .section-heading.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        .section-heading::after {
+            content: '';
+            position: absolute;
+            width: 80px;
+            height: 4px;
+            background-color: var(--accent-color);
+            left: 50%;
+            transform: translateX(-50%);
+            bottom: -15px;
+            border-radius: 2px;
+        }
+
+        .cards-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 2rem;
+        }
+
+        .card {
+            background-color: var(--card-bg);
+            padding: 2rem;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+            text-align: center;
+            transition: transform 0.3s ease, background-color 0.8s ease, box-shadow 0.8s ease;
+        }
+        .card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.12);
+        }
+        .dark-mode .card:hover {
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.25);
+        }
+
+        .card .icon {
+            font-size: 3rem;
+            color: var(--accent-color);
+            margin-bottom: 1rem;
+        }
+
+        .card h3 {
+            font-family: var(--font-heading);
+            font-size: 1.5rem;
+            margin-bottom: 0.5rem;
+            color: var(--dark-color);
+        }
+
+        .card p {
+            font-size: 1rem;
+            color: var(--light-text-color);
+        }
+
+        #skills .cards-grid {
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            text-align: center;
+        }
+        #skills .skill-item {
+            background-color: var(--card-bg);
+            padding: 1.5rem;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+            transition: all 0.3s ease, background-color 0.8s ease, box-shadow 0.8s ease;
+        }
+        #skills .skill-item:hover {
+            transform: translateY(-8px) scale(1.05);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+        }
+        #skills .skill-item i {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+            color: var(--primary-color);
+        }
+        #skills .skill-item p {
+            font-weight: 500;
+            color: var(--dark-color);
+        }
+        
+        /* Portfolio card specific styles */
+        .project-card {
+            background-color: var(--card-bg);
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+            text-align: left;
+            overflow: hidden;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            cursor: pointer;
+        }
+
+        .project-card img {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+            display: block;
+        }
+
+        .project-card-content {
+            padding: 1.5rem;
+        }
+
+        .project-card h3 {
+            font-family: var(--font-heading);
+            font-size: 1.5rem;
+            margin-bottom: 0.5rem;
+            color: var(--dark-color);
+        }
+
+        .project-card p {
+            font-size: 0.9rem;
+            color: var(--light-text-color);
+            margin-bottom: 1rem;
+        }
+        
+        .project-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.12);
+        }
+
+        .footer {
+            background-color: var(--dark-color);
+            color: white;
+            text-align: center;
+            padding: 2.5rem 0;
+            font-size: 0.9rem;
+            transition: background-color 0.8s ease, color 0.8s ease;
+        }
+
+        .footer a {
+            color: var(--primary-color);
+            text-decoration: none;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .navbar {
+                display: none;
+            }
+            .hero-content h1 {
+                font-size: 2.5rem;
+            }
+            .hero-content h2 {
+                font-size: 1.2rem;
+            }
+            .hero-image-container {
+                width: 150px;
+                height: 150px;
+            }
+            .hero-buttons {
+                flex-direction: column;
+            }
+            .section-heading {
+                font-size: 2rem;
+            }
+            .vibe-guide {
+                font-size: 0.9rem;
+                bottom: -25px;
+            }
+            #skills .cards-grid {
+                grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="background-shapes" id="background-shapes">
+        <div class="shape shape-1"></div>
+        <div class="shape shape-2"></div>
+        <div class="shape shape-3"></div>
+        <div class="shape shape-4"></div>
+        <div class="shape shape-5"></div>
+        <div class="shape shape-6"></div>
+    </div>
+
+    <header class="navbar" id="main-header">
+        <div class="container">
+            <a href="#" class="logo">Harshit<span>.dev</span></a>
+            <ul class="nav-links">
+                <li><a href="#about">About</a></li>
+                <li><a href="#services">Services</a></li>
+                <li><a href="#skills">Skills</a></li>
+                <li><a href="#portfolio">Portfolio</a></li>
+            </ul>
+        </div>
+    </header>
+
+    <main>
+        <section class="hero">
+            <div class="hero-content container">
+                <div class="hero-image-container" id="profile-photo">
+                    <img src="https://i.ibb.co/d0c0p0Cz/01.jpg" alt="Harshit Singh">
+                    <span class="vibe-guide" id="vibe-guide">Click to Vibe</span>
+                </div>
+                <h1 id="my-name">Hi, I'm <span>Harshit Singh</span></h1>
+                <h2>A Vibe Coder with a passion for building cool and aesthetic digital experiences.</h2>
+                <div class="hero-buttons">
+                    <a href="#portfolio" class="btn primary">Explore My Vibe</a>
+                    <a href="#about" class="btn secondary">Know My Story</a>
+                </div>
+                <div class="social-icons">
+                    <a href="https://github.com/iknowharshit" target="_blank"><i class="fab fa-github"></i></a>
+                    <a href="https://instagram.com/coder.harshitsingh" target="_blank"><i class="fab fa-instagram"></i></a>
+                    <a href="#"><i class="fab fa-linkedin-in"></i></a>
+                </div>
+            </div>
+        </section>
+
+        <section id="about" class="container">
+            <h2 class="section-heading">About Me</h2>
+            <div class="card">
+                <p>I’m Harshit Singh, a developer who blends technical expertise with creative intuition — a vibe coder at heart.
+For me, coding goes beyond solving problems; it’s about creating digital experiences that feel as good as they function. I focus on building clean, scalable, and visually engaging applications where performance meets personality.
+With hands on experience in technologies like JavaScript, React, Node.js, and Tailwind CSS, I develop interfaces and systems that are responsive, elegant, and user-centric. I approach each project with a strong sense of flow, ensuring that both the codebase and the user experience maintain a consistent rhythm.
+Driven by design sensibility and clean engineering, I value the balance between form and function writing code that’s as intuitive behind the scenes as it is on screen.
+I'm currently focused on crafting seamless web applications that resonate with users technically solid, aesthetically refined, and built with intention.</p>
+            </div>
+        </section>
+
+        <section id="services" class="container">
+            <h2 class="section-heading">What I Do</h2>
+            <div class="cards-grid">
+                <div class="card">
+                    <div class="icon"><i class="fas fa-desktop"></i></div>
+                    <h3>Web Development</h3>
+                    <p>I build clean, fast, and responsive websites and web applications that are just good vibes to use.</p>
+                </div>
+                <div class="card">
+                    <div class="icon"><i class="fas fa-mobile-alt"></i></div>
+                    <h3>Mobile Development</h3>
+                    <p>Crafting mobile applications that are smooth and seamless, for good vibes on the go.</p>
+                </div>
+                <div class="card">
+                    <div class="icon"><i class="fas fa-server"></i></div>
+                    <h3>Backend Development</h3>
+                    <p>Designing powerful and stable server-side logic that makes the entire user experience feel right.</p>
+                </div>
+            </div>
+        </section>
+
+        <section id="skills" class="container">
+            <h2 class="section-heading">My Skills</h2>
+            <div class="cards-grid">
+                <div class="skill-item"><i class="fab fa-html5"></i><p>HTML5</p></div>
+                <div class="skill-item"><i class="fab fa-css3-alt"></i><p>CSS3</p></div>
+                <div class="skill-item"><i class="fab fa-js-square"></i><p>JavaScript</p></div>
+                <div class="skill-item"><i class="fab fa-react"></i><p>React</p></div>
+                <div class="skill-item"><i class="fab fa-node-js"></i><p>Node.js</p></div>
+                <div class="skill-item"><i class="fas fa-database"></i><p>Databases</p></div>
+                <div class="skill-item"><i class="fab fa-python"></i><p>Python</p></div>
+                <div class="skill-item"><i class="fab fa-aws"></i><p>AWS</p></div>
+            </div>
+        </section>
+
+        <section id="portfolio" class="container">
+            <h2 class="section-heading">My Portfolio</h2>
+            <div class="projects-grid cards-grid">
+                </div>
+        </section>
+
+    </main>
+
+    <audio id="background-music" loop muted>
+        <source src="https://raw.githubusercontent.com/githarshitindia/01-/main/music.mp3" type="audio/mpeg">
+    </audio>
+
+    <footer>
+        <div class="container">
+            <p>&copy; 2023 Harshit Singh. Vibe Coder. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-firestore.js"></script>
+
+    <script>
+        // Paste your Firebase config object here.
+        // It looks something like this:
+        const firebaseConfig = {
+            apiKey: "YOUR_API_KEY",
+            authDomain: "YOUR_AUTH_DOMAIN",
+            projectId: "YOUR_PROJECT_ID",
+            storageBucket: "YOUR_STORAGE_BUCKET",
+            messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
+            appId: "YOUR_APP_ID"
+        };
+        
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+
+        // JavaScript for animations and dynamic content
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const targetId = this.getAttribute('href');
+                document.querySelector(targetId).scrollIntoView({
+                    behavior: 'smooth'
+                });
+            });
+        });
+
+        const header = document.getElementById('main-header');
+        window.addEventListener('scroll', () => {
+            if (window.scrollY > 50) {
+                header.classList.add('scrolled');
+            } else {
+                header.classList.remove('scrolled');
+            }
+        });
+        
+        const profilePhoto = document.getElementById('profile-photo');
+        const vibeGuide = document.getElementById('vibe-guide');
+        const audio = document.getElementById('background-music');
+        const body = document.body;
+        const backgroundShapes = document.getElementById('background-shapes');
+
+        profilePhoto.addEventListener('click', () => {
+            if (audio.paused) {
+                audio.volume = 0.5;
+                audio.play().then(() => {
+                    audio.muted = false;
+                    vibeGuide.classList.add('hidden');
+                    body.classList.add('dark-mode');
+                    backgroundShapes.classList.add('active');
+                    profilePhoto.classList.add('spinning-vibe');
+                }).catch(e => {
+                    console.error("Audio playback failed:", e);
+                    vibeGuide.textContent = 'Oops, something went wrong.';
+                });
+            } else {
+                audio.pause();
+                body.classList.remove('dark-mode');
+                backgroundShapes.classList.remove('active');
+                profilePhoto.classList.remove('spinning-vibe');
+                vibeGuide.classList.remove('hidden');
+            }
+        });
+
+        // New JavaScript for scroll animations
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                }
+            });
+        }, {
+            threshold: 0.1
+        });
+
+        const sectionHeadings = document.querySelectorAll('.section-heading');
+        sectionHeadings.forEach(heading => {
+            observer.observe(heading);
+        });
+
+        // Function to fetch and display projects from Firestore
+        const projectsContainer = document.querySelector('.projects-grid');
+        async function fetchProjects() {
+            try {
+                const snapshot = await db.collection('projects').get();
+                snapshot.forEach(doc => {
+                    const project = doc.data();
+                    const projectCard = document.createElement('a');
+                    projectCard.href = project.link;
+                    projectCard.target = "_blank";
+                    projectCard.classList.add('project-card');
+
+                    projectCard.innerHTML = `
+                        <img src="${project.image_url}" alt="${project.title}">
+                        <div class="project-card-content">
+                            <h3>${project.title}</h3>
+                            <p>${project.description}</p>
+                        </div>
+                    `;
+                    projectsContainer.appendChild(projectCard);
+                });
+            } catch (error) {
+                console.error("Error fetching projects: ", error);
+                projectsContainer.innerHTML = "<p style='text-align: center; color: var(--light-text-color);'>Could not load projects. Please check your Firebase setup.</p>";
+            }
+        }
+        
+        fetchProjects();
+    </script>
+</body>
+</html>
