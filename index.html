@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Under Development</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-family: "Poppins", sans-serif;
+      background: linear-gradient(135deg, #1e3c72, #2a5298);
+      color: #fff;
+      text-align: center;
+    }
+
+    .card {
+      background: #ffffff10;
+      backdrop-filter: blur(12px);
+      padding: 2rem;
+      border-radius: 1.5rem;
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.25);
+      max-width: 400px;
+      width: 90%;
+      animation: fadeIn 1.2s ease-in-out;
+    }
+
+    h1 {
+      font-size: 1.8rem;
+      margin-bottom: 0.8rem;
+    }
+
+    p {
+      font-size: 1rem;
+      font-weight: 300;
+      line-height: 1.4;
+      margin-bottom: 1.5rem;
+    }
+
+    .loader {
+      margin: auto;
+      width: 45px;
+      height: 45px;
+      border: 4px solid rgba(255, 255, 255, 0.4);
+      border-top: 4px solid #fff;
+      border-radius: 50%;
+      animation: spin 1.2s linear infinite;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes spin {
+      100% { transform: rotate(360deg); }
+    }
+
+    /* Mobile adjustments */
+    @media (max-width: 480px) {
+      h1 { font-size: 1.5rem; }
+      p { font-size: 0.95rem; }
+      .card { padding: 1.5rem; }
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1>🚧 Under Development 🚧</h1>
+    <p>This website is being developed by <b>Harshit</b> and <b>Shubham Singh</b>.</p>
+    <div class="loader"></div>
+  </div>
+</body>
+</html>
