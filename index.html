@@ -105,6 +105,7 @@
             transition: all 0.2s ease-in-out;
             font-size: 1rem; /* Increased font size */
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            width: 150px; /* Explicitly set the width */
         }
 
         .join-button {
@@ -133,18 +134,14 @@
 
         /* Responsive Styles */
         @media (max-width: 768px) {
-            header, main, .about-section {
+            /* Hide the header completely on mobile devices */
+            header {
+                display: none;
+            }
+            
+            main, .about-section {
                 padding-left: 1.5rem;
                 padding-right: 1.5rem;
-            }
-
-            .header-title {
-                font-size: 1rem;
-            }
-
-            .nav-links {
-                gap: 1rem;
-                font-size: 0.875rem;
             }
 
             .main-title {
@@ -155,19 +152,33 @@
                 font-size: 1.25rem;
             }
 
-            .profile-card {
-                flex-direction: column;
+            .buttons-container {
+                flex-direction: row;
+                justify-content: center;
             }
 
-            .profile-info {
-                text-align: center;
-            }
-            .profile-image-container {
-                margin-bottom: 1rem;
-            }
             .button {
                 font-size: 0.875rem;
                 padding: 0.5rem 1rem;
+            }
+            
+            /* Profile card specific mobile styles */
+            .profile-container {
+                flex-direction: column;
+                gap: 1.5rem; /* Reduced gap for a more compact look */
+            }
+            
+            .profile-card {
+                flex-direction: column;
+                text-align: center;
+                gap: 1rem; /* Adjusted gap inside the card */
+                padding: 1.5rem; /* Adjusted padding */
+            }
+            
+            .profile-image-container {
+                width: 80px;
+                height: 80px;
+                margin-bottom: 0.5rem;
             }
         }
 
