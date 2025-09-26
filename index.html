@@ -64,6 +64,7 @@
             flex-grow: 1;
             display: flex;
             align-items: center;
+            justify-content: center; /* Added for horizontal centering */
             padding: 0 2rem;
             min-height: 100vh;
         }
@@ -72,16 +73,17 @@
             display: flex;
             flex-direction: column;
             gap: 0.5rem;
+            text-align: center; /* Added for text centering */
         }
 
         .main-title {
             font-family: 'Montserrat', sans-serif;
-            font-size: 3rem;
+            font-size: 4rem; /* Increased font size */
             font-weight: 700;
         }
 
         .subtitle {
-            font-size: 1.125rem;
+            font-size: 1.5rem; /* Increased font size */
             line-height: 1.5;
         }
 
@@ -90,17 +92,18 @@
             flex-direction: column;
             gap: 0.5rem;
             margin-top: 1rem;
+            align-items: center; /* Centering buttons within the column */
         }
 
         .button {
-            padding: 0.5rem 1rem;
+            padding: 0.75rem 1.5rem; /* Increased padding */
             border-radius: 9999px;
             font-weight: 600;
             text-align: center;
             text-decoration: none;
             color: white;
             transition: all 0.2s ease-in-out;
-            font-size: 0.875rem;
+            font-size: 1rem; /* Increased font size */
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
         }
 
@@ -145,11 +148,11 @@
             }
 
             .main-title {
-                font-size: 2rem;
+                font-size: 2.5rem;
             }
 
             .subtitle {
-                font-size: 1rem;
+                font-size: 1.25rem;
             }
 
             .profile-card {
@@ -161,6 +164,10 @@
             }
             .profile-image-container {
                 margin-bottom: 1rem;
+            }
+            .button {
+                font-size: 0.875rem;
+                padding: 0.5rem 1rem;
             }
         }
 
