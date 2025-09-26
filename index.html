@@ -67,6 +67,7 @@
             justify-content: center; /* Added for horizontal centering */
             padding: 0 2rem;
             min-height: 100vh;
+            position: relative; /* Essential for positioning the scroll hint */
         }
 
         .content-section {
@@ -132,6 +133,29 @@
             opacity: 1;
         }
 
+        /* Scroll Down Hint Animation */
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% {
+                transform: translate(-50%, 0);
+            }
+            40% {
+                transform: translate(-50%, -10px);
+            }
+            60% {
+                transform: translate(-50%, -5px);
+            }
+        }
+
+        .scroll-down-hint {
+            display: none; /* Default hidden */
+            position: absolute;
+            bottom: 2rem;
+            left: 50%;
+            color: #4a90e2; /* Blue color for contrast */
+            z-index: 1;
+            cursor: pointer;
+        }
+
         /* Responsive Styles */
         @media (max-width: 768px) {
             /* Hide the header completely on mobile devices */
@@ -160,6 +184,12 @@
             .button {
                 font-size: 0.875rem;
                 padding: 0.5rem 1rem;
+            }
+            
+            /* Show scroll hint on mobile and apply animation */
+            .scroll-down-hint {
+                display: block;
+                animation: bounce 2s infinite;
             }
             
             /* Profile card specific mobile styles */
@@ -264,6 +294,15 @@
                 <a href="https://codely.fun/" class="button projects-button">PROJECTS</a>
             </div>
         </div>
+        
+        <!-- Scroll Down Hint for Mobile View -->
+        <a href="#about-section" class="scroll-down-hint" aria-label="Scroll Down">
+            <!-- Down arrow icon -->
+            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevrons-down">
+                <path d="m7 5 5 5 5-5"/>
+                <path d="m7 15 5 5 5-5"/>
+            </svg>
+        </a>
     </main>
 
     <!-- About Section -->
