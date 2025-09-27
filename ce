@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CodeDrill - Code Editor</title>
+    
+    <script src="lib/vs/loader.js"></script> 
+    
+    <style>
+        /* --- CSS Styles (Duplicated for standalone file) --- */
+        :root {
+            --primary-color: #007bff;
+            --card-background: #ffffff;
+            --text-color: #343a40;
+            --border-radius: 8px;
+            --box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            --transition-speed: 0.3s;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: var(--text-color);
+            background-color: #f8f9fa;
+            padding-top: 70px;
+        }
+        .container { width: 90%; max-width: 1200px; margin: 0 auto; }
+        .navbar { /* Basic Navbar styling */ }
+        .navbar {
+            background-color: var(--card-background);
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+            position: fixed;
+            width: 100%;
+            top: 0;
+            z-index: 1000;
+        }
+        .navbar .container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 0;
+        }
+        .logo a { font-size: 1.5rem; font-weight: bold; color: var(--primary-color); text-decoration: none; }
+        .nav-links { list-style: none; display: flex; gap: 20px; }
+        .nav-links a { color: var(--text-color); padding: 5px 10px; border-radius: var(--border-radius); transition: background-color var(--transition-speed); text-decoration: none; }
+        .nav-links a:hover, .nav-links a.active { background-color: var(--primary-color); color: var(--card-background); }
+        
+        .nav-toggle { display: none; } /* Hide on desktop */
+
+        .content-area { padding: 40px 0; }
+        .page-title { font-size: 2.5rem; margin-bottom: 20px; color: var(--primary-color); }
+        
+        .editor-controls {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        #language-select { padding: 8px 10px; border-radius: var(--border-radius); border: 1px solid #ced4da; }
+        
+        .cta-button {
+            padding: 10px 20px;
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            transition: background-color var(--transition-speed);
+        }
+        .cta-button:hover { background-color: #0056b3; }
+
+        .editor-container {
+            height: 400px; /* Crucial fixed height for Monaco Editor */
+            border: 1px solid #ced4da;
+            border-radius: var(--border-radius);
+            overflow: hidden;
+            box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.05);
+        }
+        
+        .output-panel {
+            background-color: #212529;
+            color: #f8f9fa;
+            padding: 15px;
+            border-radius: var(--border-radius);
+            margin-top: 20px;
+            margin-bottom: 40px;
+        }
+        
+        .output-panel h3 { color: #00ff73; margin-top: 0; font-size: 1.2rem; }
+        #output-area {
+            white-space: pre-wrap;
+            font-family: 'Consolas', 'Courier New', monospace;
+            font-size: 0.9rem;
+            min-height: 80px;
+            padding-top: 10px;
+        }
+    </style>
+</head>
+<body>
+
+    <header class="navbar">
+        <div class="container">
+            <h1 class="logo"><a href="coding-platform.html#home">CodeDrill 💡</a></h1>
+            <nav>
+                <button class="nav-toggle" aria-label="Toggle navigation">&#9776;</button>
+                <ul class="nav-links">
+                    <li><a href="coding-platform.html#home" class="nav-link">Home</a></li>
+                    <li><a href="coding-platform.html#choose" class="nav-link">Choose Test</a></li>
+                    <li><a href="editor.html" class="nav-link active">Code Editor</a></li>
+                    <li><a href="coding-platform.html#about" class="nav-link">About</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <main class="container content-area editor-page">
+        <h2 class="page-title">Interactive Code Editor</h2>
+        <p>Write, run, and test your code in the browser. Select a language to get started.</p>
+
+        <div class="editor-controls">
+            <label for="language-select">Language:</label>
+            <select id="language-select">
+                <option value="python">Python</option>
+                <option value="javascript">JavaScript</option>
+                <option value="cpp">C++</option>
+                <option value="java">Java</option>
+            </select>
+            <button id="run-code" class="cta-button">Run Code</button>
+        </div>
+
+        <div id="editor-container" class="editor-container">
+            </div>
+
+        <div class="output-panel">
+            <h3>Output:</h3>
+            <pre id="output-area">Click 'Run Code' to see the execution result.</pre>
+        </div>
+    </main>
+
+    <script>
+        // --- Code Editor Logic ---
+        
+        // This is necessary for Monaco to find its files relative to the base URL
+        require.config({ paths: { 'vs': 'lib/vs' } });
+
+        function getMonacoLanguage(lang) {
+            switch(lang) {
+                case 'python': return 'python';
+                case 'javascript': return 'javascript';
+                case 'cpp': return 'cpp';
+                case 'java': return 'java';
+                default: return 'plaintext';
+            }
+        }
+
+        let editor = null;
+
+        require(['vs/editor/editor.main'], function() {
+            const editorContainer = document.getElementById('editor-container');
+            const languageSelect = document.getElementById('language-select');
+            const runButton = document.getElementById('run-code');
+            const outputArea = document.getElementById('output-area');
+
+            // 1. Initialize the Monaco Editor
+            editor = monaco.editor.create(editorContainer, {
+                value: '// Select a language and start coding!\nconsole.log("Hello World!");\n',
+                language: 'javascript', // Default
+                theme: 'vs-dark',
+                automaticLayout: true,
+                minimap: { enabled: false }
+            });
+
+            // 2. Handle Language Change
+            languageSelect.addEventListener('change', () => {
+                const selectedLang = languageSelect.value;
+                const monacoLang = getMonacoLanguage(selectedLang);
+                
+                monaco.editor.setModelLanguage(editor.getModel(), monacoLang);
+
+                // Update placeholder code
+                let placeholderCode = '';
+                if (selectedLang === 'python') {
+                    placeholderCode = 'def main():\n    print("Python code running!")\n\nmain()';
+                } else if (selectedLang === 'javascript') {
+                    placeholderCode = 'console.log("JavaScript code running!");';
+                } else if (selectedLang === 'cpp') {
+                    placeholderCode = '#include <iostream>\n\nint main() {\n    std::cout << "C++ output here!" << std::endl;\n    return 0;\n}';
+                } else if (selectedLang === 'java') {
+                    placeholderCode = 'public class Main {\n    public static void main(String[] args) {\n        System.out.println("Java output here!");\n    }\n}';
+                }
+                editor.setValue(placeholderCode);
+            });
+
+            // 3. Handle 'Run Code' button click (Placeholder API)
+            runButton.addEventListener('click', () => {
+                const code = editor.getValue();
+                const lang = languageSelect.value;
+                outputArea.textContent = `Running ${lang} code...\n\n`;
+
+                // --- PLACEHOLDER BACKEND API CALL SIMULATION ---
+                setTimeout(() => {
+                    const placeholderOutput = `--- Simulation Result ---\nLanguage: ${lang}\n\n[API_MOCK_START]\nThis is a hardcoded simulation of a successful API execution.\n\nCode snippet length: ${code.length} characters.\n\nSimulated Output:\nHello from the ${lang} environment! The execution time was 0.05s.\n[API_MOCK_END]`;
+                    
+                    // In a real application, this would be a fetch call to a backend service.
+                    outputArea.textContent = placeholderOutput;
+                }, 1000); // Simulate network latency
+            });
+        });
+    </script>
+</body>
+</html>
