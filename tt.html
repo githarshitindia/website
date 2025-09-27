@@ -1,0 +1,630 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CodeDrill - Coding Platform</title>
+    <style>
+        /* --- CSS STYLES --- */
+        :root {
+            --primary-color: #007bff;
+            --secondary-color: #6c757d;
+            --background-color: #f8f9fa;
+            --card-background: #ffffff;
+            --text-color: #343a40;
+            --border-radius: 8px;
+            --box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            --transition-speed: 0.3s;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: var(--text-color);
+            background-color: var(--background-color);
+            padding-top: 70px;
+        }
+
+        a {
+            text-decoration: none;
+            color: var(--primary-color);
+            transition: color var(--transition-speed);
+        }
+
+        a:hover {
+            color: #0056b3;
+        }
+
+        .container {
+            width: 90%;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        /* --- Navigation Bar --- */
+        .navbar {
+            background-color: var(--card-background);
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+            position: fixed;
+            width: 100%;
+            top: 0;
+            left: 0;
+            z-index: 1000;
+        }
+
+        .navbar .container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 0;
+        }
+
+        .logo a {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: var(--primary-color);
+        }
+
+        .nav-links {
+            list-style: none;
+            display: flex;
+            gap: 20px;
+        }
+
+        .nav-links a {
+            color: var(--text-color);
+            padding: 5px 10px;
+            border-radius: var(--border-radius);
+            transition: background-color var(--transition-speed);
+        }
+
+        .nav-links a:hover, .nav-links a.active {
+            background-color: var(--primary-color);
+            color: var(--card-background);
+        }
+
+        .nav-toggle {
+            display: none;
+            font-size: 1.5rem;
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: var(--text-color);
+        }
+
+        /* --- Main Content --- */
+        .content-area {
+            padding: 40px 0;
+        }
+
+        .page-title {
+            font-size: 2.5rem;
+            margin-bottom: 20px;
+            color: var(--primary-color);
+            border-bottom: 2px solid rgba(0, 123, 255, 0.1);
+            padding-bottom: 10px;
+        }
+
+        /* --- Hero Section (Home) --- */
+        .hero {
+            background: linear-gradient(135deg, var(--primary-color) 0%, #0056b3 100%);
+            color: white;
+            padding: 60px 40px;
+            border-radius: var(--border-radius);
+            margin-bottom: 40px;
+            text-align: center;
+            box-shadow: var(--box-shadow);
+        }
+
+        .hero h2 {
+            font-size: 3rem;
+            margin-bottom: 10px;
+        }
+
+        .cta-button {
+            display: inline-block;
+            padding: 12px 25px;
+            background-color: var(--card-background);
+            color: var(--primary-color);
+            border: 2px solid var(--card-background);
+            border-radius: 50px;
+            font-weight: bold;
+            text-transform: uppercase;
+            transition: all var(--transition-speed) ease;
+            cursor: pointer;
+        }
+
+        .cta-button:hover {
+            background-color: transparent;
+            color: var(--card-background);
+            transform: translateY(-2px);
+        }
+        
+        /* --- Features Grid (Home) --- */
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 30px;
+        }
+
+        .feature-card {
+            background-color: var(--card-background);
+            padding: 30px;
+            border-radius: var(--border-radius);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+            border-left: 5px solid var(--primary-color);
+            transition: transform var(--transition-speed);
+        }
+
+        .feature-card h3 {
+            color: var(--primary-color);
+            margin-bottom: 10px;
+        }
+
+        /* --- Language Grid (Choose) --- */
+        .language-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 25px;
+            margin-top: 30px;
+        }
+
+        .lang-card {
+            display: block;
+            background-color: var(--card-background);
+            padding: 30px;
+            border-radius: var(--border-radius);
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+            border-top: 5px solid var(--primary-color);
+            transition: transform var(--transition-speed) ease-out, box-shadow var(--transition-speed);
+            text-align: center;
+            color: var(--text-color);
+        }
+
+        .lang-card:hover {
+            transform: scale(1.03);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+        }
+
+        .lang-card h3 {
+            font-size: 1.8rem;
+            color: var(--primary-color);
+            margin-bottom: 10px;
+        }
+
+        /* --- Quiz Page Styles --- */
+        .quiz-container {
+            background-color: var(--card-background);
+            padding: 30px;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            margin-top: 30px;
+        }
+
+        .question-card {
+            border-bottom: 1px solid #eee;
+            padding: 20px 0;
+            margin-bottom: 20px;
+        }
+
+        .option-label {
+            display: block;
+            background-color: #f1f1f1;
+            padding: 12px 15px;
+            margin: 8px 0;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color var(--transition-speed);
+        }
+
+        .option-label:hover {
+            background-color: #e9ecef;
+        }
+
+        .question-card input[type="radio"] {
+            position: absolute;
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .question-card input[type="radio"]:checked + .option-label {
+            background-color: var(--primary-color);
+            color: white;
+            font-weight: 500;
+        }
+
+        .cta-button#submit-quiz {
+            display: block;
+            width: 100%;
+            margin-top: 30px;
+            background-color: #28a745;
+            color: white;
+            border: 2px solid #28a745;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        .result-box {
+            margin-top: 30px;
+            padding: 30px;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            text-align: center;
+            background-color: #e9f7ef;
+            border: 1px solid #c3e6cb;
+        }
+
+        .result-box h3 {
+            color: #28a745;
+            font-size: 2rem;
+            margin-bottom: 15px;
+        }
+
+        .result-list {
+            list-style: none;
+            padding: 0;
+            margin-top: 20px;
+            text-align: left;
+        }
+
+        .correct-answer {
+            color: #28a745;
+            font-weight: bold;
+        }
+        .your-answer {
+            color: #dc3545;
+            font-style: italic;
+        }
+
+        /* --- Animations --- */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .animate-in {
+            opacity: 0;
+            animation: fadeIn 0.6s ease-out forwards;
+        }
+
+        .delay-1 { animation-delay: 0.1s; }
+        .delay-2 { animation-delay: 0.2s; }
+        .delay-3 { animation-delay: 0.3s; }
+        .delay-4 { animation-delay: 0.4s; }
+        .delay-5 { animation-delay: 0.5s; }
+
+        /* --- Responsive Design --- */
+        @media (max-width: 768px) {
+            body { padding-top: 60px; }
+            .nav-links {
+                display: none;
+                flex-direction: column;
+                width: 100%;
+                position: absolute;
+                top: 60px;
+                left: 0;
+                background-color: var(--card-background);
+                box-shadow: 0 4px 5px rgba(0, 0, 0, 0.1);
+                padding: 10px 0;
+            }
+            .nav-links.open { display: flex; }
+            .nav-links li { width: 100%; text-align: center; }
+            .nav-toggle { display: block; }
+            .hero { padding: 40px 20px; text-align: left; }
+            .hero h2 { font-size: 2rem; }
+            .page-title { font-size: 2rem; }
+        }
+
+    </style>
+</head>
+<body>
+
+    <header class="navbar">
+        <div class="container">
+            <h1 class="logo"><a href="#home">CodeDrill 💡</a></h1>
+            <nav>
+                <button class="nav-toggle" aria-label="Toggle navigation">&#9776;</button>
+                <ul class="nav-links">
+                    <li><a href="#home" class="nav-link active">Home</a></li>
+                    <li><a href="#choose" class="nav-link">Choose Test</a></li>
+                    <li><a href="editor.html" class="nav-link">Code Editor</a></li>
+                    <li><a href="#about" class="nav-link">About</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <main class="content-area">
+        <section id="home" class="page container active">
+            <div class="hero">
+                <h2 class="animate-in">Welcome to CodeDrill!</h2>
+                <p class="animate-in delay-1">Your ultimate platform for practicing and mastering programming skills. Dive into language-specific quizzes or sharpen your coding with our powerful, browser-based editor.</p>
+                <a href="#choose" class="cta-button animate-in delay-2">Start a Quiz Today &rarr;</a>
+            </div>
+
+            <div class="features-grid">
+                <div class="feature-card animate-in delay-3">
+                    <h3>Test Your Knowledge</h3>
+                    <p>Challenging multiple-choice quizzes across various languages.</p>
+                </div>
+                <div class="feature-card animate-in delay-4">
+                    <h3>Practice Coding</h3>
+                    <p>A full-featured code editor with syntax highlighting.</p>
+                </div>
+                <div class="feature-card animate-in delay-5">
+                    <h3>Track Progress</h3>
+                    <p>Get instant results and feedback to understand your strengths.</p>
+                </div>
+            </div>
+        </section>
+
+        <section id="choose" class="page container hidden">
+            <h2 class="page-title animate-in">Choose a Language Test</h2>
+            <p class="animate-in delay-1">Select a programming language below to start a multiple-choice quiz.</p>
+
+            <div class="language-grid">
+                <a href="#quiz-python" class="lang-card animate-in delay-2" data-lang="python">
+                    <h3>🐍 Python</h3>
+                    <p>Test your knowledge of Python syntax, data structures, and best practices.</p>
+                </a>
+                <a href="#quiz-javascript" class="lang-card animate-in delay-3" data-lang="javascript">
+                    <h3>JS JavaScript</h3>
+                    <p>Questions covering ES6+, DOM manipulation, and asynchronous programming.</p>
+                </a>
+                <a href="#quiz-java" class="lang-card animate-in delay-4" data-lang="java">
+                    <h3>☕ Java</h3>
+                    <p>Focuses on OOP concepts, exceptions, and core Java features.</p>
+                </a>
+                <a href="#quiz-cpp" class="lang-card animate-in delay-5" data-lang="cpp">
+                    <h3>C++ C++</h3>
+                    <p>Challenge yourself on pointers, memory management, and STL.</p>
+                </a>
+            </div>
+        </section>
+
+        <section id="quiz-page" class="page container hidden">
+            <h2 class="page-title" id="quiz-title">Quiz</h2>
+            <div id="quiz-container" class="quiz-container">
+                <p>Select a quiz from the Choose Test page.</p>
+            </div>
+            <button id="submit-quiz" class="cta-button hidden">Submit Quiz</button>
+            <div id="quiz-result" class="result-box hidden"></div>
+        </section>
+
+
+        <section id="about" class="page container hidden">
+            <div class="about-section">
+                <h2 class="page-title animate-in">About CodeDrill</h2>
+                <p class="animate-in delay-1">CodeDrill was built with a simple mission: to provide a **focused, distraction-free environment** for developers and students to sharpen their coding fundamentals.</p>
+
+                <div class="about-card animate-in delay-2">
+                    <h3>The Platform's Purpose</h3>
+                    <p>In today's fast-paced tech world, solid fundamentals are key. We help you cement your knowledge through two main channels:</p>
+                    <ul>
+                        <li>**Targeted Quizzes:** Quickly test and validate your theoretical understanding of core language concepts.</li>
+                        <li>**Browser Editor:** A professional-grade, in-browser code editor for hands-on, practical practice.</li>
+                    </ul>
+                </div>
+
+                <p class="animate-in delay-3">We believe that learning is an active process. CodeDrill encourages you to **actively recall** information with quizzes and **actively apply** that knowledge with the code editor. Happy coding! 🚀</p>
+            </div>
+        </section>
+
+    </main>
+
+    <script>
+        // --- JAVASCRIPT LOGIC ---
+
+        const hardcodedQuestions = {
+            python: [
+                { question: "What is the correct way to open a file named 'data.txt' for reading in Python?", options: ["file = open('data.txt', 'r')", "file.open('data.txt', 'read')", "with open('data.txt') as file:", "file = read('data.txt')"], answer: "with open('data.txt') as file:" },
+                { question: "Which of the following is NOT a built-in data type in Python?", options: ["list", "tuple", "array", "dict"], answer: "array" },
+                { question: "Which method is used to add an element to the end of a list?", options: ["insert()", "add()", "append()", "extend()"], answer: "append()" },
+                { question: "What is the output of 'print(type(1 / 2))'?", options: ["<class 'int'>", "<class 'float'>", "<class 'str'>", "Error"], answer: "<class 'float'>" },
+                { question: "How do you start a block of code in Python?", options: ["{}", "indentation", "begin/end", "()"], answer: "indentation" }
+            ],
+            javascript: [
+                { question: "Which keyword is used to declare a block-scoped variable in modern JavaScript (ES6+)?", options: ["var", "let", "const", "def"], answer: "let" },
+                { question: "What does the '===' operator check for in JavaScript?", options: ["Value equality only", "Type equality only", "Value and Type equality", "Assignment"], answer: "Value and Type equality" },
+                { question: "Which object is the top-level object in the browser?", options: ["Document", "Window", "Global", "Browser"], answer: "Window" },
+                { question: "How do you stop a set of code execution using an interval?", options: ["clearInterval()", "stopInterval()", "deleteInterval()", "clearTimeout()"], answer: "clearInterval()" },
+                { question: "What is hoisting in JavaScript?", options: ["Moving declarations to the bottom", "Moving function calls to the top", "Moving declarations to the top of their scope", "Converting variables to objects"], answer: "Moving declarations to the top of their scope" }
+            ],
+            // Add Java and C++ questions here...
+        };
+
+        const pageMappings = {
+            'home': document.getElementById('home'),
+            'choose': document.getElementById('choose'),
+            'quiz': document.getElementById('quiz-page'),
+            'about': document.getElementById('about')
+        };
+        const navLinks = document.querySelectorAll('.nav-link');
+        const navToggle = document.querySelector('.nav-toggle');
+        const navUl = document.querySelector('.nav-links');
+
+        function showPage(pageId) {
+            // Hide all pages
+            Object.values(pageMappings).forEach(page => page.classList.add('hidden'));
+
+            // Show the target page
+            if (pageMappings[pageId]) {
+                pageMappings[pageId].classList.remove('hidden');
+                
+                // If it's the quiz page, scroll to top for fresh experience
+                if (pageId === 'quiz') {
+                     window.scrollTo({ top: 0, behavior: 'smooth' });
+                }
+            } else {
+                // If a specific quiz link is clicked (e.g., #quiz-python)
+                if (pageId.startsWith('quiz-')) {
+                    const lang = pageId.split('-')[1];
+                    loadQuiz(lang);
+                }
+            }
+
+            // Update active state in navigation
+            navLinks.forEach(link => {
+                link.classList.remove('active');
+                if (link.getAttribute('href') === `#${pageId}`) {
+                    link.classList.add('active');
+                }
+            });
+
+            // Close mobile menu
+            navUl.classList.remove('open');
+        }
+
+        // --- Quiz Logic ---
+        function loadQuiz(lang) {
+            const quizData = hardcodedQuestions[lang];
+            const quizTitle = document.getElementById('quiz-title');
+            const quizContainer = document.getElementById('quiz-container');
+            const submitButton = document.getElementById('submit-quiz');
+            const resultBox = document.getElementById('quiz-result');
+
+            if (!quizData) {
+                quizTitle.textContent = "Error: Quiz not found.";
+                quizContainer.innerHTML = "<p>Please return to the <a href='#choose'>Choose Language</a> page.</p>";
+                submitButton.classList.add('hidden');
+                resultBox.classList.add('hidden');
+                showPage('quiz');
+                return;
+            }
+
+            quizTitle.textContent = `${lang.toUpperCase()} Fundamentals Quiz`;
+            quizContainer.innerHTML = '';
+            resultBox.classList.add('hidden');
+            submitButton.classList.remove('hidden');
+            
+            quizData.forEach((q, index) => {
+                const questionCard = document.createElement('div');
+                questionCard.className = 'question-card animate-in';
+                questionCard.style.animationDelay = `${0.1 + index * 0.1}s`;
+
+                const qText = document.createElement('p');
+                qText.textContent = `${index + 1}. ${q.question}`;
+                questionCard.appendChild(qText);
+
+                q.options.forEach((option, optionIndex) => {
+                    const inputId = `q${index}-opt${optionIndex}`;
+                    
+                    const input = document.createElement('input');
+                    input.type = 'radio';
+                    input.name = `question-${index}`;
+                    input.value = option;
+                    input.id = inputId;
+                    questionCard.appendChild(input);
+
+                    const label = document.createElement('label');
+                    label.className = 'option-label';
+                    label.setAttribute('for', inputId);
+                    label.textContent = option;
+                    questionCard.appendChild(label);
+                });
+
+                quizContainer.appendChild(questionCard);
+            });
+
+            submitButton.onclick = () => submitQuiz(quizData);
+            showPage('quiz');
+        }
+
+        function submitQuiz(quizData) {
+            let score = 0;
+            const resultBox = document.getElementById('quiz-result');
+            const submitButton = document.getElementById('submit-quiz');
+            resultBox.innerHTML = '';
+            const resultsList = document.createElement('ul');
+            resultsList.className = 'result-list';
+            
+            quizData.forEach((q, index) => {
+                const questionName = `question-${index}`;
+                const selectedOption = document.querySelector(`input[name="${questionName}"]:checked`);
+                const yourAnswer = selectedOption ? selectedOption.value : 'N/A';
+                const isCorrect = yourAnswer === q.answer;
+                
+                if (isCorrect) {
+                    score++;
+                }
+
+                const listItem = document.createElement('li');
+                listItem.innerHTML = `
+                    <strong>Q${index + 1}:</strong> ${q.question} <br>
+                    <span class="correct-answer">Correct: ${q.answer}</span> <br>
+                    <span class="your-answer" style="color: ${isCorrect ? '#28a745' : '#dc3545'};">Your Answer: ${yourAnswer}</span>
+                `;
+                resultsList.appendChild(listItem);
+
+                // Disable options and highlight answers
+                document.querySelectorAll(`input[name="${questionName}"]`).forEach(input => input.disabled = true);
+                const allLabels = document.querySelectorAll(`input[name="${questionName}"] + .option-label`);
+                allLabels.forEach(label => {
+                    if (label.textContent === q.answer) {
+                        label.style.backgroundColor = '#d4edda';
+                        label.style.fontWeight = 'bold';
+                    }
+                    if (label.textContent === yourAnswer && yourAnswer !== q.answer) {
+                        label.style.backgroundColor = '#f8d7da';
+                    }
+                });
+            });
+
+            const totalQuestions = quizData.length;
+            resultBox.innerHTML = `
+                <h3>Quiz Complete! 🎉</h3>
+                <p style="font-size: 1.5rem;">Your Score: <strong>${score} / ${totalQuestions}</strong></p>
+                <p>Percentage: <strong>${((score / totalQuestions) * 100).toFixed(0)}%</strong></p>
+                <p style="margin-top: 15px;">Review the answers below:</p>
+            `;
+            resultBox.appendChild(resultsList);
+            resultBox.classList.remove('hidden');
+            submitButton.classList.add('hidden');
+            
+            resultBox.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+
+
+        // --- Initialization and Routing ---
+        document.addEventListener('DOMContentLoaded', () => {
+            // Navigation Toggle for Mobile
+            navToggle.addEventListener('click', () => {
+                navUl.classList.toggle('open');
+            });
+
+            // Handle page routing via hash change
+            function handleRouting() {
+                const hash = window.location.hash.substring(1) || 'home';
+                
+                // Extract base page ID (e.g., 'quiz' from 'quiz-python')
+                const pageId = hash.startsWith('quiz-') ? 'quiz' : hash;
+
+                showPage(pageId, hash);
+            }
+
+            // Listen for hash changes (e.g., clicking a navigation link)
+            window.addEventListener('hashchange', handleRouting);
+
+            // Initial load
+            handleRouting();
+
+            // Handle direct clicks on language cards
+            document.querySelectorAll('.lang-card').forEach(card => {
+                card.addEventListener('click', (e) => {
+                    const lang = card.dataset.lang;
+                    window.location.hash = `#quiz-${lang}`;
+                    e.preventDefault(); // Prevent default hash change until JS takes over
+                });
+            });
+        });
+    </script>
+</body>
+</html>
