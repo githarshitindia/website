@@ -3,8 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CodeQuiz Pro - Master Your Code</title>
+    <title>CodeQuiz Pro - Master Your Code (Firebase Modular)</title>
+    <!-- Google Fonts for a modern look (Poppins) -->
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+    
     <style>
         /* ========================================
         2. CSS Styling (Modern, Responsive, Clean)
@@ -19,6 +21,7 @@
             --font-family: 'Poppins', sans-serif;
             --correct-color: #28a745;
             --incorrect-color: #dc3545;
+            --google-color: #4285f4;
         }
 
         * {
@@ -72,7 +75,7 @@
         }
 
         .page {
-            display: none; /* Pages are hidden by default, shown by JS */
+            display: none; 
             padding: 2rem 0;
             animation: fadeIn 0.5s ease-in-out;
         }
@@ -89,10 +92,11 @@
             margin-bottom: 0.5rem;
         }
 
-        #home-page p {
-            font-size: 1.1rem;
-            margin-bottom: 1.5rem;
-            max-width: 600px;
+        /* #loading-message is hidden by default to keep the home page clean */
+        #loading-message {
+            color: var(--primary-color);
+            font-weight: 600;
+            display: none; 
         }
 
         /* --- Language Selection (Card Layout) --- */
@@ -132,6 +136,8 @@
             cursor: pointer;
             transition: background-color 0.3s ease, transform 0.1s ease;
             text-transform: uppercase;
+            text-decoration: none; 
+            display: inline-block;
         }
 
         .btn-primary {
@@ -151,6 +157,14 @@
 
         .btn-secondary:hover {
             background-color: #1e7e34;
+        }
+
+        .btn-google {
+            background-color: var(--google-color);
+            color: white;
+            padding: 0.4rem 0.8rem;
+            font-size: 0.8rem;
+            margin-left: 10px;
         }
         
         .btn-start {
@@ -202,12 +216,10 @@
         }
 
         .options-group input[type="radio"] {
-            /* Hides the default radio button */
             display: none; 
         }
         
         .options-group input[type="radio"] + span {
-            /* Custom radio button style */
             position: absolute;
             left: 1rem;
             top: 50%;
@@ -225,7 +237,6 @@
         }
         
         .options-group input[type="radio"]:checked + span::after {
-            /* Inner circle of checked radio button */
             content: "";
             position: absolute;
             top: 50%;
@@ -266,6 +277,8 @@
             margin-bottom: 0.5rem;
             border-left: 5px solid transparent;
             transition: background-color 0.3s ease;
+            display: flex;
+            flex-direction: column;
         }
 
         .correct-answer {
@@ -284,24 +297,20 @@
             font-size: 1.1rem;
         }
 
-        .correct-answer::before {
-            content: "✅ Correct: ";
-            color: var(--correct-color);
-            font-weight: 600;
-        }
-        .wrong-answer::before {
-            content: "❌ Your Answer: ";
-            color: var(--incorrect-color);
-            font-weight: 600;
-        }
-        .wrong-answer .correct-info {
-            display: block;
-            color: var(--correct-color);
+        .wrong-answer .correction-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 5px;
             font-size: 0.9em;
-            margin-top: 0.25rem;
         }
 
-        /* --- Responsive Adjustments --- */
+        .wrong-answer .correction-info span {
+            color: var(--correct-color);
+            font-weight: 600;
+        }
+
+        /* --- Responsive Adjustments (Same as before) --- */
         @media (max-width: 768px) {
             .navbar {
                 padding: 1rem;
@@ -323,6 +332,7 @@
     </style>
 </head>
 <body>
+    <!-- Navigation Bar -->
     <nav class="navbar">
         <a href="#" class="navbar-brand">CodeQuiz Pro</a>
         <div class="nav-links">
@@ -333,18 +343,27 @@
     </nav>
 
     <div class="container">
+        <!-- 1. Home Page -->
         <section id="home-page" class="page" style="display: block;">
             <h1>Elevate Your Coding Skills.</h1>
             <p>Welcome to **CodeQuiz Pro**, your interactive platform for mastering programming concepts. Select a language and test your knowledge with challenging multiple-choice questions curated to deepen your understanding.</p>
-            <button class="btn btn-primary" onclick="showPage('languages-page')">Start Your Journey Now</button>
+            <!-- The loading message is hidden from the Home page -->
+            <p id="loading-message" style="display: none;"></p>
+            <button class="btn btn-primary" onclick="showPage('languages-page')" id="start-btn" style="display:none;">Start Your Journey Now</button>
         </section>
 
+        <!-- 2. Language Selection Page -->
         <section id="languages-page" class="page">
             <h2>Select a Programming Language</h2>
+            <!-- Error message shows here if Firebase fails to load languages -->
+            <p id="language-load-error" style="color: var(--incorrect-color); display: none;">Could not load languages. Check Firebase config and Firestore connection.</p>
             <div class="language-grid" id="language-cards">
-                </div>
+                <!-- Cards will be populated here by JavaScript -->
+                <p id="language-loading-status">Loading available quizzes...</p>
+            </div>
         </section>
 
+        <!-- 3. Test Page -->
         <section id="test-page" class="page">
             <h2 id="quiz-title"></h2>
             
@@ -356,18 +375,21 @@
                 </div>
             </form>
 
+            <!-- Results Section -->
             <div id="results-section">
                 <h3>Test Results</h3>
                 <p id="score-display" style="font-size: 1.5rem; font-weight: 700; margin-bottom: 2rem;"></p>
                 
                 <h4>Detailed Review:</h4>
                 <ul id="result-detail-list" class="result-detail-list">
-                    </ul>
+                    <!-- Detailed results will be shown here -->
+                </ul>
 
                 <button class="btn btn-primary" style="margin-top: 2rem;" onclick="showPage('languages-page')">Try Another Language</button>
             </div>
         </section>
 
+        <!-- 4. About Page -->
         <section id="about-page" class="page">
             <h2>About CodeQuiz Pro</h2>
             <p style="font-size: 1.1rem; margin-top: 1rem;">CodeQuiz Pro is designed to reinforce your learning through **active recall** and **testing**. We believe the best way to solidify your knowledge is to be challenged on it. Our platform provides a curated set of multiple-choice questions across various programming languages, simulating the types of knowledge checks you'll encounter in interviews or certifications.</p>
@@ -380,149 +402,154 @@
         </section>
     </div>
 
-    <script>
-        // --- 3.1. Simulated Firebase Firestore Structure (Dummy Data) ---
-        // This object simulates the 'questions' collection in Firestore.
-        // The structure matches your requirement: Collection (implicit) -> Document (Language) -> Array of Questions
-        const FIREBASE_DB = {
-            'python': [
-                {
-                    q: "Which keyword is used to define a function in Python?",
-                    options: ["def", "function", "func", "define"],
-                    answer: "def"
-                },
-                {
-                    q: "What is the output of 'print(type([]))'?",
-                    options: ["<class 'tuple'>", "<class 'list'>", "<class 'array'>", "<class 'set'>"],
-                    answer: "<class 'list'>"
-                },
-                {
-                    q: "Which of the following is NOT a built-in Python data type?",
-                    options: ["list", "dictionary", "array", "tuple"],
-                    answer: "array"
-                },
-                {
-                    q: "Which method is used to remove the last item from a list?",
-                    options: ["delete()", "pop()", "remove()", "discard()"],
-                    answer: "pop()"
-                },
-                {
-                    q: "What does 'PEP 8' stand for?",
-                    options: ["Python Enhancement Proposal", "Python Environment Protocol", "Python Executive Policy", "Python Evaluation Program"],
-                    answer: "Python Enhancement Proposal"
-                }
-            ],
-            'javascript': [
-                {
-                    q: "Which built-in method adds one or more elements to the end of an array?",
-                    options: ["last()", "put()", "push()", "append()"],
-                    answer: "push()"
-                },
-                {
-                    q: "What is the correct way to declare a constant variable?",
-                    options: ["var constantName = value;", "let constantName = value;", "const constantName = value;", "constant constantName = value;"],
-                    answer: "const constantName = value;"
-                },
-                {
-                    q: "Which operator is used for 'strict equality'?",
-                    options: ["==", "=", "===", "!="],
-                    answer: "==="
-                },
-                {
-                    q: "How do you write an IF statement for checking if 'i' is NOT equal to 5?",
-                    options: ["if (i <> 5)", "if i =! 5", "if (i != 5)", "if (i not= 5)"],
-                    answer: "if (i != 5)"
-                },
-                {
-                    q: "What will 'typeof null' return?",
-                    options: ["'null'", "'object'", "'undefined'", "'number'"],
-                    answer: "'object'" // A famous JS quirk
-                }
-            ],
-            'cpp': [
-                {
-                    q: "Which header file is required to use 'cout' and 'cin'?",
-                    options: ["<utility>", "<iostream>", "<stdlib>", "<stdio>"],
-                    answer: "<iostream>"
-                },
-                {
-                    q: "What is the output of 'int x = 5; cout << ++x;'?",
-                    options: ["5", "6", "error", "undefined"],
-                    answer: "6"
-                },
-                {
-                    q: "Which operator is used to access the member of a structure/class using a pointer?",
-                    options: [".", "->", "::", "*"],
-                    answer: "->"
-                }
-            ],
-            'java': [
-                {
-                    q: "Which keyword is used to prevent method overriding?",
-                    options: ["static", "abstract", "final", "sealed"],
-                    answer: "final"
-                },
-                {
-                    q: "Which of the following is NOT a Java primitive data type?",
-                    options: ["int", "String", "boolean", "char"],
-                    answer: "String"
-                },
-                {
-                    q: "What is the name of the method used to start a thread?",
-                    options: ["run()", "execute()", "start()", "init()"],
-                    answer: "start()"
-                }
-            ]
-        };
+    <!-- 
+    ===================================================
+    3. JavaScript Logic (Firebase Modular SDK Integrated)
+    ===================================================
+    -->
+    <script type="module">
+        // --- 3.1. Firebase Configuration and Imports (Modular) ---
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-app.js";
+        import { 
+            getFirestore, 
+            collection, 
+            getDocs, 
+            doc, 
+            getDoc 
+        } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-firestore.js";
 
-        const availableLanguages = Object.keys(FIREBASE_DB);
+        // Your provided web app's Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyBNdTrr2LqO1sfumVgsY5nEGs0HgyHyTmM",
+            authDomain: "test0001-31e4a.firebaseapp.com",
+            projectId: "test0001-31e4a",
+            storageBucket: "test0001-31e4a.firebasestorage.app",
+            messagingSenderId: "166213677995",
+            appId: "1:166213677995:web:a58770c70ba977ff7118ee"
+        };
+        
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        
+        let availableLanguages = [];
         let currentQuizQuestions = [];
         let currentLanguage = '';
 
-        // --- 3.2. Page Navigation Logic ---
-        function showPage(pageId) {
-            // Hide all pages
-            document.querySelectorAll('.page').forEach(page => {
-                page.style.display = 'none';
-            });
-            // Show the requested page
-            document.getElementById(pageId).style.display = 'block';
+        // --- Utility Functions ---
+        function capitalize(s) {
+            return s.charAt(0).toUpperCase() + s.slice(1);
+        }
 
-            // Reset state when navigating away from the test
-            if (pageId === 'languages-page') {
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+            return array;
+        }
+
+        function createGoogleSearchLink(query) {
+            const encodedQuery = encodeURIComponent(query);
+            // Uses tbm=vid to prioritize videos or detailed explanations
+            return `https://www.google.com/search?q=${encodedQuery}&tbm=vid`; 
+        }
+
+        // --- 3.2. Firebase Fetching (Modular API) ---
+        async function fetchAvailableLanguages() {
+            // Silence the home page status
+            document.getElementById('start-btn').style.display = 'none';
+            document.getElementById('language-load-error').style.display = 'none';
+            document.getElementById('language-loading-status').style.display = 'block';
+
+            try {
+                // Fetch languages (documents) from the 'questions' collection
+                const querySnapshot = await getDocs(collection(db, "questions"));
+                availableLanguages = querySnapshot.docs.map(doc => doc.id);
+
+                // Success: Show the button on Home page and hide loading status on Language page
+                document.getElementById('start-btn').style.display = 'block';
+                document.getElementById('language-loading-status').style.display = 'none';
                 renderLanguageCards();
-                document.getElementById('quiz-form').style.display = 'block';
-                document.getElementById('results-section').style.display = 'none';
+
+            } catch (error) {
+                console.error("Error fetching available languages: ", error);
+                
+                // On failure, keep the Home button hidden. Show error on Language Page.
+                document.getElementById('language-loading-status').style.display = 'none';
+                const errorEl = document.getElementById('language-load-error');
+                errorEl.textContent = 'Failed to load quiz languages. Check your connection or Firestore security rules.';
+                errorEl.style.display = 'block'; 
             }
         }
         
-        // --- 3.3. Language Selection Rendering ---
+        async function fetchQuestions(language) {
+            try {
+                const docRef = doc(db, "questions", language);
+                const docSnap = await getDoc(docRef);
+
+                if (docSnap.exists() && docSnap.data().questions) {
+                    // Assuming the array of questions is stored in a field called 'questions'
+                    return docSnap.data().questions; 
+                } else {
+                    console.error("No questions found for " + language);
+                    return [];
+                }
+            } catch (error) {
+                console.error("Error fetching document: ", error);
+                return [];
+            }
+        }
+
+        // --- 3.3. Page Navigation Logic ---
+        function showPage(pageId) {
+            document.querySelectorAll('.page').forEach(page => {
+                page.style.display = 'none';
+            });
+            document.getElementById(pageId).style.display = 'block';
+
+            if (pageId === 'languages-page') {
+                document.getElementById('quiz-form').style.display = 'block';
+                document.getElementById('results-section').style.display = 'none';
+                renderLanguageCards();
+            }
+        }
+        
+        // --- 3.4. Language Selection Rendering ---
         function renderLanguageCards() {
             const container = document.getElementById('language-cards');
-            container.innerHTML = ''; // Clear previous cards
+            // Clear only the cards, not the loading status if it was present
+            const cardsContainer = document.querySelector('.language-grid');
+            cardsContainer.innerHTML = ''; 
+
+            if (availableLanguages.length === 0) {
+                 cardsContainer.innerHTML = '<p>No quiz languages available. Please add documents (e.g., python, javascript) to the "questions" collection in Firestore, each containing an array of questions.</p>';
+                 return;
+            }
 
             availableLanguages.forEach(langKey => {
-                // Capitalize the language name for display (e.g., 'python' -> 'Python')
-                const langName = langKey.charAt(0).toUpperCase() + langKey.slice(1);
+                const langName = capitalize(langKey);
                 const cardHtml = `
                     <div class="language-card">
                         <h3>${langName}</h3>
-                        <p>Test your knowledge on ${langName} fundamentals. (${FIREBASE_DB[langKey].length} Questions)</p>
+                        <p>Challenge yourself with ${langName} questions!</p>
                         <button class="btn btn-primary btn-start" onclick="startQuiz('${langKey}')">Start Test</button>
                     </div>
                 `;
-                container.innerHTML += cardHtml;
+                cardsContainer.innerHTML += cardHtml;
             });
         }
         
-        // --- 3.4. Quiz Setup & Rendering ---
-        function startQuiz(langKey) {
+        // --- 3.5. Quiz Setup & Rendering ---
+        async function startQuiz(langKey) {
             currentLanguage = langKey;
-            // SIMULATED: Fetch questions from the 'Firebase' object
-            currentQuizQuestions = FIREBASE_DB[langKey] || [];
             
-            // Set quiz title
-            const langName = langKey.charAt(0).toUpperCase() + langKey.slice(1);
+            const langName = capitalize(langKey);
+            document.getElementById('quiz-title').textContent = `${langName} Quiz (Loading...)`;
+
+            // FETCH QUESTIONS FROM FIREBASE
+            currentQuizQuestions = await fetchQuestions(langKey);
+
             document.getElementById('quiz-title').textContent = `${langName} Quiz`;
 
             renderQuestions(currentQuizQuestions);
@@ -531,11 +558,18 @@
 
         function renderQuestions(questions) {
             const container = document.getElementById('questions-container');
-            container.innerHTML = ''; // Clear previous questions
+            container.innerHTML = ''; 
+
+            if (questions.length === 0) {
+                 container.innerHTML = '<p>No questions loaded for this language. Please check the Firestore document.</p>';
+                 document.getElementById('submit-quiz-btn').style.display = 'none';
+                 return;
+            } else {
+                 document.getElementById('submit-quiz-btn').style.display = 'block';
+            }
             
             questions.forEach((q, index) => {
                 const questionNumber = index + 1;
-                // Randomize options for a better test experience
                 const shuffledOptions = shuffleArray([...q.options]); 
 
                 const optionsHtml = shuffledOptions.map((option) => `
@@ -558,16 +592,7 @@
             });
         }
 
-        // Simple Fisher-Yates shuffle algorithm
-        function shuffleArray(array) {
-            for (let i = array.length - 1; i > 0; i--) {
-                const j = Math.floor(Math.random() * (i + 1));
-                [array[i], array[j]] = [array[j], array[i]];
-            }
-            return array;
-        }
-
-        // --- 3.5. Quiz Evaluation Logic ---
+        // --- 3.6. Quiz Evaluation Logic ---
         document.getElementById('quiz-form').addEventListener('submit', function(event) {
             event.preventDefault();
             
@@ -577,7 +602,7 @@
 
             currentQuizQuestions.forEach((q, index) => {
                 const questionName = `question-${index}`;
-                // Get the value of the selected radio button for this question
+                // Using optional chaining (?) in case element doesn't exist (e.g. no selection)
                 const selectedOption = form.elements[questionName]?.value || 'No Answer';
                 const isCorrect = selectedOption === q.answer;
                 
@@ -589,7 +614,8 @@
                     question: q.q,
                     correct: isCorrect,
                     userAnswer: selectedOption,
-                    correctAnswer: q.answer
+                    correctAnswer: q.answer,
+                    language: currentLanguage
                 });
             });
 
@@ -598,7 +624,9 @@
             const resultsSection = document.getElementById('results-section');
             resultsSection.style.display = 'block';
 
-            document.getElementById('score-display').textContent = `Your Score: ${score} out of ${currentQuizQuestions.length}`;
+            document.getElementById('score-display').textContent = 
+                `Your Score: ${score} out of ${currentQuizQuestions.length} (${((score / currentQuizQuestions.length) * 100).toFixed(0)}%)`;
+            
             renderResultsDetails(resultsDetails);
         });
 
@@ -614,10 +642,21 @@
                 let feedbackHtml = `<strong>${item.question}</strong>`;
 
                 if (item.correct) {
-                    feedbackHtml += `<p>Answer: ${item.userAnswer}</p>`;
-                } else {
                     feedbackHtml += `<p>You chose: ${item.userAnswer}</p>`;
-                    feedbackHtml += `<p class="correct-info">Correct Answer: ${item.correctAnswer}</p>`;
+                } else {
+                    // WRONG ANSWER: Show user's choice, correct answer, and Google link
+                    feedbackHtml += `<p>You chose: ${item.userAnswer}</p>`;
+                    
+                    // Construct search query for better results
+                    const searchQuery = `${item.correctAnswer} ${item.question} ${item.language} tutorial`;
+                    const googleLink = createGoogleSearchLink(searchQuery);
+
+                    feedbackHtml += `
+                        <div class="correction-info">
+                            <span>Correct Answer: ${item.correctAnswer}</span>
+                            <a href="${googleLink}" target="_blank" class="btn btn-google">View on Google 🔍</a>
+                        </div>
+                    `;
                 }
                 
                 li.innerHTML = feedbackHtml;
@@ -625,10 +664,10 @@
             });
         }
 
-        // --- 3.6. Initialization ---
+        // --- 3.7. Initialization ---
         document.addEventListener('DOMContentLoaded', () => {
-            // Start by rendering language cards and showing the home page
-            renderLanguageCards();
+            // Start by fetching languages from Firebase and showing the home page
+            fetchAvailableLanguages();
             showPage('home-page');
         });
     </script>
