@@ -490,13 +490,34 @@
 
                 if (docSnap.exists() && docSnap.data().questions) {
                     // Assuming the array of questions is stored in a field called 'questions'
-                    return docSnap.data().questions; 
+                    const questionsData = docSnap.data().questions;
+                    
+                    // CRUCIAL: Check the type of data returned. If it's a string, it must be parsed.
+                    // If the user pasted the JSON array content into a string field, we must parse it.
+                    if (typeof questionsData === 'string') {
+                        try {
+                            // Attempt to parse the JSON string into an array of objects
+                            return JSON.parse(questionsData);
+                        } catch (parseError) {
+                            console.error(`ERROR: Failed to parse questions JSON for ${language}. This usually means the JSON string in the Firestore 'questions' field has formatting errors (like missing quotes, single quotes, or smart quotes).`, parseError);
+                            // Show an error to the user on the page
+                            document.getElementById('questions-container').innerHTML = `
+                                <p style="color: var(--incorrect-color); font-weight: 600;">
+                                    A data formatting error was found in the Firestore document "${language}". 
+                                    Please check your JSON syntax (use standard double quotes).
+                                </p>`;
+                            return [];
+                        }
+                    }
+                    
+                    // If it's already an array (preferred method), return it directly
+                    return questionsData; 
                 } else {
-                    console.error("No questions found for " + language);
+                    console.error("No questions array found in the Firestore document for " + language);
                     return [];
                 }
             } catch (error) {
-                console.error("Error fetching document: ", error);
+                console.error("Error fetching or accessing Firestore document: ", error);
                 return [];
             }
         }
@@ -558,14 +579,17 @@
 
         function renderQuestions(questions) {
             const container = document.getElementById('questions-container');
-            container.innerHTML = ''; 
-
-            if (questions.length === 0) {
-                 container.innerHTML = '<p>No questions loaded for this language. Please check the Firestore document.</p>';
+            // The JSON parsing error in fetchQuestions may have already inserted an error message, 
+            // so we only clear it if we have valid questions.
+            if (questions.length > 0) {
+                container.innerHTML = ''; 
+                document.getElementById('submit-quiz-btn').style.display = 'block';
+            } else {
+                 if (!container.innerHTML.includes('A data formatting error')) {
+                    container.innerHTML = '<p>No questions loaded for this language. Please check the Firestore document.</p>';
+                 }
                  document.getElementById('submit-quiz-btn').style.display = 'none';
                  return;
-            } else {
-                 document.getElementById('submit-quiz-btn').style.display = 'block';
             }
             
             questions.forEach((q, index) => {
