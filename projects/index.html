@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Open-Source Project Showcase | Ultimate Refinement</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    
+    <link rel="stylesheet" href="styles.css"> 
+    
+    <script src="tailwind.config.js"></script>
+</head>
+
+<body class="transition-colors duration-500 font-sans">
+
+    <header class="sticky top-0 z-40 shadow-2xl shadow-indigo-900/10 dark:shadow-indigo-900/30 bg-white/70 dark:bg-gray-900/70 backdrop-blur-lg border-b border-gray-200/50 dark:border-gray-700/50">
+        <div class="max-w-7xl mx-auto p-5 flex justify-between items-center">
+            
+            <h1 class="text-3xl md:text-4xl font-extrabold text-primary dark:text-primary-light transition-colors">
+                <span class="text-gray-900 dark:text-white">Dev</span><span class="ml-1">Forge</span>
+            </h1>
+
+            <div class="flex items-center space-x-6">
+                
+                <nav class="hidden md:flex space-x-6 text-lg font-medium">
+                    <a href="https://codely.fun/" target="_blank" rel="noopener noreferrer" class="text-gray-600 dark:text-gray-300 hover:text-primary dark:hover:text-primary-light transition">
+                        <i class="fas fa-info-circle mr-1"></i>About
+                    </a>
+                    <a href="https://codely.fun/" target="_blank" rel="noopener noreferrer" class="text-gray-600 dark:text-gray-300 hover:text-primary dark:hover:text-primary-light transition">
+                        <i class="fas fa-file-alt mr-1"></i>T&C
+                    </a>
+                </nav>
+                
+                <button id="theme-toggle" class="p-3 rounded-full text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition">
+                    <i id="sun-icon" class="fas fa-sun w-6 h-6 hidden"></i>
+                    <i id="moon-icon" class="fas fa-moon w-6 h-6"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <main class="container mx-auto max-w-7xl px-4 py-12 md:py-16">
+        
+        <div class="text-center mb-16">
+            <h2 class="text-5xl md:text-7xl font-extrabold text-gray-900 dark:text-white mb-4 leading-tight">
+                Explore the Open Source <span class="text-gradient">Project Forge</span>
+            </h2>
+            <p class="text-xl text-gray-600 dark:text-gray-400 max-w-3xl mx-auto mb-10">
+                Discover innovative tools, scripts, and applications created by the community. **View code, download, and get involved!**
+            </p>
+
+            <div class="relative w-full max-w-4xl mx-auto">
+                <i class="fas fa-search absolute left-5 top-1/2 transform -translate-y-1/2 text-primary-light"></i>
+                <input type="text" id="search-input" placeholder="Search by project name, tech stack (React, Python), or category..."
+                       class="w-full p-5 pl-14 border-4 border-gray-300 dark:border-gray-600 rounded-2xl shadow-xl hover:shadow-indigo-300/50 dark:hover:shadow-indigo-700/50 focus:ring-4 focus:ring-primary-light/50 focus:border-primary transition-all duration-300 bg-white dark:bg-gray-800 dark:text-white text-base md:text-lg"
+                >
+            </div>
+        </div>
+
+        <div id="projects-container">
+            <div id="loading-spinner" class="text-center py-20 text-gray-500 dark:text-gray-400">
+                <i class="fas fa-hammer fa-spin fa-3x text-primary mx-auto mb-4"></i>
+                <p class="text-2xl font-medium">Forging the list of projects...</p>
+            </div>
+        </div>
+
+        <div id="details-modal" class="fixed inset-0 bg-gray-900 bg-opacity-80 z-50 flex items-center justify-center p-4 hidden transition-opacity duration-300 opacity-0">
+            <div class="bg-white dark:bg-gray-800 rounded-3xl shadow-2xl max-w-4xl w-full max-h-[95vh] overflow-y-auto transform transition-transform duration-300 scale-95">
+                <div class="p-6 md:p-10">
+                    <div class="flex justify-between items-start border-b pb-4 mb-6 dark:border-gray-700">
+                        <h2 id="modal-title" class="text-3xl font-black text-gray-900 dark:text-white"></h2>
+                        <button id="close-modal" class="p-2 rounded-full text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 transition">
+                            <i class="fas fa-times w-7 h-7"></i>
+                        </button>
+                    </div>
+
+                    <div id="modal-content" class="space-y-8">
+                        </div>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <script type="module" src="app.js"></script>
+</body>
+</html>
