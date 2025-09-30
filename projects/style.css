@@ -1,0 +1,50 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap');
+        
+/* 3D Tilt Effect and Shadow Lift for Project Cards */
+.project-card {
+    box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.15); /* Deeper initial shadow */
+    transition: transform 0.4s cubic-bezier(0.25, 0.8, 0.25, 1), box-shadow 0.4s;
+    border-left: 5px solid #a5b4fc; /* Light indigo stripe */
+}
+.project-card:hover {
+    transform: translateY(-10px) rotateZ(0.5deg); /* More dramatic lift and tilt */
+    box-shadow: 0 20px 40px -8px rgba(67, 56, 202, 0.45); /* Intense, colorful shadow */
+}
+.dark .project-card {
+     border-left-color: #4f46e5; /* Darker stripe in dark mode */
+     box-shadow: 0 10px 30px -10px rgba(79, 70, 229, 0.2);
+}
+.dark .project-card:hover {
+     box-shadow: 0 20px 40px -8px rgba(79, 70, 229, 0.7);
+}
+
+/* Subtle background gradient for depth */
+body {
+    background: linear-gradient(to bottom right, #f9fafb 0%, #f3f4f6 100%);
+}
+.dark body {
+    background: linear-gradient(to bottom right, #0f172a 0%, #111827 100%);
+}
+
+/* Gradient for Hero Text */
+.text-gradient {
+    background-clip: text;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-image: linear-gradient(to right, #4338ca 0%, #6366f1 100%);
+}
+
+/* Gradient Button Style */
+.btn-gradient {
+    background-image: linear-gradient(to right, #4338ca 0%, #6366f1 100%);
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px 0 rgba(67, 56, 202, 0.4);
+}
+.btn-gradient:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px 0 rgba(67, 56, 202, 0.6);
+}
+.dark .btn-gradient {
+    background-image: linear-gradient(to right, #6366f1 0%, #818cf8 100%);
+    box-shadow: 0 4px 15px 0 rgba(99, 102, 241, 0.6);
+}
