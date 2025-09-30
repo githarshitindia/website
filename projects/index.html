@@ -79,10 +79,14 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
-        import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
+        import { getFirestore, collection, getDocs, setLogLevel } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
         import { getStorage, ref as storageRef, getDownloadURL } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-storage.js";
         
-        // Define Firebase Config
+        // Use setLogLevel('debug') for detailed debugging in the console
+        setLogLevel('debug');
+
+        // Define Firebase Config - IMPORTANT: Replace with your actual config or use global variables
+        // Since you did not provide the global variables, I am keeping the hardcoded one from your file.
         const firebaseConfig = {
             apiKey: "AIzaSyDiS42BJ1Ppc1z9UNrdyTKWtb8qmkKuQ_Y",
             authDomain: "harshitproto.firebaseapp.com",
@@ -121,26 +125,35 @@
         // --- RENDERING FUNCTIONS ---
 
         function createProjectCardHTML(project) {
+            // FIX: Use the specific fields requested by the user for card display
+            const thumbnail_url = project.thumbnail_url || 'https://via.placeholder.com/600x400.png?text=Thumbnail+Missing'; // Using thumbnail_url
+            const short_description = project.short_description || 'No description provided.'; // Using short_description
+            const github_url = project.github_url || '#'; // Using github_url
+            
+            // FIX: Ensure tags is an array before using slice/map
+            const tags = Array.isArray(project.tags) ? project.tags : [];
+
             return `
                 <div class="project-card bg-white dark:bg-gray-800 rounded-2xl overflow-hidden border border-gray-200 dark:border-gray-700 flex flex-col transition duration-400" data-id="${project.id}">
                     
                     <div class="relative">
-                        <img src="${project.thumbnail_url || 'https://via.placeholder.com/600x400.png?text=Thumbnail+Missing'}" alt="${project.title} thumbnail" 
-                             class="w-full h-48 object-cover cursor-pointer" onclick="openDetailsModal('${project.id}')">
+                        <img src="${thumbnail_url}" alt="${project.title} thumbnail" 
+                             class="w-full h-48 object-cover cursor-pointer" onerror="this.onerror=null; this.src='https://via.placeholder.com/600x400.png?text=Image+Load+Failed';" onclick="openDetailsModal('${project.id}')">
                         <div class="absolute inset-x-0 bottom-0 h-1/4 bg-gradient-to-t from-gray-900/10 dark:from-gray-900/20 to-transparent"></div>
                     </div>
 
                     <div class="p-6 flex flex-col flex-grow">
                         
                         <div class="flex flex-wrap gap-2 mb-3">
-                            ${(project.tags || []).slice(0, 3).map(tag => 
+                            ${tags.slice(0, 3).map(tag => 
                                 `<span class="px-3 py-1 text-xs font-semibold rounded-full bg-primary-light/10 text-primary dark:bg-indigo-900/50 dark:text-indigo-300 shadow-sm"><i class="fas fa-microchip mr-1"></i>${tag}</span>`
                             ).join('')}
+                            ${tags.length === 0 ? `<span class="px-3 py-1 text-xs font-semibold rounded-full bg-gray-100 text-gray-500">No Tags</span>` : ''}
                         </div>
 
                         <h3 class="text-xl font-black text-gray-900 dark:text-white mb-2">${project.title}</h3>
                         
-                        <p class="text-sm text-gray-500 dark:text-gray-400 mb-4 line-clamp-3 flex-grow">${project.short_description || ''}</p>
+                        <p class="text-sm text-gray-500 dark:text-gray-400 mb-4 line-clamp-3 flex-grow">${short_description}</p>
                         
                         <hr class="border-gray-100 dark:border-gray-700 mb-4 mt-auto">
 
@@ -150,7 +163,7 @@
                                 <i class="fas fa-search mr-2"></i> View Details
                             </button>
                             
-                            <a href="${project.github_url}" target="_blank" rel="noopener noreferrer" 
+                            <a href="${github_url}" target="_blank" rel="noopener noreferrer" 
                                class="flex items-center justify-center w-full px-4 py-2 text-base font-semibold rounded-xl text-gray-700 dark:text-gray-300 border-2 border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700 transition">
                                 <i class="fab fa-github mr-2"></i> View Code
                             </a>
@@ -169,8 +182,11 @@
                  return;
             }
 
+            // Fallback category to display all projects together
+            const defaultCategory = 'All Projects'; 
+
             const groupedProjects = projectsToRender.reduce((acc, project) => {
-                const category = project.category || 'Uncategorized';
+                const category = project.category || defaultCategory;
                 if (!acc[category]) {
                     acc[category] = [];
                 }
@@ -185,7 +201,7 @@
                 section.innerHTML = `
                     <div class="flex items-center mb-8">
                         <h2 class="text-3xl md:text-4xl font-black text-gray-900 dark:text-white">
-                            <i class="fas fa-code mr-3 text-primary-light"></i>${category}
+                            <i class="fas fa-code mr-3 ${category === defaultCategory ? 'text-gray-500' : 'text-primary-light'}"></i>${category}
                         </h2>
                         <div class="flex-grow h-1 ml-4 rounded-full bg-primary-light/50 dark:bg-primary/50"></div>
                     </div>
@@ -222,6 +238,15 @@
         async function openDetailsModal(projectId) {
             const project = allProjects.find(p => p.id === projectId);
             if (!project) return;
+            
+            // FIX: Use the specific fields requested by the user for modal display
+            const thumbnail_url = project.thumbnail_url || 'https://via.placeholder.com/800x600.png?text=Main+Image'; // Using thumbnail_url
+            const full_description = project.full_description || 'No detailed description provided.'; // Using full_description
+            const github_url = project.github_url || '#'; // Using github_url
+            const category = project.category || 'General';
+            
+            // FIX: Ensure tags is an array
+            const tags = Array.isArray(project.tags) ? project.tags : [];
 
             modalTitle.textContent = project.title;
             modalContent.innerHTML = '<p class="text-center py-5 dark:text-gray-400"><i class="fas fa-spinner fa-spin mr-2"></i>Fetching details...</p>';
@@ -234,12 +259,15 @@
                 modalDialog.classList.add('scale-100');
             }, 10);
 
-            const downloadLink = await getDownloadLink(project.download_url);
+            // Fetch download link from storage path or use direct URL
+            const downloadLink = await getDownloadLink(project.download_url); 
             
             modalContent.innerHTML = `
                 <div class="flex flex-col lg:flex-row gap-8">
                     <div class="lg:w-1/2 flex flex-col items-center">
-                        <img id="main-screenshot" src="${project.thumbnail_url || 'https://via.placeholder.com/800x600.png?text=Main+Image'}" alt="${project.title} main image" class="w-full h-auto rounded-xl shadow-2xl shadow-indigo-500/20 mb-4 object-cover max-h-96">
+                        <img id="main-screenshot" src="${thumbnail_url}" alt="${project.title} main image" 
+                             class="w-full h-auto rounded-xl shadow-2xl shadow-indigo-500/20 mb-4 object-cover max-h-96"
+                             onerror="this.onerror=null; this.src='https://via.placeholder.com/800x600.png?text=Image+Load+Failed';">
                         <div class="flex gap-3 overflow-x-auto pb-2 justify-center w-full">
                             ${(project.screenshots || []).map(url => 
                                 `<img src="${url}" class="w-20 h-20 object-cover rounded-md border-2 border-transparent hover:border-primary cursor-pointer transition" alt="Screenshot" onclick="document.getElementById('main-screenshot').src='${url}'">`
@@ -250,17 +278,17 @@
                     <div class="lg:w-1/2 space-y-6">
                         <div class="flex flex-wrap justify-between items-center text-sm">
                             <span class="font-semibold px-3 py-1 rounded-full bg-primary-light/20 text-primary-light dark:bg-indigo-900/50 dark:text-indigo-300">
-                                <i class="fas fa-tag mr-1"></i> Category: ${project.category}
+                                <i class="fas fa-tag mr-1"></i> Category: ${category}
                             </span>
                             <span class="text-gray-500 dark:text-gray-400 mt-2 lg:mt-0">
                                 <i class="fas fa-calendar-alt mr-1"></i> Created: ${new Date(project.created_at || new Date()).toLocaleDateString()}
                             </span>
                         </div>
 
-                        <p class="text-gray-700 dark:text-gray-300 text-base leading-relaxed whitespace-pre-wrap">${project.full_description || project.short_description || 'No detailed description provided.'}</p>
+                        <p class="text-gray-700 dark:text-gray-300 text-base leading-relaxed whitespace-pre-wrap">${full_description}</p>
                         
                         <div class="flex flex-wrap gap-2 pt-2 border-t border-gray-200 dark:border-gray-700">
-                            ${(project.tags || []).map(tag => 
+                            ${tags.map(tag => 
                                 `<span class="px-3 py-1 text-xs font-medium rounded-full bg-gray-200 text-gray-700 dark:bg-gray-700 dark:text-gray-300"><i class="fas fa-wrench mr-1"></i>${tag}</span>`
                             ).join('')}
                         </div>
@@ -270,7 +298,7 @@
                                class="flex items-center justify-center w-full text-center px-6 py-3 text-lg font-bold rounded-xl text-white btn-gradient">
                                 <i class="fas fa-download fa-fw mr-3"></i> Download Project
                             </a>
-                            <a href="${project.github_url}" target="_blank" rel="noopener noreferrer" 
+                            <a href="${github_url}" target="_blank" rel="noopener noreferrer" 
                                class="flex items-center justify-center w-full text-center px-6 py-3 text-lg font-bold rounded-xl text-gray-800 dark:text-gray-300 border-2 border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700 transition">
                                 <i class="fab fa-github fa-fw mr-3"></i> View Source Code
                             </a>
@@ -284,12 +312,16 @@
 
         async function fetchAndRenderAllProjects() {
             try {
+                // The collection path is 'projects'
                 const projectsCol = collection(db, 'projects');
                 const projectSnapshot = await getDocs(projectsCol);
                 
                 allProjects = projectSnapshot.docs.map(doc => ({ 
                     id: doc.id, 
-                    created_at: doc.data().created_at ? doc.data().created_at.toDate() : new Date(), 
+                    // Safely handle timestamp conversion (Fixes previous error)
+                    created_at: doc.data().created_at && typeof doc.data().created_at.toDate === 'function' 
+                                ? doc.data().created_at.toDate() 
+                                : new Date(), 
                     ...doc.data() 
                 }));
 
@@ -298,7 +330,7 @@
 
             } catch (error) {
                 console.error("Error fetching projects:", error);
-                document.getElementById('projects-container').innerHTML = `<div class="text-center py-20 text-red-500 dark:text-red-400"><p class="text-xl font-medium">Failed to load projects. Please ensure your Firebase setup is correct.</p></div>`;
+                document.getElementById('projects-container').innerHTML = `<div class="text-center py-20 text-red-500 dark:text-red-400"><p class="text-xl font-medium">Failed to load projects. Check your console for details (F12).</p></div>`;
             }
         }
 
@@ -310,10 +342,15 @@
             const query = searchInput.value.toLowerCase();
             
             const filtered = allProjects.filter(project => {
+                // Ensure project.tags is an array for safe joining
+                const tags = Array.isArray(project.tags) ? project.tags : [];
+                
+                // FIX: Search now includes the new description fields (short_description and full_description)
                 const searchString = [
                     project.title, 
                     project.short_description, 
-                    (project.tags || []).join(' '),
+                    project.full_description,
+                    tags.join(' '),
                     project.category
                 ].join(' ').toLowerCase();
 
