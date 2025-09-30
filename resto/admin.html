@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Admin Console</title>
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+            padding: 2rem;
+            max-width: 500px;
+            margin: auto;
+            background-color: #f5f5f5;
+        }
+        h1 { 
+            text-align: center; 
+            color: #333;
+            margin-bottom: 2rem;
+        }
+        .form-group { 
+            margin-bottom: 1.5rem; 
+        }
+        input, button { 
+            width: 100%; 
+            padding: 12px; 
+            box-sizing: border-box; 
+            border: 1px solid #ccc;
+            border-radius: 8px;
+        }
+        input:focus {
+            outline: none;
+            border-color: #007bff;
+        }
+        button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: bold;
+            transition: background-color 0.3s;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <h1>Admin Console</h1>
+
+    <div class="form-group">
+        <input type="text" id="foodName" placeholder="Food Name" required />
+    </div>
+    <div class="form-group">
+        <input type="number" id="foodPrice" placeholder="Price" required />
+    </div>
+    <div class="form-group">
+        <input type="url" id="foodImage" placeholder="Image URL (optional)" />
+    </div>
+    <button onclick="addItem()">Add Food Item</button>
+
+    <script type="module">
+        // Import the required Firebase services using the modular SDK
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-app.js";
+        import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
+
+        // Your Firebase project configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyABf4BYpvETlUFKqn70XDd0qIYBJoML0Jo",
+            authDomain: "restaurant-app-demo-efa66.firebaseapp.com",
+            projectId: "restaurant-app-demo-efa66",
+            storageBucket: "restaurant-app-demo-efa66.firebasestorage.app",
+            messagingSenderId: "772573783622",
+            appId: "1:772573783622:web:a22bd96d5874617ba1cc47"
+        };
+
+        // Initialize Firebase app and Firestore
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        // This function adds a new item to the "menu" collection
+        window.addItem = async function() {
+            const name = document.getElementById('foodName').value.trim();
+            const price = parseFloat(document.getElementById('foodPrice').value);
+            const image = document.getElementById('foodImage').value.trim();
+
+            if (!name || isNaN(price)) {
+                alert("Please fill in a valid name and price.");
+                return;
+            }
+            
+            try {
+                // Add the new document to the "menu" collection
+                await addDoc(collection(db, "menu"), {
+                    name: name,
+                    price: price,
+                    image: image || null // Set to null if empty string
+                });
+                
+                alert("Item added successfully!");
+                // Clear the input fields after successful addition
+                document.getElementById('foodName').value = "";
+                document.getElementById('foodPrice').value = "";
+                document.getElementById('foodImage').value = "";
+
+            } catch (error) {
+                console.error("Error adding item:", error);
+                alert("Error adding item. Please check the console.");
+            }
+        }
+    </script>
+</body>
+</html>

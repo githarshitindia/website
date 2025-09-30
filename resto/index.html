@@ -1,0 +1,548 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Fresh & Delicious Menu</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <style>
+        :root {
+            --primary-color: #e74c3c; /* Red */
+            --text-color: #34495e;
+            --background-color: #f4f4f4;
+            --card-bg: #fff;
+            --border-color: #ecf0f1;
+            --shadow-light: 0 4px 12px rgba(0, 0, 0, 0.05);
+        }
+
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background: var(--background-color);
+            margin: 0;
+            padding: 1rem;
+            color: var(--text-color);
+            line-height: 1.6;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        .header {
+            text-align: center;
+            padding: 2rem 0;
+        }
+
+        .header h1 {
+            color: var(--primary-color);
+            font-weight: 700;
+            font-size: 2.2rem;
+            margin: 0;
+            line-height: 1.2;
+        }
+
+        .header h2 {
+            font-size: 1.2rem;
+            font-weight: 400;
+            margin: 0.5rem 0 0;
+            color: #7f8c8d;
+        }
+        
+        .container {
+            max-width: 900px;
+            width: 100%;
+        }
+
+        /* --- Form Inputs --- */
+        #user-details-form {
+            padding: 1.5rem;
+            background: var(--card-bg);
+            border-radius: 10px;
+            box-shadow: var(--shadow-light);
+            margin-bottom: 1rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1.25rem;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            font-size: 1rem;
+            box-sizing: border-box;
+            background-color: #fafafa;
+        }
+        
+        .form-group input:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(231, 76, 60, 0.2);
+        }
+
+        /* --- Table Selection Grid --- */
+        .table-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(70px, 1fr));
+            gap: 10px;
+        }
+
+        .table-btn {
+            background: var(--border-color);
+            color: var(--text-color);
+            border: 2px solid transparent;
+            border-radius: 8px;
+            padding: 10px 5px;
+            text-align: center;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .table-btn.selected {
+            background-color: var(--primary-color);
+            color: white;
+            border-color: var(--primary-color);
+            box-shadow: 0 4px 8px rgba(231, 76, 60, 0.3);
+        }
+        
+        #start-order-btn {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 12px;
+            font-size: 1.1rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        
+        #start-order-btn:hover {
+            background-color: #c0392b;
+        }
+
+        /* --- Menu List --- */
+        #menu-section {
+            display: none; /* Initially hidden */
+        }
+        
+        .menu-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem;
+            padding: 1rem;
+            background: var(--card-bg);
+            border-radius: 10px;
+            box-shadow: var(--shadow-light);
+        }
+        
+        @media (min-width: 600px) {
+            .menu-list {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        .menu-item {
+            display: flex;
+            align-items: center;
+            background: var(--card-bg);
+            border-radius: 10px;
+            box-shadow: var(--shadow-light);
+            padding: 12px;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .menu-item:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.1);
+        }
+
+        .item-image {
+            width: 80px;
+            height: 80px;
+            border-radius: 8px;
+            object-fit: cover;
+            margin-right: 15px;
+        }
+
+        .item-details {
+            flex-grow: 1;
+        }
+
+        .item-details h3 {
+            font-size: 1.1rem;
+            margin: 0 0 5px;
+            font-weight: 600;
+        }
+
+        .item-details .price {
+            font-size: 1rem;
+            color: var(--primary-color);
+            font-weight: 700;
+        }
+
+        .quantity-control {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .quantity-control button {
+            background: none;
+            border: 1px solid var(--border-color);
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: var(--text-color);
+            cursor: pointer;
+            transition: background-color 0.2s, color 0.2s;
+        }
+
+        .quantity-control button:hover {
+            background-color: var(--primary-color);
+            color: white;
+            border-color: var(--primary-color);
+        }
+        
+        .quantity-control span {
+            font-size: 1.1rem;
+            font-weight: 600;
+            min-width: 20px;
+            text-align: center;
+        }
+
+        .total-container {
+            text-align: center;
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin: 1.5rem 0;
+        }
+
+        .place-order-btn {
+            display: block;
+            width: 100%;
+            padding: 1rem;
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.2rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .place-order-btn:hover {
+            background-color: #c0392b;
+        }
+
+        #status-message {
+            text-align: center;
+            font-style: italic;
+            color: #888;
+            padding: 2rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Welcome to Harshit Restaurant Maner!</h1>
+        <h2>Please provide your details to begin your order.</h2>
+    </div>
+
+    <div class="container" id="user-details-section">
+        <div id="user-details-form">
+            <div class="form-group">
+                <input type="text" id="customerName" placeholder="Your Name" required />
+            </div>
+            <div class="form-group">
+                <input type="tel" id="customerPhone" placeholder="Phone Number" required />
+            </div>
+            <div class="form-group">
+                <label for="tableNumber">Select Table Number</label>
+                <div class="table-grid" id="table-grid">
+                    </div>
+            </div>
+            <button id="start-order-btn" onclick="startOrder()">Start Ordering</button>
+        </div>
+    </div>
+    
+    <div class="container" id="menu-section">
+        <div class="menu-list" id="menu-list">
+            <div id="status-message">Loading menu items...</div>
+        </div>
+
+        <div class="total-container" id="total-price">
+            Total: ₹0
+        </div>
+
+        <button class="place-order-btn" onclick="placeOrder()">Place Order</button>
+    </div>
+
+    <script type="module">
+        const { jsPDF } = window.jspdf;
+
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-app.js";
+        import { getFirestore, collection, getDocs, addDoc } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
+        
+        const firebaseConfig = {
+            apiKey: "AIzaSyABf4BYpvETlUFKqn70XDd0qIYBJoML0Jo",
+            authDomain: "restaurant-app-demo-efa66.firebaseapp.com",
+            projectId: "restaurant-app-demo-efa66",
+            storageBucket: "restaurant-app-demo-efa66.firebasestorage.app",
+            messagingSenderId: "772573783622",
+            appId: "1:772573783622:web:a22bd96d5874617ba1cc47"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const menuRef = collection(db, "menu");
+        const ordersRef = collection(db, "orders");
+
+        const userDetailsSection = document.getElementById('user-details-section');
+        const menuSection = document.getElementById('menu-section');
+        const menuListEl = document.getElementById('menu-list');
+        const totalPriceEl = document.getElementById('total-price');
+        const statusMessageEl = document.getElementById('status-message');
+        const tableGridEl = document.getElementById('table-grid');
+        const customerNameEl = document.getElementById('customerName');
+        const customerPhoneEl = document.getElementById('customerPhone');
+        
+        let menuItems = [];
+        let selectedItems = {};
+        let selectedTable = null;
+        let customerDetails = {};
+
+        function renderTables() {
+            let tablesHtml = '';
+            for (let i = 1; i <= 10; i++) {
+                tablesHtml += `<button class="table-btn" data-table="${i}">${i}</button>`;
+            }
+            tableGridEl.innerHTML = tablesHtml;
+
+            tableGridEl.querySelectorAll('.table-btn').forEach(button => {
+                button.addEventListener('click', () => {
+                    tableGridEl.querySelectorAll('.table-btn').forEach(btn => btn.classList.remove('selected'));
+                    button.classList.add('selected');
+                    selectedTable = button.dataset.table;
+                });
+            });
+        }
+        
+        window.startOrder = function() {
+            const name = customerNameEl.value.trim();
+            const phone = customerPhoneEl.value.trim();
+
+            if (!name || !phone || !selectedTable) {
+                alert("Please fill in your name and phone number, and select a table.");
+                return;
+            }
+            
+            customerDetails = { name, phone, table: selectedTable };
+            
+            userDetailsSection.style.display = 'none';
+            menuSection.style.display = 'block';
+
+            fetchMenu();
+        };
+
+        async function fetchMenu() {
+            statusMessageEl.textContent = "Loading menu items...";
+            statusMessageEl.style.display = 'block';
+
+            try {
+                const querySnapshot = await getDocs(menuRef);
+                menuItems = [];
+                
+                if (querySnapshot.empty) {
+                    statusMessageEl.textContent = "No menu items found. Please add items to your 'menu' collection in Firebase.";
+                    return;
+                }
+
+                querySnapshot.forEach(doc => {
+                    const data = doc.data();
+                    data.id = doc.id;
+                    if (data.name && typeof data.price === 'number') {
+                        menuItems.push(data);
+                    } else {
+                        console.warn("Skipping invalid menu item:", data);
+                    }
+                });
+
+                if (menuItems.length > 0) {
+                    renderMenu();
+                    statusMessageEl.style.display = 'none';
+                } else {
+                    statusMessageEl.textContent = "Invalid data found. Please ensure all menu items have a 'name' (string) and 'price' (number).";
+                }
+
+            } catch (error) {
+                console.error("Error fetching menu:", error);
+                statusMessageEl.textContent = "Error loading menu. Check your console for details.";
+            }
+        }
+
+        function renderMenu() {
+            menuListEl.innerHTML = "";
+            menuItems.forEach(item => {
+                const itemDiv = document.createElement('div');
+                itemDiv.className = "menu-item";
+                itemDiv.innerHTML = `
+                    <img src="${item.image || 'https://via.placeholder.com/100'}" alt="${item.name}" class="item-image">
+                    <div class="item-details">
+                        <h3>${item.name}</h3>
+                        <p class="price">₹${item.price.toFixed(2)}</p>
+                    </div>
+                    <div class="quantity-control">
+                        <button onclick="updateQuantity('${item.id}', -1)">-</button>
+                        <span id="qty-${item.id}">0</span>
+                        <button onclick="updateQuantity('${item.id}', 1)">+</button>
+                    </div>
+                `;
+                menuListEl.appendChild(itemDiv);
+            });
+            updateTotal();
+        }
+
+        window.updateQuantity = function(itemId, change) {
+            if (!selectedItems[itemId]) {
+                selectedItems[itemId] = 0;
+            }
+            const newQty = selectedItems[itemId] + change;
+            if (newQty >= 0) {
+                selectedItems[itemId] = newQty;
+                document.getElementById(`qty-${itemId}`).textContent = newQty;
+                updateTotal();
+            }
+        };
+
+        function updateTotal() {
+            let total = 0;
+            for (const itemId in selectedItems) {
+                const item = menuItems.find(i => i.id === itemId);
+                if (item) {
+                    total += selectedItems[itemId] * item.price;
+                }
+            }
+            totalPriceEl.textContent = `Total: ₹${total.toFixed(2)}`;
+        }
+
+        function generatePDF(orderData, status) {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+            
+            const restaurantName = "Harshit Restaurant Maner";
+            const customerName = orderData.customerName;
+            const customerPhone = orderData.customerPhone;
+            const tableNumber = orderData.tableNumber;
+            const items = orderData.items;
+            const total = items.reduce((sum, item) => sum + (item.price * item.qty), 0);
+            
+            let yPos = 20;
+
+            doc.setFontSize(20);
+            doc.text(restaurantName, 105, yPos, { align: "center" });
+            yPos += 10;
+            doc.setFontSize(10);
+            doc.text("Your Order Details", 105, yPos, { align: "center" });
+            yPos += 20;
+
+            doc.setFontSize(12);
+            doc.text(`Name: ${customerName}`, 20, yPos);
+            yPos += 7;
+            doc.text(`Phone: ${customerPhone}`, 20, yPos);
+            yPos += 7;
+            doc.text(`Table No: ${tableNumber}`, 20, yPos);
+            yPos += 15;
+
+            doc.setFontSize(14);
+            doc.text("Ordered Items:", 20, yPos);
+            yPos += 10;
+
+            items.forEach((item, index) => {
+                doc.setFontSize(12);
+                doc.text(`- ${item.name} (x${item.qty})`, 25, yPos);
+                doc.text(`₹${(item.price * item.qty).toFixed(2)}`, 180, yPos, { align: "right" });
+                yPos += 7;
+            });
+
+            yPos += 10;
+            doc.setLineWidth(0.5);
+            doc.line(20, yPos, 190, yPos);
+            yPos += 7;
+
+            doc.setFontSize(14);
+            doc.text("Total:", 20, yPos);
+            doc.text(`₹${total.toFixed(2)}`, 180, yPos, { align: "right" });
+            yPos += 20;
+            
+            doc.setFontSize(12);
+            doc.setTextColor(46, 204, 113); // Green color
+            doc.text(`Status: ${status}`, 105, yPos, { align: "center" });
+            doc.setTextColor(0, 0, 0); // Reset color
+            yPos += 15;
+
+            doc.setFontSize(10);
+            doc.text("Note: This is not an invoice. This is just an order proof.", 105, yPos, { align: "center" });
+
+            doc.save(`Order-Table-${tableNumber}.pdf`);
+        }
+
+        window.placeOrder = async function() {
+            const selectedOrderItems = Object.keys(selectedItems)
+                .filter(itemId => selectedItems[itemId] > 0)
+                .map(itemId => {
+                    const item = menuItems.find(i => i.id === itemId);
+                    return { 
+                        name: item.name, 
+                        price: item.price, 
+                        qty: selectedItems[itemId] 
+                    };
+                });
+
+            if (selectedOrderItems.length === 0) {
+                alert("Please select at least one item.");
+                return;
+            }
+
+            const orderData = {
+                customerName: customerDetails.name,
+                customerPhone: customerDetails.phone,
+                tableNumber: customerDetails.table,
+                items: selectedOrderItems,
+                orderTime: new Date().toISOString()
+            };
+
+            try {
+                await addDoc(ordersRef, orderData);
+                
+                alert("Thank you for your order! The chef has received it. An order detail PDF is automatically downloaded in your device for order proof.");
+                
+                generatePDF(orderData, "Order Received by Chef");
+
+                customerNameEl.value = "";
+                customerPhoneEl.value = "";
+                selectedTable = null;
+                document.querySelectorAll('.table-btn').forEach(btn => btn.classList.remove('selected'));
+                selectedItems = {};
+                renderTables();
+                renderMenu();
+                userDetailsSection.style.display = 'block';
+                menuSection.style.display = 'none';
+            } catch (error) {
+                console.error("Error placing order:", error);
+                alert("Error placing order. Please try again.");
+            }
+        };
+
+        // Initialize the app by rendering the table buttons
+        renderTables();
+    </script>
+</body>
+  </html>
