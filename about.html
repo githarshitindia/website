@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="dark">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>About Codely.fun (Minimalist & Polished UI)</title>
+    <title>About Codely.fun</title>
     <!-- Load Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
@@ -13,62 +13,33 @@
             transition: background-color 0.5s ease, color 0.5s ease;
         }
 
-        /* --- Custom Styling for Light Mode --- */
+        /* Define Primary and Secondary Accent Colors for Dark Mode */
+        .text-primary-blue-dark { color: #60a5fa; } /* Lighter Blue */
+        .bg-primary-blue-dark { background-color: #60a5fa; }
+        .border-primary-blue-dark { border-color: #60a5fa; }
+        
+        .text-accent-teal-dark { color: #5eead4; } /* Lighter Teal */
+        .bg-accent-teal-dark { background-color: #5eead4; }
+        .border-accent-teal-dark { border-color: #5eead4; }
+
+        /* --- Dark Mode Base Styles (Now default) --- */
         body {
-            background-color: #ffffff; /* Pure white */
-            color: #111827; /* Darkest gray */
+            background-color: #0f172a; /* Deep Slate Background */
+            color: #e5e7eb; /* Off-White Text */
         }
         
-        /* Minimalist Card Style: No shadow, rely on padding and accent line */
         .section-card {
-            background-color: #f9fafb; /* Very light background for contrast */
-            border: 1px solid #e5e7eb; /* Subtle boundary */
+            background-color: #1e293b; /* Darker Card Background */
             transition: all 0.3s ease-in-out;
-            border-radius: 1rem;
+            border-radius: 0.75rem; /* Medium Rounded Corners */
+            /* Dark Mode Shadow */
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.4), 0 4px 6px -2px rgba(0, 0, 0, 0.3);
         }
         .section-card:hover {
-            transform: scale(1.01); /* Subtle scaling instead of lift */
-            box-shadow: 0 0 10px rgba(79, 70, 229, 0.1); /* Subtle indigo glow */
+            transform: translateY(-3px); /* Subtle lift */
+            /* Dark Mode Hover Glow (Teal accent) */
+            box-shadow: 0 10px 20px -5px rgba(20, 184, 166, 0.3), 0 4px 6px -2px rgba(0, 0, 0, 0.2);
         }
-        
-        /* --- Dark Mode Overrides (Applied when 'dark' class is present on HTML) --- */
-        .dark body {
-            background-color: #030712; /* Deep true black */
-            color: #f3f4f6; /* Lightest gray */
-        }
-        
-        .dark .section-card {
-            background-color: #111827; /* Deep card background */
-            border: 1px solid #1f2937; /* Darker subtle boundary */
-        }
-        .dark .section-card:hover {
-             transform: scale(1.01); 
-             box-shadow: 0 0 15px rgba(79, 70, 229, 0.5); /* Stronger indigo glow in dark mode */
-        }
-        
-        /* Header specific styles - now transparent/light */
-        .header-bg {
-            background: none;
-            color: inherit;
-            box-shadow: none;
-        }
-
-        /* Primary accent text color */
-        .text-codely-primary {
-            color: #4f46e5; /* Indigo 600 */
-        }
-        .dark .text-codely-primary {
-            color: #818cf8; /* Indigo 400 */
-        }
-
-        /* Secondary accent text color */
-        .text-codely-secondary {
-            color: #06b6d4; /* Cyan 600 */
-        }
-        .dark .text-codely-secondary {
-            color: #22d3ee; /* Cyan 400 */
-        }
-
     </style>
 </head>
 <body class="transition-colors duration-500">
@@ -76,132 +47,115 @@
     <div class="min-h-screen p-4 sm:p-10 md:p-16">
         
         <!-- Header Section -->
-        <header class="header-bg max-w-7xl mx-auto relative mb-16 pt-8">
-            
-            <!-- Dark Mode Toggle Button -->
-            <button id="theme-toggle" class="absolute top-8 right-0 p-3 rounded-full bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 focus:outline-none transition-colors duration-300 shadow-md" aria-label="Toggle dark mode">
-                <svg id="theme-toggle-icon" class="w-6 h-6 text-gray-800 dark:text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                    <!-- Icon will be set by JS -->
-                </svg>
-            </button>
-
+        <header class="max-w-6xl mx-auto relative mb-20 pt-8">
             <div class="text-center px-4">
-                <!-- Large, clean logo with accent colors -->
-                <h1 class="text-5xl sm:text-7xl font-extrabold tracking-tight transition-colors duration-500">
-                    <span class="text-codely-primary">Code</span>ly.<span class="text-codely-secondary">fun</span>
+                <!-- Professional Logo Typography -->
+                <h1 class="text-5xl sm:text-6xl font-extrabold tracking-tight transition-colors duration-500">
+                    <span class="text-primary-blue-dark">Codely</span>.<span class="text-accent-teal-dark">fun</span>
                 </h1>
-                <!-- Clean, simple separator -->
-                <div class="w-16 h-1 bg-codely-primary dark:bg-codely-secondary mx-auto mt-4 rounded"></div>
                 
-                <p class="mt-8 text-xl sm:text-2xl text-gray-500 dark:text-gray-400 max-w-4xl mx-auto font-light">
-                    Where code meets curiosity — a student-led open-source journey.
+                <p class="mt-4 text-xl sm:text-2xl text-gray-400 max-w-4xl mx-auto font-light border-t pt-4 mt-6 border-slate-700">
+                    A creative space where code meets curiosity.
                 </p>
             </div>
         </header>
 
         <!-- Main Body Content -->
-        <main class="max-w-7xl mx-auto space-y-20">
+        <main class="max-w-6xl mx-auto space-y-20">
 
-            <!-- 1. Welcome Section (Full Width Greeting, clean typography) -->
-            <section class="p-10 sm:p-16 rounded-xl text-center border border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-900 transition-colors duration-500 shadow-lg dark:shadow-xl">
-                <h2 class="text-3xl sm:text-4xl font-extrabold text-codely-primary mb-6 tracking-tight">Welcome to Codely.fun</h2>
-                <p class="text-xl text-gray-700 dark:text-gray-300 leading-relaxed font-normal max-w-5xl mx-auto">
-                    <strong class="font-bold text-gray-900 dark:text-gray-100">Codely.fun is more than just a platform</strong> — it’s a learning journey created by young, passionate students driven by a love for programming and open-source development. Our goal is to provide a space where developers, learners, and tech enthusiasts can explore, share, and contribute to real-world projects in an open and collaborative environment.
+            <!-- 1. Welcome Section (Key Introduction) -->
+            <section class="p-10 sm:p-12 section-card border-b-4 border-accent-teal-dark">
+                <h2 class="text-3xl sm:text-4xl font-extrabold text-accent-teal-dark mb-6 tracking-tight">About Us</h2>
+                <p class="text-xl text-gray-300 leading-relaxed font-normal">
+                    <strong class="font-semibold text-gray-100">Codely.fun is more than just a platform</strong>it's a space created and run by **students like us**young, passionate, and obsessed with coding. We built this community for developers, students, and enthusiasts to explore, share, and jump directly into contributing to real open-source projects.
                 </p>
             </section>
 
             <!-- 2. What We Do Section (Feature Grid) -->
             <section>
-                <h2 class="text-3xl font-extrabold text-codely-primary dark:text-codely-secondary mb-12 text-center flex items-center justify-center">
-                    <span class="text-4xl mr-3">&#x1F6A7;</span> Our Core Activities
+                <h2 class="text-3xl font-bold text-gray-100 mb-12 text-center">
+                    What We Build & Share
                 </h2>
                 
-                <!-- Key Activities Grid - Clean, high-impact icons -->
+                <!-- Key Activities Grid - Clean, functional feature blocks -->
                 <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-8">
                     
                     <!-- Activity 1: Explore Projects -->
-                    <div class="section-card p-8 group">
-                        <span class="text-5xl text-codely-primary mb-4 block group-hover:animate-pulse transition duration-300">&#x1F50E;</span>
-                        <p class="text-xl text-gray-900 dark:text-gray-100 font-bold mb-2">Explore Projects</p>
-                        <p class="text-base text-gray-600 dark:text-gray-400">Discover open-source projects across different technologies.</p>
+                    <div class="section-card p-8 hover:border-l-4 border-primary-blue-dark">
+                        <span class="text-5xl text-accent-teal-dark mb-4 block">💻</span>
+                        <p class="text-xl text-gray-100 font-bold mb-2">Explore Projects</p>
+                        <p class="text-base text-gray-400">Find **open-source projects** covering tons of different tech stacks.</p>
                     </div>
                     
                     <!-- Activity 2: Free Source Code -->
-                    <div class="section-card p-8 group">
-                        <span class="text-5xl text-codely-primary mb-4 block group-hover:animate-pulse transition duration-300">&#x2B07;&#xFE0F;</span>
-                        <p class="text-xl text-gray-900 dark:text-gray-100 font-bold mb-2">Free Source Code</p>
-                        <p class="text-base text-gray-600 dark:text-gray-400">Download and use all source code freely for learning and building.</p>
+                    <div class="section-card p-8 hover:border-l-4 border-primary-blue-dark">
+                        <span class="text-5xl text-accent-teal-dark mb-4 block">⬇️</span>
+                        <p class="text-xl text-gray-100 font-bold mb-2">Download Source</p>
+                        <p class="text-base text-gray-400">**Take the Code:** It's 100% free and open source for you to use, break, and learn from.</p>
                     </div>
                     
                     <!-- Activity 3: Real-World Examples -->
-                    <div class="section-card p-8 group">
-                        <span class="text-5xl text-codely-primary mb-4 block group-hover:animate-pulse transition duration-300">&#x1F4DA;</span>
-                        <p class="text-xl text-gray-900 dark:text-gray-100 font-bold mb-2">Real-World Examples</p>
-                        <p class="text-base text-gray-600 dark:text-gray-400">Learn by studying practical code written by peers.</p>
+                    <div class="section-card p-8 hover:border-l-4 border-primary-blue-dark">
+                        <span class="text-5xl text-accent-teal-dark mb-4 block">📚</span>
+                        <p class="text-xl text-gray-100 font-bold mb-2">Code Examples</p>
+                        <p class="text-base text-gray-400">Master concepts by diving into **real, practical code examples.**</p>
                     </div>
                     
                     <!-- Activity 4: Collaborate -->
-                    <div class="section-card p-8 group">
-                        <span class="text-5xl text-codely-primary mb-4 block group-hover:animate-pulse transition duration-300">&#x1F91D;</span>
-                        <p class="text-xl text-gray-900 dark:text-gray-100 font-bold mb-2">Collaborate</p>
-                        <p class="text-base text-gray-600 dark:text-gray-400">Get involved by contributing, forking, or improving projects.</p>
+                    <div class="section-card p-8 hover:border-l-4 border-primary-blue-dark">
+                        <span class="text-5xl text-accent-teal-dark mb-4 block">🤝</span>
+                        <p class="text-xl text-gray-100 font-bold mb-2">Collaborate</p>
+                        <p class="text-base text-gray-400">Join in! Contribute, fork, or improve any existing project.</p>
                     </div>
                     
                     <!-- Activity 5: Grow Your Skills -->
-                    <div class="section-card p-8 group sm:col-span-2 lg:col-span-1">
-                        <span class="text-5xl text-codely-primary mb-4 block group-hover:animate-pulse transition duration-300">&#x1F680;</span>
-                        <p class="text-xl text-gray-900 dark:text-gray-100 font-bold mb-2">Grow Your Skills</p>
-                        <p class="text-base text-gray-600 dark:text-gray-400">Hands-on experience and community interaction for developers of all levels.</p>
+                    <div class="section-card p-8 hover:border-l-4 border-primary-blue-dark sm:col-span-2 lg:col-span-1">
+                        <span class="text-5xl text-accent-teal-dark mb-4 block">🚀</span>
+                        <p class="text-xl text-gray-100 font-bold mb-2">Skill Growth</p>
+                        <p class="text-base text-gray-400">**Level Up Your Skills** through hands-on coding and getting direct feedback from peers.</p>
                     </div>
-
-                    <div class="flex items-center justify-center p-8 lg:col-span-1 border-2 border-dashed border-gray-300 dark:border-gray-700 rounded-xl bg-transparent">
-                        <p class="text-center text-gray-500 dark:text-gray-400 font-medium italic">
-                            Encouraging developers of all levels to grow together as a community.
-                        </p>
-                    </div>
-                    
                 </div>
+                
+                <p class="mt-12 text-center text-base text-gray-400 pt-6 border-t border-slate-700 max-w-2xl mx-auto">
+                    This platform encourages developers of all levels whether you're just starting out or already experienced to get involved and grow together.
+                </p>
             </section>
 
             <!-- Vision and Founders (Side-by-Side on Desktop) -->
-            <div class="grid lg:grid-cols-5 gap-8">
-                <!-- 3. Our Vision Section (2/5 width) -->
-                <section class="section-card p-8 lg:col-span-3">
-                    <h2 class="text-2xl font-extrabold text-codely-primary mb-4 flex items-center">
-                        <span class="text-3xl mr-3">&#x1F4A1;</span> Our Vision & Philosophy
-                    </h2>
-                    <p class="text-lg text-gray-600 dark:text-gray-400 mb-6 leading-relaxed">
-                        We are a group of enthusiastic students using this platform as a way to learn by building. Codely.fun was born from our curiosity, experimentation, and a shared dream: to make tech education and collaboration fun, practical, and accessible for everyone — especially beginners like us.
+            <div class="grid lg:grid-cols-3 gap-8">
+                <!-- 3. Our Vision Section (2/3 width) -->
+                <section class="section-card p-8 lg:col-span-2 border-l-4 border-primary-blue-dark">
+                    <h2 class="text-2xl font-bold text-gray-100 mb-4">Why We're Doing This</h2>
+                    <p class="text-lg text-gray-300 mb-6 leading-relaxed">
+                        We started this project simply because we're students who believe the absolute best way to learn is by **actually building things.** Codely.fun grew out of our own curiosity and a core idea: making high-quality, practical tech collaboration fun and accessible for everyone especially fellow beginners.
                     </p>
-                    <div class="p-4 bg-indigo-50 dark:bg-indigo-900/30 rounded-lg text-base text-indigo-700 dark:text-indigo-200 border-l-4 border-indigo-500 dark:border-indigo-400">
-                        <p class="font-bold">Learning by Doing:</p>
+                    <div class="p-4 bg-slate-700 rounded-lg text-base text-blue-300 border-l-4 border-primary-blue-dark">
+                        <p class="font-bold">Core Philosophy:</p>
                         <p class="mt-1 font-medium">
-                            We believe that learning should be hands-on, and that the best way to grow is by doing — and sharing what you build with others.
+                            Our belief is simple: **Learning is best when it's hands-on.** The quickest way to grow is by doing and then sharing your work with the community.
                         </p>
                     </div>
                 </section>
 
-                <!-- 4. Founders Section (3/5 width) -->
-                <section class="section-card p-8 lg:col-span-2 flex flex-col justify-between">
+                <!-- 4. Founders Section (1/3 width) -->
+                <section class="section-card p-8 lg:col-span-1 border-t-4 border-accent-teal-dark flex flex-col justify-between">
                     <div>
-                        <h2 class="text-2xl font-extrabold text-codely-secondary mb-6 flex items-center">
-                            <span class="text-3xl mr-3">&#x1F465;</span> Core Team
-                        </h2>
+                        <h2 class="text-2xl font-bold text-gray-100 mb-6">The Team</h2>
                         <ul class="space-y-4">
                             <li>
-                                <p class="text-xl font-extrabold text-gray-900 dark:text-gray-100">Harshit Singh</p>
-                                <p class="text-sm text-codely-secondary">Founder & Chief Architect</p>
+                                <p class="text-xl font-bold text-primary-blue-dark">Harshit Singh</p>
+                                <p class="text-sm text-gray-400 mt-1">Founder & Developer</p>
                             </li>
                             <li>
-                                <p class="text-xl font-extrabold text-gray-900 dark:text-gray-100">Shubham Singh</p>
-                                <p class="text-sm text-codely-secondary">Co-founder & Community Lead</p>
+                                <p class="text-xl font-bold text-primary-blue-dark">Shubham Singh</p>
+                                <p class="text-sm text-gray-400 mt-1">Co-founder & Contributor</p>
                             </li>
                         </ul>
                     </div>
                     
-                    <div class="mt-8 p-3 bg-gray-100 dark:bg-gray-800/50 rounded-lg text-sm text-gray-600 dark:text-gray-400 border border-gray-300 dark:border-gray-700">
+                    <div class="mt-8 pt-4 border-t border-slate-700 text-sm text-gray-400">
                         <p class="italic">
-                            We're constantly learning, improving, and adding new features. Thank you for visiting — and we hope you’ll be part of our journey as Codely.fun grows.
+                            We're always learning, improving, and adding new features. **Thanks for being part of our journey!**
                         </p>
                     </div>
                 </section>
@@ -209,60 +163,9 @@
         </main>
 
         <!-- Footer -->
-        <footer class="mt-20 text-center text-gray-500 dark:text-gray-600 text-sm py-8 border-t border-gray-200 dark:border-gray-800 transition-colors duration-500">
-            &copy; 2025 Codely.fun. Built by students, for students.
+        <footer class="mt-20 text-center text-gray-600 text-sm py-8 border-t border-slate-800 transition-colors duration-500">
+            &copy; 2025 Codely.fun. All rights reserved.
         </footer>
     </div>
-
-    <script>
-        const htmlElement = document.documentElement;
-        const toggleButton = document.getElementById('theme-toggle');
-        const iconElement = document.getElementById('theme-toggle-icon');
-
-        // SVG icons for theme toggle
-        const sunIcon = `<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path>`;
-        const moonIcon = `<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path>`;
-
-        // Function to set the theme based on the current state
-        function setTheme(isDark) {
-            if (isDark) {
-                htmlElement.classList.add('dark');
-                iconElement.innerHTML = sunIcon; // Show sun icon when in dark mode
-                localStorage.setItem('theme', 'dark');
-            } else {
-                htmlElement.classList.remove('dark');
-                iconElement.innerHTML = moonIcon; // Show moon icon when in light mode
-                localStorage.setItem('theme', 'light');
-            }
-        }
-
-        // 1. Initial Load: Check for stored preference or system preference
-        function initializeTheme() {
-            const storedTheme = localStorage.getItem('theme');
-            // Check system preference only if no preference is stored
-            const prefersDark = !storedTheme && window.matchMedia('(prefers-color-scheme: dark)').matches;
-
-            let initialDarkState;
-
-            if (storedTheme) {
-                // Use stored preference if available
-                initialDarkState = storedTheme === 'dark';
-            } else {
-                // Otherwise, use system preference
-                initialDarkState = prefersDark;
-            }
-
-            setTheme(initialDarkState);
-        }
-
-        // 2. Add Event Listener for Toggling
-        toggleButton.addEventListener('click', () => {
-            const isDark = htmlElement.classList.contains('dark');
-            setTheme(!isDark);
-        });
-
-        // Initialize the theme on page load
-        initializeTheme();
-    </script>
 </body>
 </html>
