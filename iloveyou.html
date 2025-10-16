@@ -49,6 +49,11 @@
             /* Input is now larger and uses white text for contrast */
             @apply w-full px-5 py-4 text-2xl text-center rounded-xl bg-white/10 text-rose-100 border border-rose-500/30 focus:ring-2 focus:ring-rose-500 focus:border-rose-500 placeholder-indigo-400 tracking-wider
         }
+        
+        .vibe-input-name {
+            /* Smaller text size for the display name input */
+            @apply text-lg tracking-normal
+        }
 
         /* Custom styles for video feed */
         #localVideo, #remoteVideo {
@@ -98,8 +103,13 @@
     <!-- Room Setup Card - REDESIGNED UI -->
     <div id="setup-card" class="vibe-card-setup p-8 rounded-3xl w-full max-w-xl mx-auto mb-8 transition-opacity duration-500">
         <h2 class="text-3xl font-bold mb-8 text-center text-rose-200">
-            Enter Your Shared Key
+            Enter Your Vibe Info
         </h2>
+        
+        <!-- Display Name Input Field -->
+        <div class="relative mb-4">
+            <input type="text" id="displayNameInput" placeholder="Your Vibe Name" class="vibe-input vibe-input-name text-center tracking-normal" maxlength="15" />
+        </div>
         
         <!-- Key Input Field -->
         <div class="relative mb-8">
@@ -190,6 +200,7 @@
         let youtubePlayer = null;
         let isHost = false;
         let partnerId = null;
+        let displayName = "Guest"; // NEW: Default display name
 
         // WebRTC Configuration
         const configuration = {
@@ -214,6 +225,7 @@
         const hangupButton = document.getElementById('hangupButton');
         const connectionStatusEl = document.getElementById('connection-status');
         const peerIdDisplay = document.getElementById('peerIdDisplay');
+        const displayNameInput = document.getElementById('displayNameInput'); // NEW
 
         // --- Utility Functions ---
 
@@ -269,8 +281,8 @@
                 onAuthStateChanged(auth, (user) => {
                     if (user) {
                         userId = user.uid;
-                        authStatusEl.textContent = `Authenticated as: ${userId.substring(0, 8)}...`;
-                        peerIdDisplay.textContent = `Your ID: ${userId}`;
+                        authStatusEl.textContent = `Authenticated. Your Auth ID: ${userId.substring(0, 8)}...`;
+                        peerIdDisplay.textContent = `Your Peer ID: ${userId}`;
                         joinRoomButton.disabled = false;
                         generateKeyButton.disabled = false;
                     } else {
@@ -283,7 +295,7 @@
 
             } catch (e) {
                 console.error("Firebase initialization failed:", e);
-                authStatusEl.textContent = "Error: Firebase setup failed. Check console.";
+                authStatusEl.textContent = "Error: Firebase setup failed. Check console for config details.";
             }
         }
         
@@ -296,6 +308,18 @@
         joinRoomButton.addEventListener('click', () => {
             if (!userId) return;
 
+            // NEW: Display Name validation
+            const name = displayNameInput.value.trim();
+            if (name.length < 2) { 
+                console.error('Validation Error: Display name must be at least 2 characters.');
+                displayNameInput.classList.add('border-red-500', 'ring-red-500');
+                setTimeout(() => {
+                    displayNameInput.classList.remove('border-red-500', 'ring-red-500');
+                }, 1500);
+                return;
+            }
+            displayName = name; // Set global display name
+            
             const key = roomKeyInput.value.trim();
             if (key.length < 4) {
                 console.error('Validation Error: Room key must be at least 4 characters.');
@@ -412,15 +436,21 @@
         async function setMyRoomStatus(isHostStatus) {
             const roomRef = getRoomDocRef(roomId);
 
+            // Randomly assign a color for display purposes
+            const colors = ["#f472b6", "#a78bfa", "#4ade80", "#60a5fa", "#fde047"];
+            const color = colors[Math.floor(Math.random() * colors.length)];
+            
             // Use updateDoc to set the current user's specific fields, including ready: true
             await updateDoc(roomRef, {
                 [`users.${userId}`]: { 
                     isHost: isHostStatus, 
                     ready: true, 
-                    lastSeen: Date.now() 
+                    lastSeen: Date.now(),
+                    displayName: displayName, // NEW: Save the user's name
+                    color: color,             // NEW: Save the user's color
                 }
             });
-            console.log(`User status updated: isHost=${isHostStatus}, ready=true.`);
+            console.log(`User status updated: isHost=${isHostStatus}, ready=true, name=${displayName}.`);
         }
 
         /** Handles incoming updates from Firestore for both video sync and user status. */
@@ -458,15 +488,18 @@
             // 3. Identify partner for WebRTC
             partnerId = null;
             let partnerFound = false;
+            let partnerName = 'a partner'; // NEW: Default partner name
             // Iterate through all users in the room
             for (const uid in data.users) {
                 // Find a user that isn't me AND is marked as ready
                 if (uid !== userId && data.users[uid].ready) {
                     partnerId = uid;
+                    partnerName = data.users[uid].displayName || 'A Vibe Partner'; // NEW: Get display name
                     partnerFound = true;
                     remoteVideo.classList.remove('hidden');
                     startCallButton.classList.remove('hidden');
-                    connectionStatusEl.textContent = `Partner ID found: ${partnerId.substring(0, 8)}... Ready to start call.`;
+                    // Use partner's name in status message
+                    connectionStatusEl.textContent = `Partner ${partnerName} found! Ready to start call.`; // MODIFIED
                     break;
                 }
             }
@@ -555,7 +588,7 @@
             }
             startCallButton.classList.add('hidden');
             hangupButton.classList.remove('hidden');
-            connectionStatusEl.textContent = 'Starting video call...';
+            connectionStatusEl.textContent = `Starting video call with ${partnerName}...`;
             startWebRTCSession();
         });
 
@@ -634,7 +667,7 @@
             await setDoc(doc(signalingRef, `${userId}-offer`), { sdp: peerConnection.localDescription.sdp, createdAt: Date.now() });
             
             console.log('Offer sent to Firestore.');
-            connectionStatusEl.textContent = `Offer sent. Waiting for ${partnerId.substring(0, 8)}... to accept.`;
+            connectionStatusEl.textContent = `Offer sent. Waiting for partner to accept.`;
         }
 
         async function processOffer(sdp) {
@@ -688,6 +721,8 @@
             });
         }
 
+        // --- 6. Call & Lifecycle Management ---
+        
         function hangup() {
             if (peerConnection) {
                 peerConnection.close();
@@ -705,8 +740,31 @@
             hangupButton.classList.add('hidden');
             startCallButton.classList.remove('hidden');
 
-            // Note: In a production app, you would also clear out the signaling documents here.
+            // NEW: Explicitly mark user as not ready when they hang up
+            if (roomId && userId) {
+                 const roomRef = getRoomDocRef(roomId);
+                 updateDoc(roomRef, {
+                    [`users.${userId}.ready`]: false,
+                    [`users.${userId}.lastSeen`]: Date.now()
+                 }).catch(e => console.error("Error setting user status to not ready:", e));
+            }
         }
+
+        // NEW: Cleanup logic for when the user closes the tab/browser window
+        window.addEventListener('beforeunload', (event) => {
+            // Attempt to clean up. Note: Async Firestore operations are not guaranteed to complete.
+            if (roomId && userId) {
+                const roomRef = getRoomDocRef(roomId);
+                // Set 'ready' to false on the user's object
+                updateDoc(roomRef, {
+                    [`users.${userId}.ready`]: false,
+                    [`users.${userId}.lastSeen`]: Date.now()
+                }).catch(() => { /* suppress error */ });
+            }
+            // Always hang up the WebRTC connection
+            hangup(); 
+        });
+
 
         // --- Initialize App on Load ---
         window.addEventListener('load', initFirebase);
