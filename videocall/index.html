@@ -128,6 +128,18 @@
             padding: 5px 10px;
             border-radius: 5px;
             font-size: 12px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .admin-tag {
+            background-color: #f44336;
+            color: white;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: 700;
+            font-size: 10px;
         }
 
         .video-section {
@@ -210,6 +222,9 @@
             padding: 5px 12px;
             border-radius: 15px;
             font-size: 12px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
         }
 
         #messages {
@@ -376,7 +391,7 @@
 <body>
     <div id="setupModal" class="modal">
         <div class="modal-content">
-            <h2>Join Watch Party 🎉</h2>
+            <h2>Join Watch Party 2 🎉</h2>
             <input type="text" id="usernameInput" placeholder="Enter your name">
             <input type="text" id="roomIdInput" placeholder="Enter room ID (or leave blank to create)">
             <button id="joinBtn">Join Room</button>
@@ -394,19 +409,19 @@
                 <div class="video-call-section">
                     <div class="video-call-header">📹 Video Call</div>
                     <div class="call-controls">
-                        <button id="toggleVideoBtn" class="call-btn active">📷 Video On</button>
+                        <button id="toggleVideoBtn" class="call-btn inactive">📷 Video Off</button>
                         <button id="toggleAudioBtn" class="call-btn inactive">🎤 Muted</button>
                     </div>
                     <div class="video-grid" id="videoGrid">
                         <div class="video-container">
                             <video id="localVideo" autoplay muted playsinline></video>
-                            <div class="video-label">You</div>
+                            <div class="video-label" id="localVideoLabel">You</div>
                         </div>
                     </div>
                 </div>
 
                 <div class="video-section">
-                    <div class="video-controls">
+                    <div class="video-controls" id="videoControls">
                         <input type="text" id="videoUrlInput" placeholder="Paste YouTube URL here...">
                         <button id="loadVideoBtn">Load Video</button>
                     </div>
@@ -451,11 +466,13 @@
         let username;
         let userId;
         let isUpdating = false;
+        let isAdmin = false; // NEW: Admin flag
+        let currentAdminId = null; // NEW: Tracks the current admin
 
         // WebRTC Variables
         let localStream = null;
         let peerConnections = {};
-        let videoEnabled = true; // CHANGED to true to match the screenshot's 'Video On'
+        let videoEnabled = false;
         let audioEnabled = false;
 
         const configuration = {
@@ -481,6 +498,7 @@
             syncWithRoom();
         }
 
+        // MODIFIED: Only admin can write video state changes (play/pause/seek)
         function onPlayerStateChange(event) {
             if (isUpdating) return;
 
@@ -489,10 +507,14 @@
                 state: state,
                 time: player.getCurrentTime(),
                 videoId: getVideoId(),
-                timestamp: Date.now()
+                timestamp: Date.now(),
+                adminId: userId // Tracks who made the change (optional)
             };
-
-            db.ref(`rooms/${roomId}/video`).set(videoData);
+            
+            // Only write to database if the user is the admin
+            if (isAdmin) {
+                db.ref(`rooms/${roomId}/video`).set(videoData);
+            }
         }
 
         function getVideoId() {
@@ -509,6 +531,12 @@
             return Math.random().toString(36).substring(2, 8).toUpperCase();
         }
 
+        // NEW: Function to set/update the admin user in the database
+        async function setAdmin(newAdminId) {
+            await db.ref(`rooms/${roomId}/adminId`).set(newAdminId);
+            currentAdminId = newAdminId;
+        }
+
         // WebRTC Functions
         async function initializeMedia() {
             try {
@@ -519,22 +547,27 @@
                 });
 
                 console.log('✅ Media access granted');
-                
-                // IMPORTANT: Since videoEnabled is true, we enable the track.
-                // The original code was: localStream.getVideoTracks()[0].enabled = false;
-                localStream.getVideoTracks()[0].enabled = videoEnabled; 
+                localStream.getVideoTracks()[0].enabled = videoEnabled;
                 localStream.getAudioTracks()[0].enabled = audioEnabled;
 
                 document.getElementById('localVideo').srcObject = localStream;
 
-                // Register peer
+                // Register peer with name
                 console.log('📝 Registering peer:', userId);
                 await db.ref(`rooms/${roomId}/peers/${userId}`).set({
                     name: username,
-                    timestamp: firebase.database.ServerValue.TIMESTAMP
+                    timestamp: firebase.database.ServerValue.TIMESTAMP,
+                });
+                
+                // NEW: Ensure peer list tracks the user for the chat list
+                await db.ref(`rooms/${roomId}/users/${userId}`).set({
+                    name: username,
+                    isAdmin: isAdmin,
+                    joined: firebase.database.ServerValue.TIMESTAMP
                 });
 
                 db.ref(`rooms/${roomId}/peers/${userId}`).onDisconnect().remove();
+                db.ref(`rooms/${roomId}/users/${userId}`).onDisconnect().remove();
 
                 // Setup peer listeners
                 setTimeout(() => setupPeerListeners(), 1000);
@@ -548,6 +581,12 @@
         function setupPeerListeners() {
             console.log('👂 Setting up peer listeners for:', userId);
             
+            // Listen for admin changes
+            db.ref(`rooms/${roomId}/adminId`).on('value', (snapshot) => {
+                currentAdminId = snapshot.val();
+                updateAdminStatus();
+            });
+
             // Listen for new peers
             db.ref(`rooms/${roomId}/peers`).on('child_added', (snapshot) => {
                 const peerId = snapshot.key;
@@ -632,8 +671,16 @@
             pc.ontrack = (event) => {
                 console.log('📺 Received track from', peerId, '- Type:', event.track.kind);
                 remoteStream.addTrack(event.track);
+                
+                // Get the peer's name from the element's label if it exists
+                const container = document.getElementById(`video-${peerId}`);
+                let peerName = null;
+                if (container) {
+                    peerName = container.querySelector('.video-label').textContent;
+                }
+                
                 // The stream is updated here, which will finally display the video
-                addRemoteVideo(peerId, remoteStream); 
+                addRemoteVideo(peerId, remoteStream, peerName); 
             };
 
             pc.onicecandidate = (event) => {
@@ -678,7 +725,26 @@
             return pc;
         }
 
-        // FIXED: Takes peerName as an argument to avoid unnecessary async lookups
+        // NEW: Function to check and update admin UI status
+        function updateAdminStatus() {
+            isAdmin = (userId === currentAdminId);
+
+            // Update local video label
+            const localLabel = document.getElementById('localVideoLabel');
+            localLabel.innerHTML = 'You';
+            if (isAdmin) {
+                localLabel.innerHTML += '<span class="admin-tag">ADMIN</span>';
+            }
+
+            // Update video controls visibility
+            const videoControls = document.getElementById('videoControls');
+            if (isAdmin) {
+                videoControls.style.display = 'flex';
+            } else {
+                videoControls.style.display = 'none';
+            }
+        }
+        
         function addRemoteVideo(peerId, stream, peerName) {
             console.log('🎬 Adding remote video for peer:', peerId);
             let container = document.getElementById(`video-${peerId}`);
@@ -748,18 +814,23 @@
         }
 
         function joinRoom() {
-            const userRef = db.ref(`rooms/${roomId}/users/${userId}`);
-            userRef.set({
-                name: username,
-                joined: firebase.database.ServerValue.TIMESTAMP
+            // NEW: Set admin if room is newly created
+            db.ref(`rooms/${roomId}/adminId`).once('value', (snapshot) => {
+                if (!snapshot.exists() && isAdmin) {
+                    setAdmin(userId);
+                } else if (snapshot.exists()) {
+                    currentAdminId = snapshot.val();
+                    isAdmin = (userId === currentAdminId); // Sync with existing admin
+                }
+                updateAdminStatus();
             });
 
-            userRef.onDisconnect().remove();
 
             db.ref(`rooms/${roomId}/users`).on('value', (snapshot) => {
                 updateUsersList(snapshot.val() || {});
             });
 
+            // Video player synchronization
             db.ref(`rooms/${roomId}/video`).on('value', (snapshot) => {
                 const videoData = snapshot.val();
                 if (videoData) updateVideo(videoData);
@@ -776,11 +847,14 @@
         function updateUsersList(users) {
             const container = document.getElementById('usersOnline');
             container.innerHTML = '';
-            // Only update the chat user list for non-peer entries (optional, but good practice)
-            Object.entries(users).filter(([key, user]) => user.name).forEach(([key, user]) => {
+            
+            Object.values(users).filter(user => user.name).forEach(user => {
                 const badge = document.createElement('div');
                 badge.className = 'user-badge';
                 badge.textContent = user.name;
+                if (user.isAdmin) {
+                    badge.innerHTML += '<span class="admin-tag">ADMIN</span>';
+                }
                 container.appendChild(badge);
             });
         }
@@ -801,11 +875,13 @@
                     player.seekTo(videoData.time, true);
                 }
 
+                // If admin paused/played, force that state
                 if (videoData.state === YT.PlayerState.PLAYING && player.getPlayerState() !== YT.PlayerState.PLAYING) {
                     player.playVideo();
                 } else if (videoData.state === YT.PlayerState.PAUSED && player.getPlayerState() !== YT.PlayerState.PAUSED) {
                     player.pauseVideo();
                 }
+                // Optional: You could also add logic here to sync volume or other states if needed
             } catch (error) {
                 console.error('Update error:', error);
             }
@@ -882,23 +958,37 @@
                     alert('Please enter your name');
                     return;
                 }
+                
+                // NEW: Determine if user is the admin (creator)
+                if (!inputRoomId) {
+                    roomId = generateRoomId();
+                    isAdmin = true;
+                } else {
+                    roomId = inputRoomId;
+                }
 
-                roomId = inputRoomId || generateRoomId();
                 userId = Date.now().toString();
 
                 document.getElementById('setupModal').classList.add('hidden');
                 document.getElementById('app').classList.remove('hidden');
                 document.getElementById('roomIdDisplay').textContent = roomId;
-
+                
                 joinRoom();
             });
 
+            // MODIFIED: Only allow video load if admin
             document.getElementById('loadVideoBtn').addEventListener('click', () => {
+                if (!isAdmin) {
+                    alert('Only the room admin can load videos.');
+                    return;
+                }
+                
                 const url = document.getElementById('videoUrlInput').value;
                 const videoId = extractVideoId(url);
                 
                 if (videoId) {
-                    player.loadVideoById(videoId);
+                    // This action will trigger onPlayerStateChange which will write to Firebase if isAdmin is true
+                    player.loadVideoById(videoId); 
                     sendSystemMessage(`${username} loaded a new video`);
                 } else {
                     alert('Invalid YouTube URL');
@@ -912,6 +1002,9 @@
             document.getElementById('messageInput').addEventListener('keypress', (e) => {
                 if (e.key === 'Enter') sendMessage();
             });
+            
+            // Initial setting of controls visibility (will be updated on join)
+            document.getElementById('videoControls').style.display = 'none';
         }
 
         if (document.readyState === 'loading') {
