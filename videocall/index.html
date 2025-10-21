@@ -417,7 +417,7 @@
 <body>
     <div id="setupModal" class="modal">
         <div class="modal-content">
-            <h2>Join Watch Party v1.2🎉</h2>
+            <h2>Join Watch Party v1.3 🎉</h2>
             <input type="text" id="usernameInput" placeholder="Enter your name">
             <input type="text" id="roomIdInput" placeholder="Enter room ID (or leave blank to create)">
             <button id="joinBtn">Join Room</button>
@@ -494,9 +494,8 @@
         let isUpdating = false; 
         let isAdmin = false; 
         let currentAdminId = null; 
-        let pendingVideoSync = null; // NEW: Holds the desired video state after a new video is cued
 
-        // WebRTC Variables (omitted for brevity, functionality is the same)
+        // WebRTC Variables
         let localStream = null;
         let peerConnections = {};
         let videoEnabled = false;
@@ -525,14 +524,13 @@
             syncWithRoom();
         }
 
-        // MODIFIED: Added logic to trigger playback once the video is CUED (loaded).
         function onPlayerStateChange(event) {
-            // Prevent writing if the player state change was triggered by a remote update
+            // CRITICAL: Prevent writing if the player state change was triggered by a remote update
             if (isUpdating) return;
 
             const state = event.data;
             
-            // 1. Admin/User Control Logic
+            // Only broadcast state changes that matter (playing, paused, ended)
             if (state === YT.PlayerState.PLAYING || state === YT.PlayerState.PAUSED || state === YT.PlayerState.ENDED) {
                 const videoData = {
                     state: state,
@@ -546,23 +544,7 @@
                     db.ref(`rooms/${roomId}/video`).set(videoData);
                 }
             }
-            
-            // 2. NEW Asynchronous Playback Logic (Remote client only)
-            if (state === YT.PlayerState.CUED && pendingVideoSync) {
-                if (pendingVideoSync.state === YT.PlayerState.PLAYING) {
-                    // Temporarily block updates while performing critical async operations
-                    isUpdating = true; 
-                    
-                    // Seek and Play simultaneously for smooth startup
-                    player.seekTo(pendingVideoSync.time, true);
-                    player.playVideo();
-                    
-                    pendingVideoSync = null;
-                    
-                    // Release the block after the commands have been sent
-                    setTimeout(() => { isUpdating = false; }, 500);
-                }
-            }
+            // NO ASYNC QUEUE HERE: All loading/playing logic is now consolidated into updateVideo for simplicity and reliability.
         }
 
         function getVideoId() {
@@ -873,48 +855,47 @@
             });
         }
 
-        // MODIFIED: Implemented asynchronous queuing for robust video loading and playback.
+        /**
+         * The core synchronization function.
+         * MODIFIED: Uses direct load/cue methods and is heavily defensive against race conditions.
+         */
         function updateVideo(videoData) {
-            // Check for player existence and prevent re-entry during update
             if (!player || !player.loadVideoById) return;
 
-            const currentVideoId = getVideoId();
-            
-            // If we are currently processing an asynchronous command, do not interrupt.
-            if (isUpdating) return; 
-
+            // CRITICAL: Immediately block local events from interfering with remote command
             isUpdating = true; 
 
             try {
-                const playerTime = player.getCurrentTime() || 0;
+                const currentVideoId = getVideoId();
                 const playerState = player.getPlayerState();
-
-                // 1. New Video Load Logic (MUST be done via cueVideoById for all clients, let onStateChange handle play)
+                
+                // 1. Load video if ID is new
                 if (videoData.videoId && videoData.videoId !== currentVideoId) {
                     
-                    // Save the desired state and time globally for the onPlayerStateChange listener to pick up
-                    pendingVideoSync = videoData;
+                    // Use loadVideoById (starts playing immediately) if admin state is PLAYING.
+                    if (videoData.state === YT.PlayerState.PLAYING) {
+                         player.loadVideoById(videoData.videoId, videoData.time || 0);
+                    } 
+                    // Use cueVideoById (loads video but stays paused) if admin state is PAUSED
+                    else { 
+                         player.cueVideoById(videoData.videoId, videoData.time || 0);
+                    }
                     
-                    // Use cueVideoById for safe loading. The onStateChange will trigger play when CUED state is reached.
-                    player.cueVideoById(videoData.videoId, videoData.time || 0);
-
-                    // Skip the rest of the sync logic for a new video load
-                    isUpdating = false;
-                    return; 
-                } 
-                
-                // 2. Ongoing Sync Logic (only if video ID is the same)
-                else if (videoData.videoId === currentVideoId) {
+                // 2. If video ID is the same, sync time and state.
+                } else if (videoData.videoId === currentVideoId) {
                     
-                    // Time Sync: Only seek if the difference is significant AND player is not currently buffering
+                    const playerTime = player.getCurrentTime() || 0;
                     const timeDiff = Math.abs(playerTime - videoData.time);
-                    
-                    if (timeDiff > 2 && playerState !== YT.PlayerState.BUFFERING && playerState !== YT.PlayerState.CUED) {
+
+                    // Time Sync: Seek only if difference is significant AND player is not busy buffering
+                    if (timeDiff > 2 && playerState !== YT.PlayerState.BUFFERING) {
                         player.seekTo(videoData.time, true);
                     }
 
                     // State Sync: Apply play/pause command explicitly
                     if (videoData.state === YT.PlayerState.PLAYING && playerState !== YT.PlayerState.PLAYING) {
+                        // FIX: Unmute before playing to improve success rate against autoplay blocks
+                        if (player.isMuted()) player.unMute(); 
                         player.playVideo();
                     } else if (videoData.state === YT.PlayerState.PAUSED && playerState !== YT.PlayerState.PAUSED) {
                         player.pauseVideo();
@@ -925,7 +906,7 @@
                 console.error('Update video error:', error);
             }
 
-            // Clear the update block after a short delay
+            // CRITICAL: Clear the flag after a short delay to allow the player to settle/process its own events
             setTimeout(() => { isUpdating = false; }, 500);
         }
 
