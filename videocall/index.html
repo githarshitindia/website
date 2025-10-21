@@ -417,7 +417,7 @@
 <body>
     <div id="setupModal" class="modal">
         <div class="modal-content">
-            <h2>Join Watch Party 2 🎉</h2>
+            <h2>Join Watch Party 1🎉</h2>
             <input type="text" id="usernameInput" placeholder="Enter your name">
             <input type="text" id="roomIdInput" placeholder="Enter room ID (or leave blank to create)">
             <button id="joinBtn">Join Room</button>
@@ -524,7 +524,6 @@
             syncWithRoom();
         }
 
-        // MODIFIED: Simplified to prevent update loop while still syncing admin's actions
         function onPlayerStateChange(event) {
             // Prevent writing if the player state change was triggered by a remote update
             if (isUpdating) return;
@@ -572,7 +571,7 @@
             sendSystemMessage(`${newAdminName} is now the Admin.`);
         }
 
-        // WebRTC Functions (Unchanged as they are not the source of the video issue)
+        // WebRTC Functions (omitted for brevity, they are unchanged from previous successful step)
         async function initializeMedia() {
             try {
                 localStream = await navigator.mediaDevices.getUserMedia({
@@ -857,36 +856,47 @@
             });
         }
 
-        // MODIFIED: Improved synchronization logic for loading and state
+        /**
+         * The core synchronization function.
+         * MODIFIED to use loadVideoById or cueVideoById based on desired state,
+         * which is the robust way to ensure playback starts immediately upon loading.
+         */
         function updateVideo(videoData) {
             if (!player || !player.loadVideoById) return;
 
-            // Set flag to prevent local actions from writing back to DB immediately
             isUpdating = true; 
 
             try {
                 const currentVideoId = getVideoId();
                 const playerState = player.getPlayerState();
                 
-                // 1. Load video if necessary
+                // 1. Load video if ID is new
                 if (videoData.videoId && videoData.videoId !== currentVideoId) {
-                    // Load the new video and seek to the provided time
-                    player.loadVideoById(videoData.videoId, videoData.time || 0);
                     
-                // 2. Sync time if the video is the same and time is off by more than 2 seconds
+                    // Use loadVideoById (starts playing immediately) if admin state is PLAYING
+                    if (videoData.state === YT.PlayerState.PLAYING) {
+                         player.loadVideoById(videoData.videoId, videoData.time || 0);
+                    } 
+                    // Use cueVideoById (loads video but stays paused) if admin state is PAUSED
+                    else { 
+                         player.cueVideoById(videoData.videoId, videoData.time || 0);
+                    }
+                    
+                // 2. If video ID is the same, sync time and state.
                 } else if (videoData.videoId === currentVideoId) {
+                    
+                    // Sync time if difference is significant (over 2s) and player is not currently playing.
                     const timeDiff = Math.abs((player.getCurrentTime() || 0) - videoData.time);
                     if (timeDiff > 2 && playerState !== YT.PlayerState.PLAYING) {
-                         // Only seek if the video is paused or buffering, to avoid playback stuttering
                         player.seekTo(videoData.time, true);
                     }
-                }
-                
-                // 3. Sync state (play/pause)
-                if (videoData.state === YT.PlayerState.PLAYING && playerState !== YT.PlayerState.PLAYING) {
-                    player.playVideo();
-                } else if (videoData.state === YT.PlayerState.PAUSED && playerState !== YT.PlayerState.PAUSED) {
-                    player.pauseVideo();
+                    
+                    // Sync state (play/pause)
+                    if (videoData.state === YT.PlayerState.PLAYING && playerState !== YT.PlayerState.PLAYING) {
+                        player.playVideo();
+                    } else if (videoData.state === YT.PlayerState.PAUSED && playerState !== YT.PlayerState.PAUSED) {
+                        player.pauseVideo();
+                    }
                 }
                 
             } catch (error) {
@@ -983,7 +993,7 @@
                 joinRoom();
             });
 
-            // MODIFIED: Now only writes the intention to load to Firebase
+            // The load button now only writes the desired state (PLAYING) to Firebase
             document.getElementById('loadVideoBtn').addEventListener('click', () => {
                 if (!isAdmin) {
                     alert('Only the room admin can load videos.');
@@ -994,7 +1004,7 @@
                 const videoId = extractVideoId(url);
                 
                 if (videoId) {
-                    // Write the new video information and state (PLAYING) directly to Firebase
+                    // Write the new video information and initial state (PLAYING) directly to Firebase
                     db.ref(`rooms/${roomId}/video`).set({
                         state: YT.PlayerState.PLAYING,
                         time: 0, 
@@ -1003,7 +1013,6 @@
                     });
                     sendSystemMessage(`${username} loaded a new video`);
                     
-                    // Clear the input field
                     document.getElementById('videoUrlInput').value = '';
                 } else {
                     alert('Invalid YouTube URL');
