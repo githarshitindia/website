@@ -417,7 +417,7 @@
 <body>
     <div id="setupModal" class="modal">
         <div class="modal-content">
-            <h2>Join Watch Party 1🎉</h2>
+            <h2>Join Watch Party b.v1.1🎉</h2>
             <input type="text" id="usernameInput" placeholder="Enter your name">
             <input type="text" id="roomIdInput" placeholder="Enter room ID (or leave blank to create)">
             <button id="joinBtn">Join Room</button>
@@ -563,15 +563,13 @@
         async function setAdmin(newAdminId) {
             if (newAdminId === currentAdminId) return;
 
-            // Update DB
             await db.ref(`rooms/${roomId}/adminId`).set(newAdminId);
             
-            // Send system message
             const newAdminName = (await db.ref(`rooms/${roomId}/users/${newAdminId}/name`).once('value')).val();
             sendSystemMessage(`${newAdminName} is now the Admin.`);
         }
 
-        // WebRTC Functions (omitted for brevity, they are unchanged from previous successful step)
+        // WebRTC functions (omitted for brevity)
         async function initializeMedia() {
             try {
                 localStream = await navigator.mediaDevices.getUserMedia({
@@ -858,45 +856,40 @@
 
         /**
          * The core synchronization function.
-         * MODIFIED to use loadVideoById or cueVideoById based on desired state,
-         * which is the robust way to ensure playback starts immediately upon loading.
+         * MODIFIED to use cueVideoById for safer loading and explicitly command playback.
          */
         function updateVideo(videoData) {
-            if (!player || !player.loadVideoById) return;
+            // Check for player existence and prevent re-entry during update
+            if (!player || !player.loadVideoById || isUpdating) return;
 
             isUpdating = true; 
 
             try {
                 const currentVideoId = getVideoId();
+                const playerTime = player.getCurrentTime() || 0;
                 const playerState = player.getPlayerState();
-                
-                // 1. Load video if ID is new
+
+                // 1. If video ID is new, CUE the video to load it without immediately attempting autoplay.
                 if (videoData.videoId && videoData.videoId !== currentVideoId) {
-                    
-                    // Use loadVideoById (starts playing immediately) if admin state is PLAYING
-                    if (videoData.state === YT.PlayerState.PLAYING) {
-                         player.loadVideoById(videoData.videoId, videoData.time || 0);
-                    } 
-                    // Use cueVideoById (loads video but stays paused) if admin state is PAUSED
-                    else { 
-                         player.cueVideoById(videoData.videoId, videoData.time || 0);
-                    }
-                    
-                // 2. If video ID is the same, sync time and state.
-                } else if (videoData.videoId === currentVideoId) {
-                    
-                    // Sync time if difference is significant (over 2s) and player is not currently playing.
-                    const timeDiff = Math.abs((player.getCurrentTime() || 0) - videoData.time);
-                    if (timeDiff > 2 && playerState !== YT.PlayerState.PLAYING) {
-                        player.seekTo(videoData.time, true);
-                    }
-                    
-                    // Sync state (play/pause)
-                    if (videoData.state === YT.PlayerState.PLAYING && playerState !== YT.PlayerState.PLAYING) {
-                        player.playVideo();
-                    } else if (videoData.state === YT.PlayerState.PAUSED && playerState !== YT.PlayerState.PAUSED) {
-                        player.pauseVideo();
-                    }
+                     // Cue the video to load it safely. The rest of the logic handles playing/seeking.
+                     player.cueVideoById(videoData.videoId, videoData.time || 0);
+                }
+
+                // 2. Sync time and state (runs for both new video and ongoing sync)
+                
+                // Time Sync: Check if time is off by more than 2s OR if player is unstarted/cued (needs initial seek/play)
+                const timeDiff = Math.abs(playerTime - videoData.time);
+                
+                if (timeDiff > 2 || playerState === YT.PlayerState.UNSTARTED || playerState === YT.PlayerState.CUED) {
+                    player.seekTo(videoData.time, true);
+                }
+
+                // State Sync: Apply play/pause command explicitly
+                if (videoData.state === YT.PlayerState.PLAYING && playerState !== YT.PlayerState.PLAYING) {
+                    // This explicit command is critical to overcome browser autoplay blocks.
+                    player.playVideo();
+                } else if (videoData.state === YT.PlayerState.PAUSED && playerState !== YT.PlayerState.PAUSED) {
+                    player.pauseVideo();
                 }
                 
             } catch (error) {
