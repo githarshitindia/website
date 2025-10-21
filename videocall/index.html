@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>YouTube Watch Party with Video Call</title>
+    <link href="https://vjs.zencdn.net/8.10.0/video-js.css" rel="stylesheet" />
     <style>
         * {
             margin: 0;
@@ -183,12 +184,18 @@
             transform: translateY(-2px);
         }
 
-        #player {
+        /* Video.js player container */
+        .video-js {
             width: 100%;
             aspect-ratio: 16/9;
             background: #000;
             border-radius: 15px;
             overflow: hidden;
+        }
+        
+        #player {
+            width: 100%;
+            height: 100%;
         }
 
         .chat-section {
@@ -417,7 +424,7 @@
 <body>
     <div id="setupModal" class="modal">
         <div class="modal-content">
-            <h2>Join Watch Party v1.3 🎉</h2>
+            <h2>Join Watch Party v1.4🎉</h2>
             <input type="text" id="usernameInput" placeholder="Enter your name">
             <input type="text" id="roomIdInput" placeholder="Enter room ID (or leave blank to create)">
             <button id="joinBtn">Join Room</button>
@@ -451,7 +458,7 @@
                         <input type="text" id="videoUrlInput" placeholder="Paste YouTube URL here...">
                         <button id="loadVideoBtn">Load Video</button>
                     </div>
-                    <div id="player"></div>
+                    <video id="player" class="video-js vjs-default-skin" controls preload="auto" data-setup='{}'></video>
                 </div>
 
                 <div class="chat-section">
@@ -469,7 +476,9 @@
         </div>
     </div>
 
-    <script src="https://www.youtube.com/iframe_api"></script>
+    <script src="https://vjs.zencdn.net/8.10.0/video.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/videojs-youtube@3.0.1/dist/Youtube.min.js"></script>
+
     <script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/9.22.0/firebase-app-compat.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/9.22.0/firebase-database-compat.min.js"></script>
     
@@ -495,6 +504,16 @@
         let isAdmin = false; 
         let currentAdminId = null; 
 
+        // Map standard YouTube API states to constants for DB synchronization
+        const PLAYER_STATE = {
+            UNSTARTED: -1,
+            ENDED: 0,
+            PLAYING: 1,
+            PAUSED: 2,
+            BUFFERING: 3,
+            CUED: 5 
+        };
+
         // WebRTC Variables
         let localStream = null;
         let peerConnections = {};
@@ -508,53 +527,67 @@
             ]
         };
 
-        // YouTube Player Setup
-        window.onYouTubeIframeAPIReady = function() {
-            player = new YT.Player('player', {
-                height: '100%',
-                width: '100%',
-                events: {
-                    'onStateChange': onPlayerStateChange,
-                    'onReady': onPlayerReady
+        // NEW: Video.js Player Initialization
+        function initializeVideoPlayer() {
+            player = videojs('player', {
+                controls: true,
+                autoplay: false,
+                techOrder: ['youtube', 'html5'], // Use youtube tech first
+                sources: [] 
+            }, function() {
+                console.log('Video.js player is ready');
+                setupVideoListeners(this);
+                syncWithRoom();
+            });
+        }
+        
+        // NEW: Setup Video.js Listeners
+        function setupVideoListeners(playerInstance) {
+            // Listeners for outgoing state changes (Admin role)
+            
+            // Play/Pause/End events only trigger database write if it was a user action (i.e., not isUpdating)
+            playerInstance.on('play', function() { handlePlayerStateChange(PLAYER_STATE.PLAYING); });
+            playerInstance.on('pause', function() { handlePlayerStateChange(PLAYER_STATE.PAUSED); });
+            playerInstance.on('ended', function() { handlePlayerStateChange(PLAYER_STATE.ENDED); });
+            
+            // Time synchronization (to reduce database writes, only sync every 5 seconds while playing)
+            playerInstance.on('timeupdate', function() {
+                // Check if playing and time is roughly a multiple of 5 seconds (5, 10, 15...)
+                if (!playerInstance.paused() && isAdmin && !isUpdating) {
+                    const currentTime = playerInstance.currentTime();
+                    if (Math.floor(currentTime * 10) % 50 === 0) { // Check every 5 seconds
+                        handlePlayerStateChange(PLAYER_STATE.PLAYING);
+                    }
                 }
             });
-        };
-
-        function onPlayerReady(event) {
-            syncWithRoom();
         }
 
-        function onPlayerStateChange(event) {
-            // CRITICAL: Prevent writing if the player state change was triggered by a remote update
-            if (isUpdating) return;
+        // NEW: Handles outgoing state changes to Firebase (only for Admin)
+        function handlePlayerStateChange(state) {
+            if (isUpdating || !isAdmin) return;
 
-            const state = event.data;
-            
-            // Only broadcast state changes that matter (playing, paused, ended)
-            if (state === YT.PlayerState.PLAYING || state === YT.PlayerState.PAUSED || state === YT.PlayerState.ENDED) {
-                const videoData = {
-                    state: state,
-                    time: player.getCurrentTime(),
-                    videoId: getVideoId(),
-                    timestamp: firebase.database.ServerValue.TIMESTAMP
-                };
-                
-                // Only write to database if the user is the admin
-                if (isAdmin) {
-                    db.ref(`rooms/${roomId}/video`).set(videoData);
-                }
+            // Get videoId from the current source URL
+            const videoId = getVideoIdFromUrl(player.currentSrc());
+
+            const videoData = {
+                state: state,
+                time: player.currentTime(),
+                videoId: videoId,
+                timestamp: firebase.database.ServerValue.TIMESTAMP
+            };
+
+            // Only write if the state is a significant event and a video is loaded
+            if (videoId && (state === PLAYER_STATE.PLAYING || state === PLAYER_STATE.PAUSED || state === PLAYER_STATE.ENDED)) {
+                db.ref(`rooms/${roomId}/video`).set(videoData);
             }
-            // NO ASYNC QUEUE HERE: All loading/playing logic is now consolidated into updateVideo for simplicity and reliability.
         }
 
-        function getVideoId() {
-            try {
-                const url = player.getVideoUrl();
-                const match = url.match(/[?&]v=([^&]+)/);
-                return match ? match[1] : null;
-            } catch (e) {
-                return null;
-            }
+
+        function getVideoIdFromUrl(url) {
+            // Extracts ID from YouTube URL formats
+            const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
+            const match = url.match(regExp);
+            return (match && match[2].length === 11) ? match[2] : null;
         }
 
         function generateRoomId() {
@@ -823,6 +856,9 @@
 
             sendSystemMessage(`${username} joined the room`);
             initializeMedia();
+            
+            // NEW: Initialize the Video.js player after joining
+            initializeVideoPlayer();
         }
 
         function updateUsersList(users) {
@@ -856,54 +892,57 @@
         }
 
         /**
-         * The core synchronization function.
-         * MODIFIED: Uses direct load/cue methods and is heavily defensive against race conditions.
+         * The core synchronization function. Rewritten for Video.js.
          */
         function updateVideo(videoData) {
-            if (!player || !player.loadVideoById) return;
+            if (!player || player.isDisposed()) return;
 
             // CRITICAL: Immediately block local events from interfering with remote command
             isUpdating = true; 
 
             try {
-                const currentVideoId = getVideoId();
-                const playerState = player.getPlayerState();
+                const currentVideoId = getVideoIdFromUrl(player.currentSrc());
+                const targetVideoId = videoData.videoId;
+
+                // 1. Load video if ID is new or player is uninitialized
+                if (targetVideoId && targetVideoId !== currentVideoId) {
+                    
+                    const newSource = {
+                        type: 'video/youtube',
+                        src: `https://www.youtube.com/watch?v=${targetVideoId}`
+                    };
+                    
+                    // Set the new video source. Video.js will handle the load.
+                    player.src(newSource);
+                    
+                    // After loading the source, we fall through to step 2 to set the time/state.
+                } 
                 
-                // 1. Load video if ID is new
-                if (videoData.videoId && videoData.videoId !== currentVideoId) {
-                    
-                    // Use loadVideoById (starts playing immediately) if admin state is PLAYING.
-                    if (videoData.state === YT.PlayerState.PLAYING) {
-                         player.loadVideoById(videoData.videoId, videoData.time || 0);
-                    } 
-                    // Use cueVideoById (loads video but stays paused) if admin state is PAUSED
-                    else { 
-                         player.cueVideoById(videoData.videoId, videoData.time || 0);
-                    }
-                    
-                // 2. If video ID is the same, sync time and state.
-                } else if (videoData.videoId === currentVideoId) {
-                    
-                    const playerTime = player.getCurrentTime() || 0;
+                // 2. Sync State and Time
+                
+                // Time Sync: Seek only if difference is significant and player is ready
+                if (player.readyState() >= 1) { // readyState >= 1 means metadata loaded
+                    const playerTime = player.currentTime() || 0;
                     const timeDiff = Math.abs(playerTime - videoData.time);
 
-                    // Time Sync: Seek only if difference is significant AND player is not busy buffering
-                    if (timeDiff > 2 && playerState !== YT.PlayerState.BUFFERING) {
-                        player.seekTo(videoData.time, true);
+                    if (timeDiff > 2) { 
+                        player.currentTime(videoData.time);
                     }
+                }
 
-                    // State Sync: Apply play/pause command explicitly
-                    if (videoData.state === YT.PlayerState.PLAYING && playerState !== YT.PlayerState.PLAYING) {
-                        // FIX: Unmute before playing to improve success rate against autoplay blocks
-                        if (player.isMuted()) player.unMute(); 
-                        player.playVideo();
-                    } else if (videoData.state === YT.PlayerState.PAUSED && playerState !== YT.PlayerState.PAUSED) {
-                        player.pauseVideo();
-                    }
+                // State Sync: Apply play/pause command explicitly
+                if (videoData.state === PLAYER_STATE.PLAYING && player.paused()) {
+                    // This command is critical for remote play.
+                    player.play().catch(e => {
+                        console.warn("Autoplay was blocked by browser. User must click play.", e);
+                        // This warning is normal for browsers with strict autoplay policies.
+                    });
+                } else if (videoData.state === PLAYER_STATE.PAUSED && !player.paused()) {
+                    player.pause();
                 }
                 
             } catch (error) {
-                console.error('Update video error:', error);
+                console.error('Video.js Update error:', error);
             }
 
             // CRITICAL: Clear the flag after a short delay to allow the player to settle/process its own events
@@ -916,6 +955,7 @@
                 if (videoData) updateVideo(videoData);
             });
         }
+
 
         function extractVideoId(url) {
             const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
@@ -1009,7 +1049,7 @@
                 if (videoId) {
                     // Write the new video information and initial state (PLAYING) directly to Firebase
                     db.ref(`rooms/${roomId}/video`).set({
-                        state: YT.PlayerState.PLAYING,
+                        state: PLAYER_STATE.PLAYING,
                         time: 0, 
                         videoId: videoId,
                         timestamp: firebase.database.ServerValue.TIMESTAMP
