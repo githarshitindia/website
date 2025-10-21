@@ -211,9 +211,17 @@
 
         .users-online {
             display: flex;
+            flex-direction: column; /* Changed to column for better admin button placement */
             gap: 10px;
             margin-top: 10px;
             flex-wrap: wrap;
+        }
+
+        .user-entry {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 10px;
         }
 
         .user-badge {
@@ -225,7 +233,25 @@
             display: flex;
             align-items: center;
             gap: 5px;
+            flex-grow: 1;
         }
+        
+        .admin-action-btn {
+            padding: 5px 10px;
+            background: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 10px;
+            font-weight: 600;
+            transition: background 0.2s;
+        }
+        
+        .admin-action-btn:hover {
+            background: #45a049;
+        }
+
 
         #messages {
             flex: 1;
@@ -391,7 +417,7 @@
 <body>
     <div id="setupModal" class="modal">
         <div class="modal-content">
-            <h2>Join Watch Party 2 🎉</h2>
+            <h2>Join Watch Party 3 🎉</h2>
             <input type="text" id="usernameInput" placeholder="Enter your name">
             <input type="text" id="roomIdInput" placeholder="Enter room ID (or leave blank to create)">
             <button id="joinBtn">Join Room</button>
@@ -466,8 +492,8 @@
         let username;
         let userId;
         let isUpdating = false;
-        let isAdmin = false; // NEW: Admin flag
-        let currentAdminId = null; // NEW: Tracks the current admin
+        let isAdmin = false; 
+        let currentAdminId = null; 
 
         // WebRTC Variables
         let localStream = null;
@@ -503,17 +529,20 @@
             if (isUpdating) return;
 
             const state = event.data;
-            const videoData = {
-                state: state,
-                time: player.getCurrentTime(),
-                videoId: getVideoId(),
-                timestamp: Date.now(),
-                adminId: userId // Tracks who made the change (optional)
-            };
             
-            // Only write to database if the user is the admin
-            if (isAdmin) {
-                db.ref(`rooms/${roomId}/video`).set(videoData);
+            // Only broadcast state changes that matter (playing or paused)
+            if (state === YT.PlayerState.PLAYING || state === YT.PlayerState.PAUSED || state === YT.PlayerState.ENDED) {
+                const videoData = {
+                    state: state,
+                    time: player.getCurrentTime(),
+                    videoId: getVideoId(),
+                    timestamp: firebase.database.ServerValue.TIMESTAMP
+                };
+                
+                // Only write to database if the user is the admin
+                if (isAdmin) {
+                    db.ref(`rooms/${roomId}/video`).set(videoData);
+                }
             }
         }
 
@@ -533,43 +562,44 @@
 
         // NEW: Function to set/update the admin user in the database
         async function setAdmin(newAdminId) {
+            if (newAdminId === currentAdminId) return;
+
+            // Update DB
             await db.ref(`rooms/${roomId}/adminId`).set(newAdminId);
-            currentAdminId = newAdminId;
+            
+            // Send system message
+            const newAdminName = (await db.ref(`rooms/${roomId}/users/${newAdminId}/name`).once('value')).val();
+            sendSystemMessage(`${newAdminName} is now the Admin.`);
         }
 
         // WebRTC Functions
         async function initializeMedia() {
             try {
-                console.log('🎥 Requesting media access...');
                 localStream = await navigator.mediaDevices.getUserMedia({
                     video: { width: 640, height: 480 },
                     audio: true
                 });
-
-                console.log('✅ Media access granted');
+                
                 localStream.getVideoTracks()[0].enabled = videoEnabled;
                 localStream.getAudioTracks()[0].enabled = audioEnabled;
 
                 document.getElementById('localVideo').srcObject = localStream;
 
                 // Register peer with name
-                console.log('📝 Registering peer:', userId);
                 await db.ref(`rooms/${roomId}/peers/${userId}`).set({
                     name: username,
                     timestamp: firebase.database.ServerValue.TIMESTAMP,
                 });
                 
-                // NEW: Ensure peer list tracks the user for the chat list
+                // Register user for chat list
                 await db.ref(`rooms/${roomId}/users/${userId}`).set({
                     name: username,
-                    isAdmin: isAdmin,
                     joined: firebase.database.ServerValue.TIMESTAMP
                 });
 
                 db.ref(`rooms/${roomId}/peers/${userId}`).onDisconnect().remove();
                 db.ref(`rooms/${roomId}/users/${userId}`).onDisconnect().remove();
 
-                // Setup peer listeners
                 setTimeout(() => setupPeerListeners(), 1000);
 
             } catch (error) {
@@ -579,7 +609,6 @@
         }
 
         function setupPeerListeners() {
-            console.log('👂 Setting up peer listeners for:', userId);
             
             // Listen for admin changes
             db.ref(`rooms/${roomId}/adminId`).on('value', (snapshot) => {
@@ -587,25 +616,19 @@
                 updateAdminStatus();
             });
 
-            // Listen for new peers
+            // Listen for new peers (WebRTC signaling)
             db.ref(`rooms/${roomId}/peers`).on('child_added', (snapshot) => {
                 const peerId = snapshot.key;
                 const peerData = snapshot.val();
-                console.log('👤 Peer detected:', peerId, peerData.name);
                 
                 if (peerId !== userId && !peerConnections[peerId]) {
-                    console.log('🤝 Will connect to peer:', peerId);
-                    
-                    // FIX: Create the remote video container immediately with a blank stream
                     addRemoteVideo(peerId, new MediaStream(), peerData.name);
-                    
                     setTimeout(() => createPeerConnection(peerId, true), 500);
                 }
             });
 
             db.ref(`rooms/${roomId}/peers`).on('child_removed', (snapshot) => {
                 const peerId = snapshot.key;
-                console.log('👋 Peer left:', peerId);
                 removePeerConnection(peerId);
             });
 
@@ -613,14 +636,11 @@
             db.ref(`rooms/${roomId}/signals/${userId}`).on('child_added', async (snapshot) => {
                 const data = snapshot.val();
                 const peerId = data.from;
-                console.log('📨 Received signal from', peerId, '- Type:', data.type);
 
                 try {
                     if (data.type === 'offer') {
-                        console.log('📩 Processing offer from:', peerId);
                         if (!peerConnections[peerId]) {
                             await createPeerConnection(peerId, false);
-                            // FIX: Create the remote video container immediately upon receiving offer
                             const peerData = (await db.ref(`rooms/${roomId}/peers/${peerId}`).once('value')).val();
                             addRemoteVideo(peerId, new MediaStream(), peerData.name);
                         }
@@ -633,17 +653,13 @@
                             type: 'answer',
                             answer: answer
                         });
-                        console.log('✅ Answer sent to:', peerId);
                     } else if (data.type === 'answer') {
-                        console.log('📩 Processing answer from:', peerId);
                         if (peerConnections[peerId]) {
                             await peerConnections[peerId].setRemoteDescription(new RTCSessionDescription(data.answer));
-                            console.log('✅ Answer processed from:', peerId);
                         }
                     } else if (data.type === 'ice') {
                         if (peerConnections[peerId]) {
                             await peerConnections[peerId].addIceCandidate(new RTCIceCandidate(data.candidate));
-                            console.log('🧊 ICE candidate added from:', peerId);
                         }
                     }
                     snapshot.ref.remove();
@@ -654,7 +670,6 @@
         }
 
         async function createPeerConnection(peerId, createOffer) {
-            console.log('🔌 Creating peer connection to:', peerId, 'createOffer:', createOffer);
             
             const pc = new RTCPeerConnection(configuration);
             peerConnections[peerId] = pc;
@@ -662,24 +677,20 @@
             if (localStream) {
                 localStream.getTracks().forEach(track => {
                     pc.addTrack(track, localStream);
-                    console.log('➕ Added', track.kind, 'track to peer:', peerId);
                 });
             }
 
             let remoteStream = new MediaStream();
             
             pc.ontrack = (event) => {
-                console.log('📺 Received track from', peerId, '- Type:', event.track.kind);
                 remoteStream.addTrack(event.track);
                 
-                // Get the peer's name from the element's label if it exists
                 const container = document.getElementById(`video-${peerId}`);
                 let peerName = null;
                 if (container) {
                     peerName = container.querySelector('.video-label').textContent;
                 }
                 
-                // The stream is updated here, which will finally display the video
                 addRemoteVideo(peerId, remoteStream, peerName); 
             };
 
@@ -690,23 +701,9 @@
                         type: 'ice',
                         candidate: event.candidate.toJSON()
                     });
-                    console.log('🧊 ICE candidate sent to:', peerId);
                 }
             };
-
-            pc.onconnectionstatechange = () => {
-                console.log('🔗 Connection state with', peerId, ':', pc.connectionState);
-                if (pc.connectionState === 'connected') {
-                    console.log('✅ Successfully connected to:', peerId);
-                } else if (pc.connectionState === 'failed' || pc.connectionState === 'disconnected') {
-                    console.log('❌ Connection failed with:', peerId);
-                }
-            };
-
-            pc.oniceconnectionstatechange = () => {
-                console.log('🧊 ICE state with', peerId, ':', pc.iceConnectionState);
-            };
-
+            
             if (createOffer) {
                 try {
                     const offer = await pc.createOffer();
@@ -716,7 +713,6 @@
                         type: 'offer',
                         offer: offer
                     });
-                    console.log('📤 Offer sent to:', peerId);
                 } catch (error) {
                     console.error('❌ Offer error:', error);
                 }
@@ -735,6 +731,11 @@
             if (isAdmin) {
                 localLabel.innerHTML += '<span class="admin-tag">ADMIN</span>';
             }
+            
+            // Re-render the user list to update "Make Admin" buttons
+            db.ref(`rooms/${roomId}/users`).once('value', (snapshot) => {
+                updateUsersList(snapshot.val() || {});
+            });
 
             // Update video controls visibility
             const videoControls = document.getElementById('videoControls');
@@ -746,7 +747,6 @@
         }
         
         function addRemoteVideo(peerId, stream, peerName) {
-            console.log('🎬 Adding remote video for peer:', peerId);
             let container = document.getElementById(`video-${peerId}`);
             
             if (!container) {
@@ -757,26 +757,19 @@
                 const video = document.createElement('video');
                 video.autoplay = true;
                 video.playsinline = true;
-                
-                // IMPORTANT: Set srcObject here even if the stream is empty (new MediaStream())
                 video.srcObject = stream; 
 
                 const label = document.createElement('div');
                 label.className = 'video-label';
-                
-                // Use the name passed during peer connection setup
                 label.textContent = peerName || 'Peer ' + peerId.substring(0, 6);
                 
                 container.appendChild(video);
                 container.appendChild(label);
                 document.getElementById('videoGrid').appendChild(container);
-                console.log('✅ Remote video container created for:', peerId);
             } else {
-                // UPDATE: Only update the srcObject if a new stream (i.e., new tracks) arrives
                 const video = container.querySelector('video');
                 if (video.srcObject !== stream) {
                     video.srcObject = stream;
-                    console.log('🔄 Updated video stream for:', peerId);
                 }
             }
         }
@@ -814,13 +807,13 @@
         }
 
         function joinRoom() {
-            // NEW: Set admin if room is newly created
+            // Set admin if room is newly created
             db.ref(`rooms/${roomId}/adminId`).once('value', (snapshot) => {
                 if (!snapshot.exists() && isAdmin) {
                     setAdmin(userId);
                 } else if (snapshot.exists()) {
                     currentAdminId = snapshot.val();
-                    isAdmin = (userId === currentAdminId); // Sync with existing admin
+                    isAdmin = (userId === currentAdminId);
                 }
                 updateAdminStatus();
             });
@@ -848,14 +841,30 @@
             const container = document.getElementById('usersOnline');
             container.innerHTML = '';
             
-            Object.values(users).filter(user => user.name).forEach(user => {
+            Object.entries(users).filter(([key, user]) => user.name).forEach(([userKey, user]) => {
+                const entry = document.createElement('div');
+                entry.className = 'user-entry';
+                
                 const badge = document.createElement('div');
                 badge.className = 'user-badge';
                 badge.textContent = user.name;
-                if (user.isAdmin) {
+                
+                if (userKey === currentAdminId) {
                     badge.innerHTML += '<span class="admin-tag">ADMIN</span>';
                 }
-                container.appendChild(badge);
+                
+                entry.appendChild(badge);
+                
+                // Add "Make Admin" button if current user is admin and the user is not the current admin
+                if (isAdmin && userKey !== userId) {
+                    const adminBtn = document.createElement('button');
+                    adminBtn.className = 'admin-action-btn';
+                    adminBtn.textContent = 'Make Admin';
+                    adminBtn.onclick = () => setAdmin(userKey);
+                    entry.appendChild(adminBtn);
+                }
+                
+                container.appendChild(entry);
             });
         }
 
@@ -866,27 +875,33 @@
 
             try {
                 const currentVideoId = getVideoId();
+                const playerState = player.getPlayerState();
+                
+                // 1. Load video if necessary
                 if (videoData.videoId && videoData.videoId !== currentVideoId) {
                     player.loadVideoById(videoData.videoId, videoData.time);
+                    
+                // 2. Sync time if necessary (only if not currently loading/playing/paused)
+                } else if (playerState !== YT.PlayerState.PLAYING && playerState !== YT.PlayerState.PAUSED) {
+                    const timeDiff = Math.abs((player.getCurrentTime() || 0) - videoData.time);
+                    if (timeDiff > 2) {
+                        player.seekTo(videoData.time, true);
+                    }
                 }
-
-                const timeDiff = Math.abs((player.getCurrentTime() || 0) - videoData.time);
-                if (timeDiff > 2) {
-                    player.seekTo(videoData.time, true);
-                }
-
-                // If admin paused/played, force that state
-                if (videoData.state === YT.PlayerState.PLAYING && player.getPlayerState() !== YT.PlayerState.PLAYING) {
+                
+                // 3. Sync state (play/pause)
+                if (videoData.state === YT.PlayerState.PLAYING && playerState !== YT.PlayerState.PLAYING) {
                     player.playVideo();
-                } else if (videoData.state === YT.PlayerState.PAUSED && player.getPlayerState() !== YT.PlayerState.PAUSED) {
+                } else if (videoData.state === YT.PlayerState.PAUSED && playerState !== YT.PlayerState.PAUSED) {
                     player.pauseVideo();
                 }
-                // Optional: You could also add logic here to sync volume or other states if needed
+                
             } catch (error) {
                 console.error('Update error:', error);
             }
 
-            setTimeout(() => { isUpdating = false; }, 1000);
+            // Small delay to prevent infinite synchronization loops
+            setTimeout(() => { isUpdating = false; }, 500);
         }
 
         function syncWithRoom() {
@@ -959,7 +974,6 @@
                     return;
                 }
                 
-                // NEW: Determine if user is the admin (creator)
                 if (!inputRoomId) {
                     roomId = generateRoomId();
                     isAdmin = true;
@@ -976,7 +990,6 @@
                 joinRoom();
             });
 
-            // MODIFIED: Only allow video load if admin
             document.getElementById('loadVideoBtn').addEventListener('click', () => {
                 if (!isAdmin) {
                     alert('Only the room admin can load videos.');
@@ -1003,7 +1016,6 @@
                 if (e.key === 'Enter') sendMessage();
             });
             
-            // Initial setting of controls visibility (will be updated on join)
             document.getElementById('videoControls').style.display = 'none';
         }
 
