@@ -3,377 +3,142 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Codely.fun - place for developers</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <title>Codely.fun | Code With Fun</title>
+    <!-- Load Tailwind CSS --><script src="https://cdn.tailwindcss.com"></script>
+    <!-- Configure Tailwind for a clean, professional look --><script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                    colors: {
+                        // Professional Dashboard Palette
+                        'primary': '#4f46e5',   // Classic Indigo
+                        'accent': '#10b981',    // Green for positive actions
+                        'body-bg': '#f9fafb',   // Light gray background for contrast
+                        'text-dark': '#1f2937', // Nearly black text
+                        'text-muted': '#6b7280',// Muted gray text
+                    }
+                },
+            }
+        }
+    </script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
-        @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@700&display=swap');
-        
         body {
             font-family: 'Inter', sans-serif;
-            background-color: #121212;
-            color: #e0e0e0;
-            display: flex;
-            flex-direction: column;
-            scroll-behavior: smooth;
-            overflow-x: hidden; /* Prevent horizontal scroll on mobile */
         }
-
-        header {
-            width: 100%;
-            padding: 2rem 2rem;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            position: fixed;
-            top: 0;
-            left: 0;
-            background-color: transparent;
-            z-index: 10;
-            transition: transform 0.3s ease-in-out;
-        }
-
-        .header-hidden {
-            transform: translateY(-100%);
-        }
-
-        .header-title {
-            font-family: 'Montserrat', sans-serif;
-            font-size: 1.25rem;
-            font-weight: 700;
-        }
-
-        .nav-links {
-            display: flex;
-            gap: 1.5rem;
-            font-size: 1rem;
-            text-transform: uppercase;
-        }
-
-        .nav-link {
-            text-decoration: none;
-            color: #e0e0e0;
-            transition: all 0.2s ease-in-out;
-        }
-
-        .nav-link:hover {
-            color: #4a90e2;
-        }
-
-        main {
-            flex-grow: 1;
-            display: flex;
-            align-items: center;
-            justify-content: center; /* Added for horizontal centering */
-            padding: 0 2rem;
-            min-height: 100vh;
-            position: relative; /* Essential for positioning the scroll hint */
-        }
-
-        .content-section {
-            display: flex;
-            flex-direction: column;
-            gap: 0.5rem;
-            text-align: center; /* Added for text centering */
-        }
-
-        .main-title {
-            font-family: 'Montserrat', sans-serif;
-            font-size: 4rem; /* Increased font size */
-            font-weight: 700;
-        }
-
-        .subtitle {
-            font-size: 1.5rem; /* Increased font size */
-            line-height: 1.5;
-        }
-
-        .buttons-container {
-            display: flex;
-            flex-direction: column;
-            gap: 0.5rem;
-            margin-top: 1rem;
-            align-items: center; /* Centering buttons within the column */
-        }
-
-        .button {
-            padding: 0.75rem 1.5rem; /* Increased padding */
-            border-radius: 9999px;
-            font-weight: 600;
-            text-align: center;
-            text-decoration: none;
-            color: white;
-            transition: all 0.2s ease-in-out;
-            font-size: 1rem; /* Increased font size */
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            width: 150px; /* Explicitly set the width */
-        }
-
-        .join-button {
-            background-color: #4a90e2;
-        }
-        
-        .projects-button {
-            background-color: #26d0ce;
-        }
-
-        .button:hover {
+        /* Custom focus for professional feel on interaction */
+        .app-link-focus:hover {
+            opacity: 0.85;
             transform: translateY(-2px);
-            box-shadow: 0 8px 12px rgba(0, 0, 0, 0.2);
-            opacity: 0.8;
-        }
-
-        /* Classes for on-scroll animation */
-        .hidden-section {
-            opacity: 0;
-            transition: opacity 1s ease-in;
-        }
-        
-        .visible-section {
-            opacity: 1;
-        }
-
-        /* Scroll Down Hint Animation */
-        @keyframes bounce {
-            0%, 20%, 50%, 80%, 100% {
-                transform: translate(-50%, 0);
-            }
-            40% {
-                transform: translate(-50%, -10px);
-            }
-            60% {
-                transform: translate(-50%, -5px);
-            }
-        }
-
-        .scroll-down-hint {
-            display: none; /* Default hidden */
-            position: absolute;
-            bottom: 2rem;
-            left: 50%;
-            color: #4a90e2; /* Blue color for contrast */
-            z-index: 1;
-            cursor: pointer;
-        }
-
-        /* Responsive Styles */
-        @media (max-width: 768px) {
-            /* Hide the header completely on mobile devices */
-            header {
-                display: none;
-            }
-            
-            main, .about-section {
-                padding-left: 1.5rem;
-                padding-right: 1.5rem;
-            }
-
-            .main-title {
-                font-size: 2.5rem;
-            }
-
-            .subtitle {
-                font-size: 1.25rem;
-            }
-
-            .buttons-container {
-                flex-direction: row;
-                justify-content: center;
-            }
-
-            .button {
-                font-size: 0.875rem;
-                padding: 0.5rem 1rem;
-            }
-            
-            /* Show scroll hint on mobile and apply animation */
-            .scroll-down-hint {
-                display: block;
-                animation: bounce 2s infinite;
-                bottom: 8rem; /* Lifted higher for better visibility on mobile */
-            }
-            
-            /* Profile card specific mobile styles */
-            .profile-container {
-                flex-direction: column;
-                gap: 1.5rem; /* Reduced gap for a more compact look */
-            }
-            
-            .profile-card {
-                flex-direction: column;
-                text-align: center;
-                gap: 1rem; /* Adjusted gap inside the card */
-                padding: 1.5rem; /* Adjusted padding */
-            }
-            
-            .profile-image-container {
-                width: 80px;
-                height: 80px;
-                margin-bottom: 0.5rem;
-                /* Ensure perfect circle on mobile */
-                border-radius: 50%;
-            }
-        }
-
-        .profile-container {
-            display: flex;
-            justify-content: center;
-            gap: 2rem;
-            flex-wrap: wrap;
-        }
-
-        .profile-card {
-            background-color: #1e1e1e;
-            padding: 2rem;
-            border-radius: 1rem;
-            display: flex;
-            flex-direction: row;
-            align-items: center;
-            gap: 1.5rem;
-            transition: transform 0.3s ease-in-out;
-        }
-
-        .profile-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
-        }
-
-        .profile-image-container {
-            width: 100px;
-            height: 100px;
-            overflow: hidden;
-            border-radius: 50%;
-            border: 2px solid #4a90e2;
-        }
-
-        .profile-image {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-
-        .profile-info {
-            display: flex;
-            flex-direction: column;
-            gap: 0.25rem;
-        }
-
-        .profile-name {
-            font-size: 1.25rem;
-            font-weight: 700;
-        }
-
-        .profile-role {
-            font-size: 0.875rem;
-            color: #9ca3af;
-        }
-        
-        .footer {
-            padding: 2rem;
-            text-align: center;
-            color: #6b7280;
+            transition: all 0.2s;
         }
     </style>
 </head>
-<body>
-    <header>
-        <div class="header-title">codely.fun</div>
-        <nav class="nav-links">
-            <a href="https://codely.fun/" class="nav-link">JOIN</a>
-            <a href="https://codely.fun/projects/" class="nav-link">PROJECTS</a>
-            <a href="https://codely.fun/about" class="nav-link">ABOUT</a>
-            <a href="https://codely.fun/" class="nav-link">OPEN SOURSE</a>
-        </nav>
+
+<body class="bg-body-bg text-text-dark min-h-screen antialiased">
+
+    <!-- Navigation Bar (Simple and full-width) --><header class="sticky top-0 z-50 bg-white border-b border-gray-200 shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <!-- Logo/Site Name --><a href="#" class="flex-shrink-0 text-2xl font-extrabold text-text-dark tracking-tight">
+                    <span class="text-primary">Code</span>ly.<span class="font-light text-text-dark">fun</span>
+                </a>
+                <!-- Navigation Links --><nav class="hidden md:block space-x-6">
+                    <a href="#intro" class="text-sm font-medium text-text-muted hover:text-primary transition duration-150">Intro</a>
+                    <a href="#apps" class="text-sm font-medium text-text-muted hover:text-primary transition duration-150">Our Apps</a>
+                    <a href="#" class="text-sm font-medium text-text-muted hover:text-primary transition duration-150">Blog</a>
+                    <a href="https://codely.fun/about" class="text-sm font-medium text-text-muted hover:text-primary transition duration-150">Contact</a>
+                </nav>
+                <!-- CTA Button (Clean, high-contrast) --><button class="bg-primary text-white font-semibold py-2 px-4 rounded-lg text-sm hover:bg-indigo-600 transition duration-300 hidden sm:block shadow-md">
+                    Start Now
+                </button>
+            </div>
+        </div>
     </header>
 
-    <main>
-        <div class="content-section">
-            <div class="main-title">Codely.fun</div>
-            <div class="subtitle">codely.fun is a tool for developers <br/> & made by a develloper</div>
-            <div class="buttons-container">
-                <a href="https://codely.fun/" class="button join-button">JOIN</a>
-                <a href="https://codely.fun/projects/" class="button projects-button">PROJECTS</a>
-            </div>
-        </div>
-        
-        <!-- Scroll Down Hint for Mobile View -->
-        <a href="#about-section" class="scroll-down-hint" aria-label="Scroll Down">
-            <!-- Down arrow icon -->
-            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevrons-down">
-                <path d="m7 5 5 5 5-5"/>
-                <path d="m7 15 5 5 5-5"/>
-            </svg>
-        </a>
-    </main>
+    <!-- Main Content Wrapper - Centered and Contained --><div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 
-    <!-- About Section -->
-    <section id="about-section" class="hidden-section" style="padding: 4rem; min-height: 50vh; background-color: #1e1e1e;">
-        <div class="about-content">
-            <h2 class="text-3xl font-bold font-montserrat mb-4">About Us</h2>
-            <p class="text-lg mb-8">
-                Codely.fun is a collaborative platform for developers to share projects and learn new skills. We believe in the power of open source and a supportive community.
-            </p>
-            <div class="profile-container">
-                <a href="https://codely.fun/harshit_profile.html" class="profile-card">
-                    <div class="profile-image-container">
-                        <img src="https://i.ibb.co/d0c0p0Cz/01.jpg" onerror="this.src='https://placehold.co/100x100/121212/e0e0e0?text=HS'" alt="Harshit Singh" class="profile-image">
-                    </div>
-                    <div class="profile-info">
-                        <span class="profile-name">Harshit Singh</span>
-                        <span class="profile-role">Web-App Dev</span>
-                    </div>
-                </a>
-                <a href="https://shubhamsingh-silk.vercel.app/" class="profile-card">
-                    <div class="profile-image-container">
-                        <img src="https://i.ibb.co/XZ0PhjZz/1000007199-1.jpg" onerror="this.src='https://placehold.co/100x100/121212/e0e0e0?text=SS'" alt="Shubham Singh" class="profile-image">
-                    </div>
-                    <div class="profile-info">
-                        <span class="profile-name">Shubham Singh</span>
-                        <span class="profile-role">Full Stack Dev</span>
-                    </div>
-                </a>
-            </div>
-            <div class="mt-8 text-center text-lg">
-                <p>
-                    This is the place to add more details about the Codely.fun team, mission, or vision. You can expand on what makes the platform unique and a great place for developers to connect.
+        <!-- 1. Codely Intro Section (Full width, simple hero) --><section id="intro" class="py-16 md:py-24 text-center">
+            <div class="max-w-4xl mx-auto">
+                
+                <h1 class="text-4xl sm:text-5xl lg:text-6xl font-extrabold leading-snug mb-6 text-text-dark">
+                    Simplify Your Workflow with 
+                    <span class="block text-primary">Codely.fun.</span>
+                </h1>
+                <p class="text-lg md:text-xl text-text-muted max-w-3xl mx-auto mb-10">
+                    We provide high-utility, beautifully engineered web applications that turn complex, repetitive coding tasks into simple, single-click solutions.
                 </p>
+
+                <!-- Main CTA Group (Responsive centering) --><div class="flex flex-col sm:flex-row justify-center space-y-4 sm:space-y-0 sm:space-x-4">
+                    <a href="#apps" class="inline-flex items-center justify-center px-8 py-3 text-base font-bold rounded-full text-white bg-primary hover:bg-indigo-600 transition duration-300 shadow-lg shadow-primary/30">
+                        Explore Our Apps
+                    </a>
+                    <a href="https://codely.fun/projects" class="inline-flex items-center justify-center px-8 py-3 text-base font-semibold rounded-full text-text-dark border border-gray-300 bg-white hover:bg-gray-100 transition duration-300 shadow-sm">
+                        View Open Source codes
+                    </a>
+                </div>
+            </div>
+        </section>
+        
+        <!-- 2. Our Apps Section (Reverted to single-column focus) --><section id="apps" class="pt-8 pb-16 md:pb-24">
+            <div class="text-center mb-10">
+                <span class="text-accent font-semibold uppercase tracking-widest text-sm mb-2 inline-block">Featured Tool</span>
+                <h2 class="text-3xl font-extrabold text-text-dark">
+                    Our Apps
+                </h2>
+                <p class="text-text-muted mt-2">Essential tools to supercharge your daily coding tasks.</p>
+            </div>
+            
+            <!-- Focused Container for Single App - Max-width set to 'md' (448px) --><div class="max-w-md mx-auto w-full">
+                <!-- Grid setup: Single column --><div class="grid grid-cols-1 gap-6">
+
+                    <!-- App Card 1: TOGETHER Watch Party Platform (Height reduced) --><div class="bg-white p-3 md:p-4 rounded-xl text-left border border-gray-200 shadow-md">
+                        <div class="flex items-start space-x-3 mb-2">
+                            <!-- Icon --><div class="bg-primary/10 text-primary p-2 rounded-full flex-shrink-0">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M4 7v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2H6a2 2 0 00-2 2z" />
+                                </svg>
+                            </div>
+                            <!-- Title --><h3 class="text-xl font-bold text-text-dark leading-8">TOGETHER</h3>
+                        </div>
+                        
+                        <!-- Image Banner for TOGETHER --><img src="https://i.ibb.co/CK2VKHLR/date.png" alt="TOGETHER Watch Party Banner" class="w-full h-auto rounded-lg mb-3 border border-gray-200">
+
+                        <!-- Description --><p class="text-text-muted text-sm mb-4">
+                            TOGETHER is a Watch Party Platform where you can watch YouTube videos with your loved ones via video call and chat with them in real-time.
+                        </p>
+                        
+                        <!-- Action Links Container (Reduced vertical spacing) --><div class="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-3">
+                            <a href="https://codely.fun/together" class="flex-1 text-center py-1.5 px-3 rounded-full text-white font-semibold bg-primary hover:bg-indigo-600 transition duration-150 app-link-focus text-sm">
+                                Visit Together
+                            </a>
+                            <a href="https://codely.fun/projects" class="flex-1 text-center py-1.5 px-3 rounded-full text-text-dark font-semibold border border-gray-300 bg-white hover:bg-gray-100 transition duration-150 app-link-focus text-sm">
+                                Get Source code
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </section>
+
+    </div>
+
+    <!-- Footer (Simpler and clean, full width) --><footer class="py-8 bg-white border-t border-gray-200">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center text-text-muted">
+            <!-- Added Authorship Credit -->
+            <p class="mb-1 text-sm text-text-dark font-medium">Created and developed by Harshit Singh</p>
+            
+            <p class="mb-2 text-sm">&copy; 2025 Codely.fun. All rights reserved.</p>
+            <div class="space-x-4 text-xs">
+                <a href="https://codely.fun/t&c" class="hover:text-primary transition duration-150">Privacy</a>
+                <span class="text-gray-300">|</span>
+                <a href="https://codely.fun/t&c" class="hover:text-primary transition duration-150">Terms</a>
             </div>
         </div>
-    </section>
-    
-    <footer class="footer">
-        &copy; 2025 Codely.fun. All Rights Reserved.
     </footer>
 
-    <script>
-        const aboutSection = document.getElementById('about-section');
-        const header = document.querySelector('header');
-        let lastScrollY = window.scrollY;
-
-        // Intersection Observer to show "About Us" section on scroll
-        const aboutObserver = new IntersectionObserver(entries => {
-            entries.forEach(entry => {
-                if (entry.isIntersecting) {
-                    entry.target.classList.remove('hidden-section');
-                    entry.target.classList.add('visible-section');
-                    aboutObserver.unobserve(entry.target);
-                }
-            });
-        }, {
-            threshold: 0.1
-        });
-
-        aboutObserver.observe(aboutSection);
-
-        // Hide/Show header on scroll
-        window.addEventListener('scroll', () => {
-            if (window.scrollY > lastScrollY && window.scrollY > 50) {
-                header.classList.add('header-hidden');
-            } else {
-                header.classList.remove('header-hidden');
-            }
-            lastScrollY = window.scrollY;
-        });
-    </script>
 </body>
 </html>
