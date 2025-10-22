@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>YouTube Watch Party with Video Call</title>
+    <title>Together - A Watch Party with Video Call</title>
     <link href="https://vjs.zencdn.net/8.10.0/video-js.css" rel="stylesheet" />
     <style>
         /* Define Dark Theme Variables */
@@ -304,6 +304,41 @@
             flex-direction: column;
             gap: 15px;
         }
+        
+        /* --- Clean Message Styles (Revert from Glass UI) --- */
+        
+        /* Message text styling (for all non-system messages) */
+        .message-text {
+            background: var(--color-border-dark); /* Default dark background for older messages */
+            color: var(--color-text-light);
+            padding: 10px 15px;
+            border-radius: 10px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1); /* Subtle shadow */
+            font-size: 14px;
+            word-wrap: break-word;
+            transition: background 0.2s, color 0.2s, box-shadow 0.2s;
+            border: none; /* Ensure no residual borders */
+        }
+
+        /* Default username color for older messages */
+        .message-user {
+            font-weight: 600;
+            color: var(--color-accent-blue);
+            margin-bottom: 5px;
+            font-size: 14px;
+        }
+
+        /* --- Newest Message Highlight (Blue Background Only) --- */
+        .message-newest .message-text {
+            background: var(--color-accent-blue); /* Solid Blue Background */
+            color: white; /* White text on blue background */
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5); /* Slightly prominent shadow */
+        }
+        
+        /* Newest Message: Username color - must be white for contrast */
+        .message-newest .message-user {
+            color: white;
+        }
 
         .message {
             animation: slideIn 0.3s ease;
@@ -320,22 +355,6 @@
             }
         }
 
-        .message-user {
-            font-weight: 600;
-            color: var(--color-accent-blue); /* Accent color for username */
-            margin-bottom: 5px;
-            font-size: 14px;
-        }
-
-        .message-text {
-            background: var(--color-border-dark); /* Message bubble background */
-            color: var(--color-text-light);
-            padding: 10px 15px;
-            border-radius: 10px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-            font-size: 14px;
-            word-wrap: break-word;
-        }
 
         .message-system {
             text-align: center;
@@ -382,7 +401,7 @@
             background: #5568d3;
         }
         
-        /* Modal Styles - Dark Theme */
+        /* Modal Styles - Dark Theme (omitted for brevity) */
         .modal {
             display: flex;
             position: fixed;
@@ -592,7 +611,7 @@
 <body>
     <div id="setupModal" class="modal">
         <div class="modal-content">
-            <h2>Join Watch Party v1.4🎉</h2>
+            <h2>Join Watch Party v1.5🎉</h2>
             <input type="text" id="usernameInput" placeholder="Enter your name">
             <input type="text" id="roomIdInput" placeholder="Enter room ID (or leave blank to create)">
             <button id="joinBtn">Join Room</button>
@@ -714,7 +733,7 @@
             ]
         };
         
-        // --- ROOM CLEANUP FUNCTIONS ---
+        // --- ROOM CLEANUP FUNCTIONS (omitted for brevity) ---
         
         /**
          * Custom "alert" implementation to show a non-blocking message before reloading.
@@ -879,23 +898,21 @@
         }
         // --- END: ROOM CLEANUP FUNCTIONS ---
 
-        // NEW: Video.js Player Initialization
+        // Video and WebRTC functions (omitted for brevity)
         function initializeVideoPlayer() {
             player = videojs('player', {
                 controls: true,
                 autoplay: false,
                 techOrder: ['youtube', 'html5'], // Use youtube tech first
                 sources: [],
-                // --- START FIX: ADD YOUTUBE CONFIGURATION ---
                 youtube: { 
-                    iv_load_policy: 3, // Disable annotations
-                    modestbranding: 1, // Cleaner player
-                    enablejsapi: 1, // Ensure JS API is enabled for sync
-                    origin: window.location.origin, // CRITICAL: Fixes cross-origin security check
-                    rel: 0, // ADDED: No related videos at end
-                    html5: 1 // ADDED: Explicitly use HTML5 player
+                    iv_load_policy: 3,
+                    modestbranding: 1,
+                    enablejsapi: 1,
+                    origin: window.location.origin,
+                    rel: 0,
+                    html5: 1
                 }
-                // --- END FIX ---
             }, function() {
                 console.log('Video.js player is ready');
                 setupVideoListeners(this);
@@ -903,32 +920,24 @@
             });
         }
         
-        // NEW: Setup Video.js Listeners
         function setupVideoListeners(playerInstance) {
-            // Listeners for outgoing state changes (Admin role)
-            
-            // Play/Pause/End events only trigger database write if it was a user action (i.e., not isUpdating)
             playerInstance.on('play', function() { handlePlayerStateChange(PLAYER_STATE.PLAYING); });
             playerInstance.on('pause', function() { handlePlayerStateChange(PLAYER_STATE.PAUSED); });
             playerInstance.on('ended', function() { handlePlayerStateChange(PLAYER_STATE.ENDED); });
             
-            // Time synchronization (to reduce database writes, only sync every 5 seconds while playing)
             playerInstance.on('timeupdate', function() {
-                // Check if playing and time is roughly a multiple of 5 seconds (5, 10, 15...)
                 if (!playerInstance.paused() && isAdmin && !isUpdating) {
                     const currentTime = playerInstance.currentTime();
-                    if (Math.floor(currentTime * 10) % 50 === 0) { // Check every 5 seconds
+                    if (Math.floor(currentTime * 10) % 50 === 0) {
                         handlePlayerStateChange(PLAYER_STATE.PLAYING);
                     }
                 }
             });
         }
 
-        // NEW: Handles outgoing state changes to Firebase (only for Admin)
         function handlePlayerStateChange(state) {
             if (isUpdating || !isAdmin) return;
 
-            // Get videoId from the current source URL
             const videoId = getVideoIdFromUrl(player.currentSrc());
 
             const videoData = {
@@ -938,7 +947,6 @@
                 timestamp: firebase.database.ServerValue.TIMESTAMP
             };
 
-            // Only write if the state is a significant event and a video is loaded
             if (videoId && (state === PLAYER_STATE.PLAYING || state === PLAYER_STATE.PAUSED || state === PLAYER_STATE.ENDED)) {
                 db.ref(`rooms/${roomId}/video`).set(videoData);
             }
@@ -946,7 +954,6 @@
 
 
         function getVideoIdFromUrl(url) {
-            // Extracts ID from YouTube URL formats
             const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
             const match = url.match(regExp);
             return (match && match[2].length === 11) ? match[2] : null;
@@ -965,39 +972,26 @@
             sendSystemMessage(`${newAdminName} is now the Admin.`);
         }
         
-        /**
-         * Checks if the removed user was the admin and, if so, elects a new random admin.
-         */
         async function electNewAdmin(removedUserId) {
-            // Only proceed if the user who left was the current admin.
             if (removedUserId === currentAdminId) {
-                
-                // Fetch the remaining users
                 const usersSnapshot = await db.ref(`rooms/${roomId}/users`).once('value');
                 const remainingUsers = usersSnapshot.val();
 
                 if (remainingUsers && Object.keys(remainingUsers).length > 0) {
                     const userIds = Object.keys(remainingUsers);
-                    
-                    // Randomly select one remaining user
                     const randomIndex = Math.floor(Math.random() * userIds.length);
                     const newAdminId = userIds[randomIndex];
                     
                     console.log(`Admin (${removedUserId}) left. Electing new admin: ${newAdminId}`);
-                    
-                    // Set the new admin (setAdmin updates the adminId node and sends a system message)
                     await setAdmin(newAdminId);
-                    
                 } else {
                     console.log(`Admin left, but no other users remain in room ${roomId}. Room is empty.`);
-                    // Remove the adminId reference if the room is empty
                     db.ref(`rooms/${roomId}/adminId`).remove();
                 }
             }
         }
 
 
-        // WebRTC functions (omitted for brevity)
         async function initializeMedia() {
             try {
                 localStream = await navigator.mediaDevices.getUserMedia({
@@ -1015,13 +1009,11 @@
                     timestamp: firebase.database.ServerValue.TIMESTAMP,
                 });
                 
-                // Store user metadata
                 await db.ref(`rooms/${roomId}/users/${userId}`).set({
                     name: username,
                     joined: firebase.database.ServerValue.TIMESTAMP
                 });
 
-                // Set disconnect handlers
                 db.ref(`rooms/${roomId}/peers/${userId}`).onDisconnect().remove();
                 db.ref(`rooms/${roomId}/users/${userId}`).onDisconnect().remove();
 
@@ -1029,7 +1021,6 @@
 
             } catch (error) {
                 console.error('❌ Error accessing media:', error);
-                // alert('Camera/microphone access denied. Video call will not work.'); // Replaced with console log
             }
         }
 
@@ -1040,16 +1031,13 @@
                 updateAdminStatus();
             });
             
-            // --- Attach room value listener to check for remote deletion ---
             db.ref(`rooms/${roomId}`).on('value', (snapshot) => {
                 const roomData = snapshot.val();
                 if (roomData === null && !document.getElementById('expiredDiv')) {
-                    // Room no longer exists, and we haven't already shown the expiration message
                     handleRoomDeletion('Your room was deleted by a remote cleanup process because it expired.');
                 }
             });
-            // -------------------------------------------------------------------
-
+            
 
             db.ref(`rooms/${roomId}/peers`).on('child_added', (snapshot) => {
                 const peerId = snapshot.key;
@@ -1200,7 +1188,6 @@
                 label.className = 'video-label';
                 label.textContent = peerName || 'Peer ' + peerId.substring(0, 6);
                 
-                // Add admin tag to the label if the peer is the current admin
                 if (peerId === currentAdminId) {
                      label.innerHTML += '<span class="admin-tag">ADMIN</span>';
                 }
@@ -1214,7 +1201,6 @@
                     video.srcObject = stream;
                 }
                 
-                // Update admin tag on existing video label
                 const label = container.querySelector('.video-label');
                 label.innerHTML = (peerName || 'Peer ' + peerId.substring(0, 6)) + (peerId === currentAdminId ? '<span class="admin-tag">ADMIN</span>' : '');
             }
@@ -1253,7 +1239,7 @@
         }
 
         async function joinRoom() {
-            // --- ROOM LIFECYCLE MANAGEMENT (Check and Set Creation Timestamp) ---
+            // --- ROOM LIFECYCLE MANAGEMENT (omitted for brevity) ---
             const roomRef = db.ref(`rooms/${roomId}`);
             const roomSnapshot = await roomRef.once('value');
             const roomData = roomSnapshot.val();
@@ -1262,34 +1248,27 @@
             let roomCreatedTimestamp;
 
             if (roomData && roomData.created) {
-                // Room exists, get the creation timestamp
                 roomCreatedTimestamp = roomData.created;
                 
-                // Check if room has expired upon joining
                 if (now - roomCreatedTimestamp > ROOM_LIFETIME_MS) {
                     console.log(`Room ${roomId} is already expired. Deleting now.`);
                     cleanupRoom();
-                    return; // Exit join process
+                    return; 
                 }
             } else {
-                // Room is new, set the creation timestamp to a server value placeholder
                 await roomRef.update({ created: firebase.database.ServerValue.TIMESTAMP });
                 
-                // Fetch the newly written timestamp to accurately calculate expiration
                 const newSnapshot = await roomRef.once('value');
                 roomCreatedTimestamp = newSnapshot.val().created || now;
                 
                 console.log(`New room ${roomId} created at ${new Date(roomCreatedTimestamp).toLocaleString()}.`);
             }
 
-            // Schedule cleanup based on the determined or new creation time
             scheduleRoomCleanup(roomCreatedTimestamp);
-            // NEW: Start the visual countdown
             startCountdownTimer(roomCreatedTimestamp);
             // --- END: ROOM LIFECYCLE MANAGEMENT ---
 
 
-            // Check/Set Admin when joining
             db.ref(`rooms/${roomId}/adminId`).once('value', (snapshot) => {
                 if (!snapshot.exists() && isAdmin) {
                     setAdmin(userId);
@@ -1305,14 +1284,11 @@
                 updateUsersList(snapshot.val() || {});
             });
             
-            // --- NEW LISTENER: Re-elect admin if a user is removed (e.g., disconnection) ---
             db.ref(`rooms/${roomId}/users`).on('child_removed', (snapshot) => {
                 const removedUserId = snapshot.key;
                 electNewAdmin(removedUserId);
             });
-            // --------------------------------------------------------------------------------
             
-            // Video player synchronization
             db.ref(`rooms/${roomId}/video`).on('value', (snapshot) => {
                 const videoData = snapshot.val();
                 if (videoData) updateVideo(videoData);
@@ -1325,7 +1301,6 @@
             sendSystemMessage(`${username} joined the room`);
             initializeMedia();
             
-            // NEW: Initialize the Video.js player after joining
             initializeVideoPlayer();
         }
 
@@ -1359,20 +1334,15 @@
             });
         }
 
-        /**
-         * The core synchronization function. Rewritten for Video.js.
-         */
         function updateVideo(videoData) {
             if (!player || player.isDisposed()) return;
 
-            // CRITICAL: Immediately block local events from interfering with remote command
             isUpdating = true; 
 
             try {
                 const currentVideoId = getVideoIdFromUrl(player.currentSrc());
                 const targetVideoId = videoData.videoId;
 
-                // 1. Load video if ID is new or player is uninitialized
                 if (targetVideoId && targetVideoId !== currentVideoId) {
                     
                     const newSource = {
@@ -1380,16 +1350,10 @@
                         src: `https://www.youtube.com/watch?v=${targetVideoId}`
                     };
                     
-                    // Set the new video source. Video.js will handle the load.
                     player.src(newSource);
-                    
-                    // After loading the source, we fall through to step 2 to set the time/state.
                 } 
                 
-                // 2. Sync State and Time
-                
-                // Time Sync: Seek only if difference is significant and player is ready
-                if (player.readyState() >= 1) { // readyState >= 1 means metadata loaded
+                if (player.readyState() >= 1) {
                     const playerTime = player.currentTime() || 0;
                     const timeDiff = Math.abs(playerTime - videoData.time);
 
@@ -1398,12 +1362,9 @@
                     }
                 }
 
-                // State Sync: Apply play/pause command explicitly
                 if (videoData.state === PLAYER_STATE.PLAYING && player.paused()) {
-                    // This command is critical for remote play.
                     player.play().catch(e => {
                         console.warn("Autoplay was blocked by browser. User must click play.", e);
-                        // This warning is normal for browsers with strict autoplay policies.
                     });
                 } else if (videoData.state === PLAYER_STATE.PAUSED && !player.paused()) {
                     player.pause();
@@ -1413,7 +1374,6 @@
                 console.error('Video.js Update error:', error);
             }
 
-            // CRITICAL: Clear the flag after a short delay to allow the player to settle/process its own events
             setTimeout(() => { isUpdating = false; }, 500);
         }
 
@@ -1458,12 +1418,26 @@
             const container = document.getElementById('messages');
             container.innerHTML = '';
             
-            Object.values(messages).sort((a, b) => (a.timestamp || 0) - (b.timestamp || 0)).forEach(msg => {
+            // 1. Sort all messages by timestamp (LATEST first: b - a)
+            const sortedMessages = Object.values(messages).sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
+            
+            // 2. Take the latest 5 messages to display
+            const latestFiveMessages = sortedMessages.slice(0, 5);
+
+            // 3. Iterate over the latest 5 messages and display them.
+            latestFiveMessages.forEach((msg, index) => { 
                 const msgDiv = document.createElement('div');
                 msgDiv.className = 'message';
                 
+                // Highlight the newest message (index 0) with the blue background
+                if (index === 0) {
+                    msgDiv.classList.add('message-newest'); 
+                }
+
                 if (msg.system) {
                     msgDiv.innerHTML = `<div class="message-system">${msg.text}</div>`;
+                    // System messages should not have custom highlights
+                    msgDiv.classList.remove('message-newest'); 
                 } else {
                     msgDiv.innerHTML = `
                         <div class="message-user">${msg.user}</div>
@@ -1473,8 +1447,6 @@
                 
                 container.appendChild(msgDiv);
             });
-            
-            container.scrollTop = container.scrollHeight;
         }
 
         // Event Listeners
@@ -1484,7 +1456,6 @@
                 let inputRoomId = document.getElementById('roomIdInput').value.trim();
 
                 if (!username) {
-                    // Replaced alert() with console error/log
                     console.error('Please enter your name');
                     return;
                 }
@@ -1505,10 +1476,8 @@
                 joinRoom();
             });
 
-            // The load button now only writes the desired state (PLAYING) to Firebase
             document.getElementById('loadVideoBtn').addEventListener('click', () => {
                 if (!isAdmin) {
-                    // Replaced alert() with console error/log
                     console.error('Only the room admin can load videos.');
                     return;
                 }
@@ -1517,7 +1486,6 @@
                 const videoId = extractVideoId(url);
                 
                 if (videoId) {
-                    // Write the new video information and initial state (PLAYING) directly to Firebase
                     db.ref(`rooms/${roomId}/video`).set({
                         state: PLAYER_STATE.PLAYING,
                         time: 0, 
@@ -1528,7 +1496,6 @@
                     
                     document.getElementById('videoUrlInput').value = '';
                 } else {
-                    // Replaced alert() with console error/log
                     console.error('Invalid YouTube URL');
                 }
             });
