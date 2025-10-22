@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Together - A Watch Party with Video Call</title>
+    <title>YouTube Watch Party with Video Call</title>
     <link href="https://vjs.zencdn.net/8.10.0/video-js.css" rel="stylesheet" />
     <style>
         /* Define Dark Theme Variables */
@@ -463,6 +463,29 @@
         }
 
         /* ------------------------------------- */
+        /* WATERMARK STYLES - NEWLY ADDED */
+        /* ------------------------------------- */
+        .watermark {
+            position: fixed;
+            bottom: 10px;
+            right: 10px;
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.4); /* Subtle white on dark background */
+            z-index: 999;
+            text-shadow: 0 0 2px rgba(0, 0, 0, 0.5);
+            white-space: nowrap; /* Prevent wrapping */
+        }
+        .watermark a {
+            color: inherit;
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+        .watermark a:hover {
+            color: var(--color-accent-blue);
+            text-decoration: underline;
+        }
+
+        /* ------------------------------------- */
         /* MEDIA QUERY: Tablet/Laptop (up to 1200px) */
         /* ------------------------------------- */
         @media (max-width: 1200px) {
@@ -556,14 +579,20 @@
             .chat-input button {
                 padding: 10px 20px;
             }
+            
+            /* Smaller watermark on mobile */
+            .watermark {
+                font-size: 10px;
+                bottom: 5px;
+                right: 5px;
+            }
         }
     </style>
 </head>
 <body>
     <div id="setupModal" class="modal">
         <div class="modal-content">
-            <h2>TOGETHER - A Watch Party 
-                v1.4🎉</h2>
+            <h2>Join Watch Party v1.4🎉</h2>
             <input type="text" id="usernameInput" placeholder="Enter your name">
             <input type="text" id="roomIdInput" placeholder="Enter room ID (or leave blank to create)">
             <button id="joinBtn">Join Room</button>
@@ -622,6 +651,11 @@
         </div>
     </div>
 
+    <div class="watermark">
+        <a href="https://codely.fun/harshit_profile" target="_blank">
+            Developed by Codely.fun (Harshit Singh)
+        </a>
+    </div>
     <script src="https://vjs.zencdn.net/8.10.0/video.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/videojs-youtube@3.0.1/dist/Youtube.min.js"></script>
 
@@ -1135,9 +1169,7 @@
                 adminName = snapshot.val() || 'Host';
             }
             
-            // --- UPDATED LINE (includes the possessive 's) ---
             document.getElementById('headerTitle').textContent = `🎬 ${adminName}'s Watch Party`; 
-            // -------------------------------------------------
             
             db.ref(`rooms/${roomId}/users`).once('value', (snapshot) => {
                 updateUsersList(snapshot.val() || {});
