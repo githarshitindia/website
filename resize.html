@@ -1,0 +1,1004 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <title>Zero Ads GOVT. Exam Photo & Signature Resizer | Compress Image to KB | Made in India 🇮🇳</title>
+    <meta name="description" content="Free Online, AD-FREE GOVT Exam Photo and Signature Resizer tool. Crop and compress images to exact pixel dimensions (e.g., 50KB) for SSC, UPSC, Bank exams. 100% Secure, No data stored!">
+    <meta name="keywords" content="govt exam photo resizer, compress image to 50kb, ssc photo resizer, upsc signature size, online photo cropper, ad free photo resizer, made in india">
+    <meta name="author" content="Codely.fun">
+    <meta name="robots" content="index, follow">
+    
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        /* --- CORE STYLES: DARK THEME (DEFAULT) --- */
+        :root {
+            --bg-primary: #121212; /* Main Dark Background */
+            --bg-secondary: #1E1E1E; /* Settings Panel Background */
+            --bg-card: #282828; /* Card/Container Background */
+            --text-primary: #E0E0E0; /* Primary Light Text */
+            --text-secondary: #BBBBBB; /* Secondary Text */
+            --color-primary: #90CAF9; /* Light Blue for accents/links */
+            --color-primary-dark: #64B5F6;
+            --color-success: #69F0AE; /* Bright Green */
+            --color-error: #FF8A80; /* Light Red */
+            --shadow-subtle: 0 1px 3px rgba(0,0,0,0.5), 0 1px 2px rgba(0,0,0,0.8);
+            --shadow-elevated: 0 10px 30px rgba(0, 0, 0, 0.4);
+            --border-color: #333333;
+            --border-radius: 12px;
+            --bg-privacy: #3A3A3A; /* Background for the privacy message */
+            --text-privacy: #F0F0F0;
+        }
+
+        /* --- LIGHT THEME OVERRIDES --- */
+        body.light-theme {
+            --bg-primary: #F8F9FA; 
+            --bg-secondary: #F1F3F4; 
+            --bg-card: #FFFFFF;
+            --text-primary: #3C4043;
+            --text-secondary: #5F6368;
+            --color-primary: #1A73E8;
+            --color-primary-dark: #1558B5;
+            --color-success: #34A853; 
+            --color-error: #EA4335; 
+            --shadow-subtle: 0 1px 3px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.12);
+            --shadow-elevated: 0 10px 30px rgba(0, 0, 0, 0.1);
+            --border-color: #E0E0E0;
+            --bg-privacy: #E8F0FE; /* Light Blue/Gray for privacy message */
+            --text-privacy: #1A73E8;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            margin: 0;
+            padding: 0;
+            background: var(--bg-primary); 
+            color: var(--text-primary);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            line-height: 1.6;
+            scroll-behavior: smooth;
+            transition: background 0.3s, color 0.3s;
+        }
+        
+        header {
+            background: var(--bg-card);
+            padding: 20px 20px;
+            text-align: center;
+            box-shadow: var(--shadow-subtle);
+        }
+        header h1 {
+            margin: 0;
+            color: var(--color-primary);
+            font-size: 2.2em;
+            font-weight: 700;
+        }
+        
+        .container {
+            max-width: 1200px; 
+            margin: 30px auto;
+            background: var(--bg-card);
+            padding: 30px;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow-elevated);
+            flex: 1;
+            transition: background 0.3s, box-shadow 0.3s;
+        }
+        
+        /* --- WIZARD LAYOUT --- */
+        .wizard-layout {
+            display: flex;
+            gap: 25px;
+        }
+
+        .settings-panel {
+            flex: 0 0 320px;
+            padding: 20px;
+            border-radius: var(--border-radius);
+            background: var(--bg-secondary); 
+        }
+
+        .cropper-panel {
+            flex: 1;
+            padding: 20px;
+            border-radius: var(--border-radius);
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+        }
+        
+        /* --- CROPPER UI --- */
+        #cropper-container {
+            position: relative;
+            max-width: 100%;
+            margin: 15px auto;
+            background: #333;
+            border-radius: 8px;
+            overflow: hidden;
+            border: 1px solid var(--border-color);
+        }
+        #original-image {
+            display: block;
+            width: 100%;
+            height: auto;
+            user-select: none;
+            transition: filter 0.2s ease-out;
+        }
+        #crop-box {
+            position: absolute;
+            border: 3px dashed #FFFFFF;
+            outline: 2px solid var(--color-primary);
+            box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.4);
+            cursor: move;
+            touch-action: none;
+            box-sizing: border-box;
+            transition: outline-color 0.1s;
+        }
+        
+        /* --- CONTROL STYLES --- */
+        .step { margin-bottom: 25px; padding-bottom: 15px; border-bottom: 1px solid var(--border-color); }
+        .step h3 { margin-top: 0; color: var(--text-primary); font-size: 1.3em; margin-bottom: 15px; font-weight: 600; }
+        
+        label { 
+            display: block; 
+            margin-bottom: 5px; 
+            font-weight: 500; 
+            color: var(--text-secondary); 
+            font-size: 0.95em; 
+        }
+        
+        select, input[type="file"], input[type="number"] { 
+            width: 100%; 
+            padding: 10px; 
+            margin-bottom: 15px; 
+            border: 1px solid var(--border-color); 
+            border-radius: 6px; 
+            box-sizing: border-box; 
+            background: var(--bg-card);
+            color: var(--text-primary);
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+        select:focus, input[type="number"]:focus {
+            border-color: var(--color-primary);
+            box-shadow: 0 0 0 2px rgba(144, 202, 249, 0.3);
+            outline: none;
+        }
+
+        .options-row { display: flex; gap: 15px; }
+        .option-group { flex: 1; }
+        
+        /* Range Slider Styling (Adapted for Dark Theme) */
+        input[type="range"] { 
+            -webkit-appearance: none; 
+            width: 100%; 
+            height: 6px; 
+            background: var(--border-color); 
+            border-radius: 3px; 
+            margin: 5px 0 15px 0; 
+        }
+        input[type="range"]::-webkit-slider-thumb { 
+            -webkit-appearance: none; 
+            appearance: none; 
+            width: 16px; 
+            height: 16px; 
+            background: var(--color-primary); 
+            cursor: pointer; 
+            border-radius: 50%; 
+            border: 3px solid var(--bg-card);
+            box-shadow: var(--shadow-subtle);
+        }
+        
+        /* Action Buttons */
+        .action-button { 
+            background: var(--color-primary); 
+            color: var(--bg-primary); 
+            border: none; 
+            padding: 12px; 
+            border-radius: 8px; 
+            cursor: pointer; 
+            font-size: 1.05em; 
+            font-weight: 600; 
+            width: 100%; 
+            margin-top: 8px; 
+            transition: background 0.2s, transform 0.1s, box-shadow 0.2s;
+            box-shadow: var(--shadow-subtle);
+        }
+        .action-button:hover { 
+            background: var(--color-primary-dark); 
+            transform: translateY(-1px);
+        }
+
+        #download-btn { background: var(--color-success); color: var(--bg-primary); display: none; }
+        #download-btn:hover { background: #388E3C; }
+        
+        #preview-canvas { 
+            display: block; 
+            margin: 20px auto 0; 
+            border: 2px solid var(--color-primary); 
+            border-radius: 8px; 
+            box-shadow: var(--shadow-subtle);
+        }
+        
+        /* --- DIMENSIONS CARD (#size-info) --- */
+        #size-info {
+            padding: 5px 8px; 
+            border-radius: 8px; 
+            margin-top: 10px; 
+            background: var(--bg-card); 
+            box-shadow: var(--shadow-subtle);
+            border: 1px solid var(--border-color); 
+            font-weight: 400; 
+        }
+
+        /* --- FILE SIZE STATUS CARD (#file-size-info) --- */
+        .info { 
+            padding: 12px; 
+            border-radius: 6px; 
+            margin-top: 10px; 
+            font-size: 0.9em; 
+            font-weight: 600;
+            border-left: 5px solid;
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+        }
+
+        /* Dynamic Feedback Classes */
+        .info.info-warning { border-left-color: #FFC107; background: #3A331A; color: #FFC107; }
+        .info.info-success { border-left-color: var(--color-success); background: #1A3A1E; color: var(--color-success); }
+        .info.info-error { border-left-color: var(--color-error); background: #3A1A1A; color: var(--color-error); }
+        
+        /* --- COMPACTED INFO CARD VIEW --- */
+        .info-details {
+            display: flex;
+            justify-content: space-between;
+            flex-wrap: nowrap; 
+            gap: 5px;
+            padding: 0;
+            line-height: 1.2;
+        }
+        .detail-item {
+            flex: 1 1 30%; 
+            padding: 0; 
+            text-align: center;
+            border-right: 1px solid var(--border-color); 
+        }
+        .detail-item:last-child {
+            border-right: none;
+        }
+        .detail-label {
+            display: block;
+            font-size: 0.65em; 
+            color: var(--text-secondary);
+            margin-bottom: 0px; 
+            font-weight: 500;
+            text-transform: uppercase;
+        }
+        .detail-value {
+            display: block;
+            font-size: 0.9em; 
+            font-weight: 800; 
+            color: var(--color-primary); 
+        }
+
+        /* --- PRIVACY MESSAGE STYLING --- */
+        .privacy-message {
+            max-width: 1200px; 
+            margin: 20px auto 10px;
+            padding: 15px 30px;
+            text-align: center;
+            font-size: 1.0em;
+            font-weight: 500;
+            color: var(--text-privacy);
+            background: var(--bg-privacy);
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow-subtle);
+            line-height: 1.4;
+        }
+        .privacy-message strong {
+            font-weight: 700;
+            color: var(--color-primary);
+        }
+
+        /* --- RESPONSIVENESS (Mobile First) --- */
+        @media (max-width: 900px) {
+            .container { margin: 20px; padding: 20px; }
+            .wizard-layout { flex-direction: column; }
+            .settings-panel { order: 2; flex: 1; }
+            .cropper-panel { order: 1; padding: 15px; }
+            .options-row { flex-direction: column; gap: 0; }
+            .option-group { margin-bottom: 15px; }
+            
+            .info-details { 
+                flex-direction: column; 
+                gap: 0;
+            }
+            .detail-item {
+                border-right: none;
+                border-bottom: 1px dashed var(--border-color);
+                padding: 5px 0; 
+            }
+            .detail-item:last-child {
+                border-bottom: none;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .container { margin: 10px; padding: 15px; border-radius: 10px; }
+            .step { margin-bottom: 20px; }
+            .privacy-message { font-size: 0.9em; padding: 10px 15px; }
+        }
+        
+        /* Footer Styling */
+        footer {
+            text-align: center;
+            padding: 15px;
+            font-size: 0.9em;
+            color: var(--text-secondary);
+            margin-top: auto; 
+            background: var(--bg-card);
+            border-top: 1px solid var(--border-color);
+        }
+        
+        /* Hint Section Styling */
+        .hint-section h2 { color: var(--text-secondary) !important; }
+        .hint-section > div { background: var(--bg-card) !important; }
+        .hint-section li { color: var(--text-secondary) !important; }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Codely.fun - GOVT. Exams Photo & Signature ReSizer</h1>
+    </header>
+
+    <div class="container">
+        <div class="wizard-layout">
+            
+            <div class="cropper-panel">
+                <h2 style="color: var(--color-primary);">Interactive Cropper & Resizer Preview</h2>
+                <p id="crop-instruction" style="text-align: center; color: var(--text-secondary); padding: 20px;">Use the settings on the left to upload your image and set the required dimensions.</p>
+
+                <div id="cropper-container">
+                    <img id="original-image" alt="Upload your Photo or Signature for GOVT. Exam resizing and cropping" style="display: none;">
+                    <div id="crop-box" style="display: none;"></div>
+                </div>
+                
+                <h2 style="margin-top: 30px; border-top: 1px solid var(--border-color); padding-top: 20px; color: var(--color-primary);">Final Resized Image Preview</h2>
+                <canvas id="preview-canvas" style="display: none;"></canvas>
+            </div>
+            
+            <div class="settings-panel">
+                
+                <div class="step">
+                    <h3>1. Select Required Dimensions & Type</h3>
+                    <div class="options-row">
+                        <div class="option-group">
+                            <label for="type">📷 Type :</label>
+                            <select id="type">
+                                <option value="photo">Photo</option>
+                                <option value="signature">Signature</option>
+                            </select>
+                        </div>
+
+                        <div class="option-group">
+                            <label for="exam">🏛️ Exam Preset:</label>
+                            <select id="exam">
+                                <option value="custom">👉 Custom Dimensions</option>
+                                </select>
+                        </div>
+                    </div>
+
+                    <div id="custom-inputs" class="options-row">
+                        <div class="option-group">
+                            <label for="custom-width">Width (px):</label>
+                            <input type="number" id="custom-width" value="300" min="10" max="2000">
+                        </div>
+                        <div class="option-group">
+                            <label for="custom-height">Height (px):</label>
+                            <input type="number" id="custom-height" value="400" min="10" max="2000">
+                        </div>
+                    </div>
+                    <div id="size-info"></div>
+                </div>
+
+                <div class="step">
+                    <h3>2. Upload Image and Adjust Filters</h3>
+                    <label for="file">📤 Select Image (JPG/PNG) for Cropping:</label>
+                    <input type="file" id="file" accept="image/*">
+                    
+                    <label for="brightness-slider">🔆 Brightness: <span id="brightness-val">100%</span></label>
+                    <input type="range" id="brightness-slider" min="50" max="150" value="100">
+
+                    <label for="contrast-slider">⚫ Contrast: <span id="contrast-val">100%</span></label>
+                    <input type="range" id="contrast-slider" min="50" max="150" value="100">
+                    
+                    <div style="display: flex; gap: 10px;">
+                        <button class="action-button" id="rotate-btn" style="background: #3498DB; flex: 1;">🔃 Rotate 90°</button>
+                        <button class="action-button" id="reset-filters-btn" style="background: #5F6368; flex: 1;">🔄 Reset Filters</button>
+                    </div>
+                </div>
+                
+                <div class="step">
+                    <h3>3. Set File Size Limit & Download</h3>
+                    
+                    <div class="options-row">
+                        <div class="option-group">
+                            <label for="output-format">💾 Output Format:</label>
+                            <select id="output-format">
+                                <option value="png">PNG (Lossless)</option>
+                                <option value="jpeg" selected>JPEG (Compressed)</option> </select>
+                        </div>
+                        <div class="option-group">
+                            <label for="target-kb">🎯 Target Max Size (KB):</label>
+                            <input type="number" id="target-kb" value="50" min="1" max="5000" placeholder="e.g., 50">
+                        </div>
+                    </div>
+                    
+                    <div id="jpeg-quality-group" style="display: none;">
+                        <label for="jpeg-quality-slider">🖼️ JPEG Quality: <span id="jpeg-quality-val">85%</span></label>
+                        <input type="range" id="jpeg-quality-slider" min="50" max="100" value="85">
+                    </div>
+
+                    <button class="action-button" id="crop-btn">✅ Apply Crop & Check Size (Compress)</button>
+                    <div id="file-size-info" class="info" style="display: none;"></div>
+                    <button class="action-button" id="download-btn">⬇️ Download Final Resized Image</button>
+                    
+                </div>
+                
+                <div class="step" style="border-bottom: none; padding-bottom: 0;">
+                    <h3>4. Display Settings</h3>
+                    <label for="theme-select">🎨 Theme:</label>
+                    <select id="theme-select">
+                        <option value="dark">Dark</option>
+                        <option value="light">Light</option>
+                    </select>
+                </div>
+
+            </div>
+            
+        </div>
+        
+    </div>
+    
+    <div class="hint-section" style="max-width: 1200px; margin: 0 auto 30px; padding: 0 30px;">
+        <h2>💡 Common GOVT. Exam Photo/Signature Requirements (SSC, UPSC, Banking)</h2>
+        <div style="padding: 20px; border-radius: var(--border-radius); box-shadow: var(--shadow-subtle);">
+            <ul style="list-style: none; padding: 0;">
+                <li style="margin-bottom: 5px;"><strong>SSC/Bank PO Photo:</strong> 200×250px (20-50KB)</li>
+                <li style="margin-bottom: 5px;"><strong>SSC/Bank PO Signature:</strong> 140×60px (10-20KB - Must be black ink)</li>
+                <li style="margin-bottom: 5px;"><strong>UPSC Photo:</strong> 240×300px (20-50KB)</li>
+                <li style="margin-bottom: 5px;"><strong>Passport Size (General):</strong> 35×45mm (approx 413×531px at 300 DPI)</li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="privacy-message">
+        We care deeply about your data! This tool works entirely in your browser like an <strong>offline system</strong>. We are <strong>not using any database</strong> to store your images. Your files never leave your device.
+        <br>
+        <span style="font-weight: 700;">Made with love in India for Indians ❤️</span>
+    </div>
+
+    <footer>
+        <p>© 2025 Codely.fun (Harshit Singh) | Free Online Image Resizer for Government Exams | **NO ADS**</p>
+    </footer>
+
+    <script>
+        // --- DOM Elements ---
+        const typeSelect = document.getElementById('type');
+        const examSelect = document.getElementById('exam');
+        const customInputsDiv = document.getElementById('custom-inputs');
+        const customWidthInput = document.getElementById('custom-width');
+        const customHeightInput = document.getElementById('custom-height');
+        const sizeInfo = document.getElementById('size-info');
+        const fileInput = document.getElementById('file');
+        const cropperContainer = document.getElementById('cropper-container');
+        const originalImage = document.getElementById('original-image');
+        const cropBox = document.getElementById('crop-box');
+        const previewCanvas = document.getElementById('preview-canvas');
+        const cropBtn = document.getElementById('crop-btn');
+        const downloadBtn = document.getElementById('download-btn');
+        const fileSizeInfo = document.getElementById('file-size-info');
+        const cropInstruction = document.getElementById('crop-instruction');
+        const brightnessSlider = document.getElementById('brightness-slider');
+        const contrastSlider = document.getElementById('contrast-slider');
+        const brightnessVal = document.getElementById('brightness-val');
+        const contrastVal = document.getElementById('contrast-val');
+        const resetFiltersBtn = document.getElementById('reset-filters-btn');
+        const rotateBtn = document.getElementById('rotate-btn');
+        const previewCtx = previewCanvas.getContext('2d');
+        const themeSelect = document.getElementById('theme-select');
+        
+        // Output Elements
+        const outputFormatSelect = document.getElementById('output-format');
+        const targetKBInput = document.getElementById('target-kb');
+        const jpegQualityGroup = document.getElementById('jpeg-quality-group');
+        const jpegQualitySlider = document.getElementById('jpeg-quality-slider');
+        const jpegQualityVal = document.getElementById('jpeg-quality-val');
+
+        // --- State Variables ---
+        let sizes = {
+            ssc: { photo: { width: 200, height: 250, maxSize: '50KB' }, signature: { width: 140, height: 60, maxSize: '20KB' } },
+            railway: { photo: { width: 240, height: 320, maxSize: '150KB' }, signature: { width: 140, height: 60, maxSize: '20KB' } },
+            upsc: { photo: { width: 240, height: 300, maxSize: '50KB' }, signature: { width: 354, height: 177, maxSize: '20KB' } },
+        };
+        let imageLoaded = false;
+        let cropRatio = 1;
+        let cropWidthPx = 300;
+        let cropHeightPx = 400;
+        let rotationAngle = 0;
+
+        // --- THEME LOGIC ---
+        function setTheme(theme) {
+            if (theme === 'light') {
+                document.body.classList.add('light-theme');
+            } else {
+                document.body.classList.remove('light-theme');
+            }
+            localStorage.setItem('theme', theme);
+            themeSelect.value = theme;
+        }
+
+        function loadTheme() {
+            const savedTheme = localStorage.getItem('theme') || 'dark';
+            setTheme(savedTheme);
+        }
+
+        themeSelect.addEventListener('change', (e) => {
+            setTheme(e.target.value);
+        });
+        // --- END THEME LOGIC ---
+
+        // --- Core Functions: Dimensions & Info ---
+
+        function getDimensions() {
+            const exam = examSelect.value;
+            const type = typeSelect.value;
+            let w, h, maxS;
+
+            if (exam === 'custom') {
+                w = parseInt(customWidthInput.value, 10);
+                h = parseInt(customHeightInput.value, 10);
+                maxS = 'N/A';
+            } else if (sizes[exam] && sizes[exam][type]) {
+                w = sizes[exam][type].width;
+                h = sizes[exam][type].height;
+                maxS = sizes[exam][type].maxSize;
+            } else {
+                return null;
+            }
+
+            if (isNaN(w) || isNaN(h) || w <= 0 || h <= 0) return null;
+            return { width: w, height: h, maxSize: maxS, ratio: w / h };
+        }
+
+        function updateSizeInfo() {
+            const dims = getDimensions();
+            if (!dims) {
+                sizeInfo.innerHTML = '❌ <strong>ERROR:</strong> Invalid dimensions.';
+                return;
+            }
+
+            cropWidthPx = dims.width;
+            cropHeightPx = dims.height;
+            cropRatio = dims.ratio;
+
+            const exam = examSelect.value;
+            
+            let maxS_display = dims.maxSize === 'N/A' ? 'Not Set' : dims.maxSize;
+            let ratio_label = exam === 'custom' ? 'RATIO' : 'ASPECT RATIO';
+            
+            let infoHTML = `
+                <div class="info-details">
+                    <div class="detail-item">
+                        <span class="detail-label">Dimensions</span>
+                        <span class="detail-value">${dims.width} x ${dims.height} px</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Max File Size</span>
+                        <span class="detail-value">${maxS_display}</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">${ratio_label}</span>
+                        <span class="detail-value">${(cropRatio).toFixed(2)}:1</span>
+                    </div>
+                </div>
+            `;
+            
+            sizeInfo.innerHTML = infoHTML;
+
+            if (exam === 'custom') {
+                customInputsDiv.style.display = 'flex';
+                targetKBInput.value = '50';
+            } else {
+                customInputsDiv.style.display = 'none';
+                
+                const maxS = dims.maxSize;
+                const presetTargetKB = parseInt(maxS, 10);
+                if (!isNaN(presetTargetKB)) {
+                    targetKBInput.value = presetTargetKB;
+                } else {
+                    targetKBInput.value = '50'; 
+                }
+            }
+
+            if (imageLoaded) {
+                initializeCropBox();
+            }
+        }
+
+        // --- Cropper Setup & Logic ---
+        function initializeCropBox() {
+            const containerWidth = cropperContainer.offsetWidth;
+            const containerHeight = originalImage.offsetHeight;
+            if (containerHeight === 0 || containerWidth === 0) {
+                 setTimeout(initializeCropBox, 100);
+                 return;
+            }
+
+            const containerRatio = containerWidth / containerHeight;
+
+            let boxWidth, boxHeight;
+
+            if (cropRatio > containerRatio) {
+                boxWidth = containerWidth;
+                boxHeight = containerWidth / cropRatio;
+            } else {
+                boxHeight = containerHeight;
+                boxWidth = containerHeight * cropRatio;
+            }
+            
+            const maxDimension = Math.min(containerWidth, containerHeight) * 0.9;
+            if (boxWidth > maxDimension) {
+                boxWidth = maxDimension;
+                boxHeight = boxWidth / cropRatio;
+            } else if (boxHeight > maxDimension) {
+                boxHeight = maxDimension;
+                boxWidth = boxHeight * cropRatio;
+            }
+            
+            const x = (containerWidth - boxWidth) / 2;
+            const y = (containerHeight - boxHeight) / 2;
+
+            cropBox.style.width = `${boxWidth}px`;
+            cropBox.style.height = `${boxHeight}px`;
+            cropBox.style.left = `${x}px`;
+            cropBox.style.top = `${y}px`;
+            cropBox.style.display = 'block';
+
+            cropperContainer.style.height = `${containerHeight}px`;
+
+            updatePreview();
+        }
+
+        function updatePreview() {
+            if (!imageLoaded) return;
+
+            const imageRect = originalImage.getBoundingClientRect();
+            
+            const scaleX = originalImage.naturalWidth / imageRect.width;
+            const scaleY = originalImage.naturalHeight / imageRect.height;
+            
+            const cropOffsetLeft = cropBox.offsetLeft;
+            const cropOffsetTop = cropBox.offsetTop;
+
+            const cropX = (cropOffsetLeft) * scaleX;
+            const cropY = (cropOffsetTop) * scaleY;
+            const cropW = cropBox.offsetWidth * scaleX;
+            const cropH = cropBox.offsetHeight * scaleY;
+
+            // --- Rotation-aware Canvas Setup (Modified) ---
+            let canvasWidth = cropWidthPx;
+            let canvasHeight = cropHeightPx;
+            let drawX = -cropWidthPx / 2;
+            let drawY = -cropHeightPx / 2;
+
+            // Swap dimensions for 90 or 270 degree rotation
+            if (rotationAngle === 90 || rotationAngle === 270) {
+                canvasWidth = cropHeightPx;
+                canvasHeight = cropWidthPx;
+            }
+            
+            previewCanvas.width = canvasWidth;
+            previewCanvas.height = canvasHeight;
+            previewCanvas.style.display = 'block';
+
+            previewCtx.clearRect(0, 0, canvasWidth, canvasHeight);
+            
+            previewCtx.save(); // Save the context state (important!)
+            
+            // Move the rotation point to the center of the canvas
+            previewCtx.translate(canvasWidth / 2, canvasHeight / 2);
+            previewCtx.rotate(rotationAngle * Math.PI / 180);
+            
+            // Draw the cropped image. Since we translated the context, we draw 
+            // the cropped image centered on (0, 0) of the new context.
+            previewCtx.drawImage(
+                originalImage,
+                cropX, cropY, cropW, cropH,
+                drawX, drawY, cropWidthPx, cropHeightPx
+            );
+            
+            previewCtx.restore(); // Restore the context state
+            // --- End Rotation-aware Canvas Setup ---
+        }
+        
+        // --- Cropper Dragging Logic ---
+        let isDragging = false;
+        let startX, startY;
+        let initialCropLeft, initialCropTop;
+
+        function startDrag(e) {
+            e.preventDefault();
+            if (!imageLoaded) return;
+            isDragging = true;
+            startX = e.clientX || e.touches[0].clientX;
+            startY = e.clientY || e.touches[0].clientY;
+            initialCropLeft = cropBox.offsetLeft;
+            initialCropTop = cropBox.offsetTop;
+            cropBox.style.cursor = 'grabbing';
+        }
+
+        function moveDrag(e) {
+            if (!isDragging) return;
+            const currentX = e.clientX || e.touches[0].clientX;
+            const currentY = e.clientY || e.touches[0].clientY;
+            const dx = currentX - startX;
+            const dy = currentY - startY;
+            let newLeft = initialCropLeft + dx;
+            let newTop = initialCropTop + dy;
+            const containerWidth = cropperContainer.offsetWidth;
+            const containerHeight = cropperContainer.offsetHeight;
+            const boxWidth = cropBox.offsetWidth;
+            const boxHeight = cropBox.offsetHeight;
+            
+            newLeft = Math.max(0, Math.min(newLeft, containerWidth - boxWidth));
+            newTop = Math.max(0, Math.min(newTop, containerHeight - boxHeight));
+            
+            cropBox.style.left = `${newLeft}px`;
+            cropBox.style.top = `${newTop}px`;
+            updatePreview();
+        }
+
+        function endDrag() {
+            isDragging = false;
+            cropBox.style.cursor = 'move';
+            updatePreview();
+        }
+        
+        cropBox.addEventListener('mousedown', startDrag);
+        document.addEventListener('mousemove', moveDrag);
+        document.addEventListener('mouseup', endDrag);
+        cropBox.addEventListener('touchstart', startDrag, { passive: false });
+        document.addEventListener('touchmove', moveDrag, { passive: false });
+        document.addEventListener('touchend', endDrag);
+
+
+        // --- Filter Functions (CSS-based) ---
+        function applyFilters() {
+            const brightness = brightnessSlider.value;
+            const contrast = contrastSlider.value;
+            brightnessVal.textContent = `${brightness}%`;
+            contrastVal.textContent = `${contrast}%`;
+            originalImage.style.filter = `brightness(${brightness}%) contrast(${contrast}%)`;
+            if (imageLoaded) { updatePreview(); }
+        }
+        
+        function resetFilters() {
+            brightnessSlider.value = 100;
+            contrastSlider.value = 100;
+            applyFilters();
+            rotationAngle = 0;
+            updatePreview(); 
+        }
+
+        // --- Rotation Logic ---
+        function rotateImage() {
+            rotationAngle = (rotationAngle + 90) % 360;
+            updatePreview();
+        }
+
+        // --- Output Format Controls ---
+        outputFormatSelect.addEventListener('change', () => {
+            if (outputFormatSelect.value === 'jpeg') {
+                jpegQualityGroup.style.display = 'block';
+            } else {
+                jpegQualityGroup.style.display = 'none';
+            }
+        });
+        
+        jpegQualitySlider.addEventListener('input', () => {
+            jpegQualityVal.textContent = `${jpegQualitySlider.value}%`;
+        });
+
+
+        // --- Event Handlers & Initialization ---
+
+        // Handle File Upload
+        fileInput.addEventListener('change', () => {
+            const file = fileInput.files[0];
+            if (!file || !file.type.startsWith('image/')) {
+                imageLoaded = false;
+                cropperContainer.style.display = 'none';
+                cropInstruction.style.display = 'block';
+                downloadBtn.style.display = 'none';
+                fileSizeInfo.style.display = 'none';
+                return;
+            }
+            
+            originalImage.onload = () => {
+                imageLoaded = true;
+                cropperContainer.style.display = 'block';
+                originalImage.style.display = 'block';
+                cropInstruction.style.display = 'none';
+                resetFilters();
+                setTimeout(initializeCropBox, 100); 
+            };
+            originalImage.src = URL.createObjectURL(file);
+        });
+        
+        // Filter and Dimension Change Listeners
+        typeSelect.addEventListener('change', updateSizeInfo); 
+        examSelect.addEventListener('change', updateSizeInfo); 
+        customWidthInput.addEventListener('input', updateSizeInfo);
+        customHeightInput.addEventListener('input', updateSizeInfo);
+        brightnessSlider.addEventListener('input', applyFilters);
+        contrastSlider.addEventListener('input', applyFilters);
+        resetFiltersBtn.addEventListener('click', resetFilters);
+        rotateBtn.addEventListener('click', rotateImage);
+
+        // --- Handle Crop Button Click (Check Size & Auto-Compress) ---
+        cropBtn.addEventListener('click', async () => {
+            if (!imageLoaded) {
+                alert("Please upload an image first.");
+                fileSizeInfo.innerHTML = `⚠️ <strong>Error:</strong> Please upload an image in Step 2.`;
+                fileSizeInfo.className = 'info info-error';
+                fileSizeInfo.style.display = 'block';
+                return;
+            }
+            
+            updatePreview(); 
+            downloadBtn.style.display = 'none';
+            
+            const format = outputFormatSelect.value;
+            const targetKB = parseInt(targetKBInput.value, 10);
+            
+            let mimeType;
+            let quality;
+            let dataURL;
+            let finalFileSizeKB;
+            
+            // --- JPEG Auto-Compression Logic ---
+            if (format === 'jpeg') {
+                mimeType = 'image/jpeg';
+                // Start with the current slider value, or default to 85% if not yet adjusted
+                let currentQuality = parseInt(jpegQualitySlider.value, 10) / 100;
+                let compressionAttempts = 0;
+                
+                // If target is 0 or less, skip compression loop
+                if (targetKB <= 0) {
+                    currentQuality = 1.0; 
+                }
+
+                while (compressionAttempts < 10) { 
+                    dataURL = previewCanvas.toDataURL(mimeType, currentQuality);
+                    const dataPrefix = `data:${mimeType};base64,`;
+                    const base64Data = dataURL.substring(dataPrefix.length);
+                    const fileSizeBytes = Math.ceil(base64Data.length * 0.75);
+                    finalFileSizeKB = Math.round(fileSizeBytes / 1024);
+
+                    if (finalFileSizeKB <= targetKB || currentQuality <= 0.25 || targetKB <= 0) {
+                        break; // Target size reached or minimum quality (25%) reached, or no target set
+                    }
+                    
+                    // Decrease quality for next attempt
+                    // Decrease by a slightly smaller amount as we get closer to 50%
+                    if (currentQuality > 0.6) {
+                         currentQuality = Math.max(0.25, currentQuality - 0.05); // -5%
+                    } else {
+                         currentQuality = Math.max(0.25, currentQuality - 0.02); // -2% closer to min
+                    }
+                    
+                    compressionAttempts++;
+                }
+                
+                // Update the slider/display to show the final quality used
+                jpegQualitySlider.value = Math.round(currentQuality * 100);
+                jpegQualityVal.textContent = `${jpegQualitySlider.value}%`;
+                
+            } else { // PNG format (no compression on file size)
+                mimeType = 'image/png';
+                dataURL = previewCanvas.toDataURL(mimeType);
+                const dataPrefix = `data:${mimeType};base64,`;
+                const base64Data = dataURL.substring(dataPrefix.length);
+                const fileSizeBytes = Math.ceil(base64Data.length * 0.75);
+                finalFileSizeKB = Math.round(fileSizeBytes / 1024);
+            }
+            // --- END JPEG Auto-Compression Logic ---
+
+            if (!dataURL || dataURL.startsWith('data:,')) {
+                fileSizeInfo.innerHTML = `❌ <strong>Error:</strong> Failed to generate image data. Try another file.`;
+                fileSizeInfo.className = 'info info-error';
+                fileSizeInfo.style.display = 'none';
+                return;
+            }
+
+            const sizeText = finalFileSizeKB < 1024 ? `${finalFileSizeKB} KB` : `${(finalFileSizeKB / 1024).toFixed(2)} MB`;
+            
+            let infoHTML = `✅ Final Size: <strong>${sizeText}</strong> | Format: <strong>${format.toUpperCase()}</strong>`;
+            let statusClass = 'info info-warning'; 
+            
+            if (targetKB > 0 && finalFileSizeKB > 0) {
+                const isUnderLimit = finalFileSizeKB <= targetKB;
+                const status = isUnderLimit ? '✅ <strong>GOOD</strong>' : '❌ <strong>TOO LARGE!</strong>';
+                
+                statusClass = isUnderLimit ? 'info info-success' : 'info info-error';
+                infoHTML += `<br>🎯 Target: <strong>${targetKB} KB</strong> | Status: ${status}`;
+                
+                if (format === 'jpeg') {
+                    infoHTML += `<br>🖼️ Compressed at <strong>${jpegQualitySlider.value}% Quality</strong> to fit size.`;
+                } else if (!isUnderLimit) {
+                    infoHTML += `<br>💡 <strong>HINT:</strong> Switch to **JPEG** format above for size compression!`;
+                }
+            }
+
+            if (rotationAngle !== 0) {
+                infoHTML += `<br>🔃 Rotation: <strong>${rotationAngle}° Applied!</strong>`;
+            }
+
+            fileSizeInfo.innerHTML = infoHTML + `<br>Ready to download!`;
+            fileSizeInfo.className = statusClass;
+            fileSizeInfo.style.display = 'block';
+            downloadBtn.style.display = 'block';
+        });
+
+        // Handle Download Button Click
+        downloadBtn.addEventListener('click', () => {
+            const link = document.createElement('a');
+            const type = typeSelect.value;
+            const exam = examSelect.value;
+            const format = outputFormatSelect.value;
+            
+            let mimeType, quality, extension;
+            
+            if (format === 'jpeg') {
+                mimeType = 'image/jpeg';
+                // IMPORTANT: Use the final quality value set by the compression loop
+                quality = parseInt(jpegQualitySlider.value) / 100; 
+                extension = 'jpg';
+            } else {
+                mimeType = 'image/png';
+                quality = undefined; 
+                extension = 'png';
+            }
+            
+            link.download = `${type}_${exam}_cropped.${extension}`;
+            link.href = previewCanvas.toDataURL(mimeType, quality); 
+            link.click();
+        });
+
+        // Initialization
+        document.addEventListener('DOMContentLoaded', () => {
+            loadTheme();
+            populateExamOptions();
+            updateSizeInfo(); 
+            applyFilters();
+            // Manually dispatch change event to show JPEG quality slider by default
+            outputFormatSelect.dispatchEvent(new Event('change'));
+        });
+
+        function populateExamOptions() {
+             const customOption = examSelect.querySelector('option[value="custom"]');
+            examSelect.innerHTML = ''; 
+            for (const exam in sizes) {
+                const option = document.createElement('option');
+                option.value = exam;
+                option.textContent = exam.toUpperCase(); 
+                examSelect.appendChild(option);
+            }
+            examSelect.appendChild(customOption);
+            examSelect.value = 'ssc';
+        }
+
+    </script>
+</body>
+</html>
