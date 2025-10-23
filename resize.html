@@ -412,10 +412,7 @@
                     <label for="contrast-slider">⚫ Contrast: <span id="contrast-val">100%</span></label>
                     <input type="range" id="contrast-slider" min="50" max="150" value="100">
                     
-                    <div style="display: flex; gap: 10px;">
-                        <button class="action-button" id="rotate-btn" style="background: #3498DB; flex: 1;">🔃 Rotate 90°</button>
-                        <button class="action-button" id="reset-filters-btn" style="background: #5F6368; flex: 1;">🔄 Reset Filters</button>
-                    </div>
+                    <button class="action-button" id="reset-filters-btn" style="background: #5F6368;">🔄 Reset Filters</button>
                 </div>
                 
                 <div class="step">
@@ -426,7 +423,8 @@
                             <label for="output-format">💾 Output Format:</label>
                             <select id="output-format">
                                 <option value="png">PNG (Lossless)</option>
-                                <option value="jpeg" selected>JPEG (Compressed)</option> </select>
+                                <option value="jpeg" selected>JPEG (Compressed)</option>
+                            </select>
                         </div>
                         <div class="option-group">
                             <label for="target-kb">🎯 Target Max Size (KB):</label>
@@ -434,9 +432,15 @@
                         </div>
                     </div>
                     
+                    <div class="options-row">
+                        <div class="option-group" style="flex: auto;"> 
+                            <label for="kb-increaser">➕ Custom KB Increase (KB):</label>
+                            <input type="number" id="kb-increaser" value="0" min="0" max="1000" placeholder="e.g., 10">
+                        </div>
+                    </div>
                     <div id="jpeg-quality-group" style="display: none;">
-                        <label for="jpeg-quality-slider">🖼️ JPEG Quality: <span id="jpeg-quality-val">85%</span></label>
-                        <input type="range" id="jpeg-quality-slider" min="50" max="100" value="85">
+                        <label for="jpeg-quality-slider">🖼️ JPEG Quality: <span id="jpeg-quality-val">90%</span></label>
+                        <input type="range" id="jpeg-quality-slider" min="50" max="100" value="90">
                     </div>
 
                     <button class="action-button" id="crop-btn">✅ Apply Crop & Check Size (Compress)</button>
@@ -461,13 +465,14 @@
     </div>
     
     <div class="hint-section" style="max-width: 1200px; margin: 0 auto 30px; padding: 0 30px;">
-        <h2>💡 Common GOVT. Exam Photo/Signature Requirements (SSC, UPSC, Banking)</h2>
+        <h2>💡 Common GOVT. Exam Photo/Signature Requirements (SSC, UPSC, Banking, BPSC)</h2>
         <div style="padding: 20px; border-radius: var(--border-radius); box-shadow: var(--shadow-subtle);">
             <ul style="list-style: none; padding: 0;">
-                <li style="margin-bottom: 5px;"><strong>SSC/Bank PO Photo:</strong> 200×250px (20-50KB)</li>
-                <li style="margin-bottom: 5px;"><strong>SSC/Bank PO Signature:</strong> 140×60px (10-20KB - Must be black ink)</li>
-                <li style="margin-bottom: 5px;"><strong>UPSC Photo:</strong> 240×300px (20-50KB)</li>
-                <li style="margin-bottom: 5px;"><strong>Passport Size (General):</strong> 35×45mm (approx 413×531px at 300 DPI)</li>
+                <li style="margin-bottom: 5px;"><strong>SSC Photo:</strong> 200×250px (20-50KB) | <strong>Signature:</strong> 140×60px (10-20KB)</li>
+                <li style="margin-bottom: 5px;"><strong>IBPS/SBI Bank Photo:</strong> 200×230px (20-50KB) | <strong>Signature:</strong> 140×60px (10-20KB, Black Ink)</li>
+                <li style="margin-bottom: 5px;"><strong>UPSC Photo:</strong> 350×350px (20-200KB) | <strong>Signature:</strong> 354×177px (20-100KB)</li>
+                <li style="margin-bottom: 5px;"><strong>RRB (Railway) Photo:</strong> 240×320px (30-70KB) | <strong>Signature:</strong> 140×60px (30-49KB)</li>
+                <li style="margin-bottom: 5px;"><strong>BPSC Photo:</strong> 300×300px (<100KB) | <strong>Signature:</strong> 300×80px (<60KB)</li>
             </ul>
         </div>
     </div>
@@ -504,13 +509,13 @@
         const brightnessVal = document.getElementById('brightness-val');
         const contrastVal = document.getElementById('contrast-val');
         const resetFiltersBtn = document.getElementById('reset-filters-btn');
-        const rotateBtn = document.getElementById('rotate-btn');
         const previewCtx = previewCanvas.getContext('2d');
         const themeSelect = document.getElementById('theme-select');
         
         // Output Elements
         const outputFormatSelect = document.getElementById('output-format');
         const targetKBInput = document.getElementById('target-kb');
+        const kbIncreaserInput = document.getElementById('kb-increaser'); // Added DOM reference
         const jpegQualityGroup = document.getElementById('jpeg-quality-group');
         const jpegQualitySlider = document.getElementById('jpeg-quality-slider');
         const jpegQualityVal = document.getElementById('jpeg-quality-val');
@@ -518,14 +523,20 @@
         // --- State Variables ---
         let sizes = {
             ssc: { photo: { width: 200, height: 250, maxSize: '50KB' }, signature: { width: 140, height: 60, maxSize: '20KB' } },
-            railway: { photo: { width: 240, height: 320, maxSize: '150KB' }, signature: { width: 140, height: 60, maxSize: '20KB' } },
-            upsc: { photo: { width: 240, height: 300, maxSize: '50KB' }, signature: { width: 354, height: 177, maxSize: '20KB' } },
+            ibps: { photo: { width: 200, height: 230, maxSize: '50KB' }, signature: { width: 140, height: 60, maxSize: '20KB' } },
+            upsc: { photo: { width: 350, height: 350, maxSize: '200KB' }, signature: { width: 354, height: 177, maxSize: '100KB' } },
+            rrb: { photo: { width: 240, height: 320, maxSize: '70KB' }, signature: { width: 140, height: 60, maxSize: '49KB' } },
+            bpsc: { photo: { width: 300, height: 300, maxSize: '100KB' }, signature: { width: 300, height: 80, maxSize: '60KB' } },
         };
         let imageLoaded = false;
         let cropRatio = 1;
         let cropWidthPx = 300;
         let cropHeightPx = 400;
-        let rotationAngle = 0;
+
+        // --- New Global Variables for Download ---
+        let currentDownloadDataURL = null; 
+        let currentDownloadMimeType = null;
+        // --- End New Global Variables ---
 
         // --- THEME LOGIC ---
         function setTheme(theme) {
@@ -539,7 +550,7 @@
         }
 
         function loadTheme() {
-            const savedTheme = localStorage.getItem('theme') || 'dark';
+            const savedTheme = localStorage.getItem('theme') || 'dark'; // Default to 'dark'
             setTheme(savedTheme);
         }
 
@@ -547,6 +558,7 @@
             setTheme(e.target.value);
         });
         // --- END THEME LOGIC ---
+
 
         // --- Core Functions: Dimensions & Info ---
 
@@ -686,40 +698,23 @@
             const cropW = cropBox.offsetWidth * scaleX;
             const cropH = cropBox.offsetHeight * scaleY;
 
-            // --- Rotation-aware Canvas Setup (Modified) ---
-            let canvasWidth = cropWidthPx;
-            let canvasHeight = cropHeightPx;
-            let drawX = -cropWidthPx / 2;
-            let drawY = -cropHeightPx / 2;
-
-            // Swap dimensions for 90 or 270 degree rotation
-            if (rotationAngle === 90 || rotationAngle === 270) {
-                canvasWidth = cropHeightPx;
-                canvasHeight = cropWidthPx;
-            }
-            
-            previewCanvas.width = canvasWidth;
-            previewCanvas.height = canvasHeight;
+            previewCanvas.width = cropWidthPx;
+            previewCanvas.height = cropHeightPx;
             previewCanvas.style.display = 'block';
 
-            previewCtx.clearRect(0, 0, canvasWidth, canvasHeight);
+            previewCtx.clearRect(0, 0, cropWidthPx, cropHeightPx);
             
-            previewCtx.save(); // Save the context state (important!)
-            
-            // Move the rotation point to the center of the canvas
-            previewCtx.translate(canvasWidth / 2, canvasHeight / 2);
-            previewCtx.rotate(rotationAngle * Math.PI / 180);
-            
-            // Draw the cropped image. Since we translated the context, we draw 
-            // the cropped image centered on (0, 0) of the new context.
+            // Apply current CSS filters to the canvas image
+            previewCtx.filter = originalImage.style.filter || 'none';
+
             previewCtx.drawImage(
                 originalImage,
                 cropX, cropY, cropW, cropH,
-                drawX, drawY, cropWidthPx, cropHeightPx
+                0, 0, cropWidthPx, cropHeightPx
             );
-            
-            previewCtx.restore(); // Restore the context state
-            // --- End Rotation-aware Canvas Setup ---
+
+            // Clear the filter on the canvas context for future drawings
+            previewCtx.filter = 'none';
         }
         
         // --- Cropper Dragging Logic ---
@@ -787,14 +782,6 @@
             brightnessSlider.value = 100;
             contrastSlider.value = 100;
             applyFilters();
-            rotationAngle = 0;
-            updatePreview(); 
-        }
-
-        // --- Rotation Logic ---
-        function rotateImage() {
-            rotationAngle = (rotationAngle + 90) % 360;
-            updatePreview();
         }
 
         // --- Output Format Controls ---
@@ -810,6 +797,34 @@
             jpegQualityVal.textContent = `${jpegQualitySlider.value}%`;
         });
 
+
+        // --- Helper function for byte padding (for download) ---
+        function dataURLtoPaddedBlob(dataurl, mimeType, paddingKB) {
+            const paddingBytes = paddingKB * 1024;
+            
+            // 1. Convert Base64 data to Uint8Array
+            const base64Data = dataurl.split(',')[1];
+            const bstr = atob(base64Data);
+            let n = bstr.length;
+            const u8arr = new Uint8Array(n);
+            
+            while(n--){
+                u8arr[n] = bstr.charCodeAt(n);
+            }
+            
+            const baseBlob = new Blob([u8arr], {type: mimeType});
+            
+            if (paddingBytes > 0) {
+                // 2. Create padding bytes (using ASCII space character 32, which is safe)
+                const paddingArray = new Uint8Array(paddingBytes).fill(32); 
+                
+                // 3. Combine the base image Blob and the padding data
+                return new Blob([baseBlob, paddingArray.buffer], {type: mimeType});
+            }
+
+            return baseBlob; // Return original blob if no padding needed
+        }
+        // --- End Helper Function ---
 
         // --- Event Handlers & Initialization ---
 
@@ -830,7 +845,7 @@
                 cropperContainer.style.display = 'block';
                 originalImage.style.display = 'block';
                 cropInstruction.style.display = 'none';
-                resetFilters();
+                resetFilters(); 
                 setTimeout(initializeCropBox, 100); 
             };
             originalImage.src = URL.createObjectURL(file);
@@ -844,10 +859,9 @@
         brightnessSlider.addEventListener('input', applyFilters);
         contrastSlider.addEventListener('input', applyFilters);
         resetFiltersBtn.addEventListener('click', resetFilters);
-        rotateBtn.addEventListener('click', rotateImage);
 
-        // --- Handle Crop Button Click (Check Size & Auto-Compress) ---
-        cropBtn.addEventListener('click', async () => {
+        // --- Handle Crop Button Click (Check Size) ---
+        cropBtn.addEventListener('click', () => {
             if (!imageLoaded) {
                 alert("Please upload an image first.");
                 fileSizeInfo.innerHTML = `⚠️ <strong>Error:</strong> Please upload an image in Step 2.`;
@@ -857,132 +871,99 @@
             }
             
             updatePreview(); 
-            downloadBtn.style.display = 'none';
             
             const format = outputFormatSelect.value;
-            const targetKB = parseInt(targetKBInput.value, 10);
-            
+            let dataURL;
             let mimeType;
             let quality;
-            let dataURL;
-            let finalFileSizeKB;
             
-            // --- JPEG Auto-Compression Logic ---
             if (format === 'jpeg') {
+                quality = parseInt(jpegQualitySlider.value) / 100;
                 mimeType = 'image/jpeg';
-                // Start with the current slider value, or default to 85% if not yet adjusted
-                let currentQuality = parseInt(jpegQualitySlider.value, 10) / 100;
-                let compressionAttempts = 0;
-                
-                // If target is 0 or less, skip compression loop
-                if (targetKB <= 0) {
-                    currentQuality = 1.0; 
-                }
-
-                while (compressionAttempts < 10) { 
-                    dataURL = previewCanvas.toDataURL(mimeType, currentQuality);
-                    const dataPrefix = `data:${mimeType};base64,`;
-                    const base64Data = dataURL.substring(dataPrefix.length);
-                    const fileSizeBytes = Math.ceil(base64Data.length * 0.75);
-                    finalFileSizeKB = Math.round(fileSizeBytes / 1024);
-
-                    if (finalFileSizeKB <= targetKB || currentQuality <= 0.25 || targetKB <= 0) {
-                        break; // Target size reached or minimum quality (25%) reached, or no target set
-                    }
-                    
-                    // Decrease quality for next attempt
-                    // Decrease by a slightly smaller amount as we get closer to 50%
-                    if (currentQuality > 0.6) {
-                         currentQuality = Math.max(0.25, currentQuality - 0.05); // -5%
-                    } else {
-                         currentQuality = Math.max(0.25, currentQuality - 0.02); // -2% closer to min
-                    }
-                    
-                    compressionAttempts++;
-                }
-                
-                // Update the slider/display to show the final quality used
-                jpegQualitySlider.value = Math.round(currentQuality * 100);
-                jpegQualityVal.textContent = `${jpegQualitySlider.value}%`;
-                
-            } else { // PNG format (no compression on file size)
+                dataURL = previewCanvas.toDataURL(mimeType, quality);
+            } else {
                 mimeType = 'image/png';
                 dataURL = previewCanvas.toDataURL(mimeType);
-                const dataPrefix = `data:${mimeType};base64,`;
-                const base64Data = dataURL.substring(dataPrefix.length);
-                const fileSizeBytes = Math.ceil(base64Data.length * 0.75);
-                finalFileSizeKB = Math.round(fileSizeBytes / 1024);
             }
-            // --- END JPEG Auto-Compression Logic ---
-
-            if (!dataURL || dataURL.startsWith('data:,')) {
+            
+            // Store the data for the download button to use later
+            currentDownloadDataURL = dataURL;
+            currentDownloadMimeType = mimeType;
+            
+            const dataPrefix = `data:${mimeType};base64,`;
+            
+            if (!dataURL.startsWith(dataPrefix)) {
                 fileSizeInfo.innerHTML = `❌ <strong>Error:</strong> Failed to generate image data. Try another file.`;
                 fileSizeInfo.className = 'info info-error';
                 fileSizeInfo.style.display = 'none';
+                downloadBtn.style.display = 'none';
                 return;
             }
-
-            const sizeText = finalFileSizeKB < 1024 ? `${finalFileSizeKB} KB` : `${(finalFileSizeKB / 1024).toFixed(2)} MB`;
             
-            let infoHTML = `✅ Final Size: <strong>${sizeText}</strong> | Format: <strong>${format.toUpperCase()}</strong>`;
-            let statusClass = 'info info-warning'; 
+            const base64Data = dataURL.substring(dataPrefix.length);
+            const fileSizeBytes = Math.ceil(base64Data.length * 0.75); 
             
-            if (targetKB > 0 && finalFileSizeKB > 0) {
-                const isUnderLimit = finalFileSizeKB <= targetKB;
-                const status = isUnderLimit ? '✅ <strong>GOOD</strong>' : '❌ <strong>TOO LARGE!</strong>';
-                
-                statusClass = isUnderLimit ? 'info info-success' : 'info info-error';
-                infoHTML += `<br>🎯 Target: <strong>${targetKB} KB</strong> | Status: ${status}`;
-                
-                if (format === 'jpeg') {
-                    infoHTML += `<br>🖼️ Compressed at <strong>${jpegQualitySlider.value}% Quality</strong> to fit size.`;
-                } else if (!isUnderLimit) {
-                    infoHTML += `<br>💡 <strong>HINT:</strong> Switch to **JPEG** format above for size compression!`;
-                }
-            }
+            const fileSizeKB = Math.round(fileSizeBytes / 1024);
+            
+            const targetKB = parseInt(targetKBInput.value, 10);
+            const customIncreaseKB = parseInt(kbIncreaserInput.value, 10) || 0; 
+            
+            // Calculate the size after adding the custom increase (for check/display)
+            const adjustedFileSizeKB = fileSizeKB + customIncreaseKB; 
+            
+            const adjustedSizeText = adjustedFileSizeKB < 1024 
+                ? `${adjustedFileSizeKB} KB` 
+                : `${(adjustedFileSizeKB / 1024).toFixed(2)} MB`; 
+            
+            
+            const isUnderLimit = adjustedFileSizeKB <= targetKB; 
+            const status = isUnderLimit ? '✅ **UNDER LIMIT**' : '❌ **OVER LIMIT**';
+            const statusClass = isUnderLimit ? 'info info-success' : 'info info-error';
+            
+            
+            // SIMPLIFIED OUTPUT
+            let infoHTML = `
+                🎯 Target Max Size: <strong>${targetKB} KB</strong><br>
+                ⬇️ Final Download Size: <strong>${adjustedSizeText}</strong> 
+                ${customIncreaseKB > 0 ? `(Includes ${customIncreaseKB} KB padding)` : ''}<br>
+                Status: ${status}
+            `;
 
-            if (rotationAngle !== 0) {
-                infoHTML += `<br>🔃 Rotation: <strong>${rotationAngle}° Applied!</strong>`;
-            }
-
-            fileSizeInfo.innerHTML = infoHTML + `<br>Ready to download!`;
+            fileSizeInfo.innerHTML = infoHTML;
             fileSizeInfo.className = statusClass;
             fileSizeInfo.style.display = 'block';
             downloadBtn.style.display = 'block';
         });
 
-        // Handle Download Button Click
+        // Handle Download Button Click (Uses Padding)
         downloadBtn.addEventListener('click', () => {
-            const link = document.createElement('a');
-            const type = typeSelect.value;
-            const exam = examSelect.value;
+            if (!currentDownloadDataURL) return;
+
             const format = outputFormatSelect.value;
+            let extension = format === 'jpeg' ? 'jpg' : 'png';
+            const customIncreaseKB = parseInt(kbIncreaserInput.value, 10) || 0;
+
+            // 1. Get the Blob with padding bytes added to the end
+            const finalBlob = dataURLtoPaddedBlob(currentDownloadDataURL, currentDownloadMimeType, customIncreaseKB);
             
-            let mimeType, quality, extension;
+            // 2. Create a temporary URL for the Blob and trigger download
+            const link = document.createElement('a');
+            const blobUrl = URL.createObjectURL(finalBlob);
             
-            if (format === 'jpeg') {
-                mimeType = 'image/jpeg';
-                // IMPORTANT: Use the final quality value set by the compression loop
-                quality = parseInt(jpegQualitySlider.value) / 100; 
-                extension = 'jpg';
-            } else {
-                mimeType = 'image/png';
-                quality = undefined; 
-                extension = 'png';
-            }
-            
-            link.download = `${type}_${exam}_cropped.${extension}`;
-            link.href = previewCanvas.toDataURL(mimeType, quality); 
+            link.download = `${typeSelect.value}_${examSelect.value}_padded.${extension}`;
+            link.href = blobUrl;
             link.click();
+            
+            // Clean up the object URL after download is initiated
+            URL.revokeObjectURL(blobUrl);
         });
 
         // Initialization
         document.addEventListener('DOMContentLoaded', () => {
-            loadTheme();
+            loadTheme(); // Load saved theme first
             populateExamOptions();
             updateSizeInfo(); 
             applyFilters();
-            // Manually dispatch change event to show JPEG quality slider by default
             outputFormatSelect.dispatchEvent(new Event('change'));
         });
 
