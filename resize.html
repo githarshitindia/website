@@ -300,6 +300,44 @@
             color: var(--color-primary);
         }
 
+        /* --- MOBILE BLOCKER OVERLAY STYLING (NEW) --- */
+        #mobile-blocker {
+            display: none; /* Hidden by default */
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9); 
+            z-index: 9999;
+            color: var(--text-primary);
+            text-align: center;
+            padding: 20px;
+            box-sizing: border-box;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            
+        }
+        #mobile-blocker-content {
+            background: var(--bg-card);
+            padding: 30px;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow-elevated);
+            max-width: 80%;
+        }
+        #mobile-blocker h2 {
+            color: var(--color-primary);
+            font-size: 1.8em;
+            margin-bottom: 10px;
+        }
+        #mobile-blocker p {
+            font-size: 1.1em;
+            color: var(--text-secondary);
+        }
+        /* --- END MOBILE BLOCKER STYLING --- */
+
+
         /* --- RESPONSIVENESS (Mobile First) --- */
         @media (max-width: 900px) {
             .container { margin: 20px; padding: 20px; }
@@ -320,6 +358,11 @@
             }
             .detail-item:last-child {
                 border-bottom: none;
+            }
+            
+            /* SHOW THE BLOCKER ON MOBILE */
+            #mobile-blocker {
+                display: flex;
             }
         }
 
@@ -347,6 +390,14 @@
     </style>
 </head>
 <body>
+    
+    <div id="mobile-blocker">
+        <div id="mobile-blocker-content">
+            <h2>Desktop Mode Recommended</h2>
+            <p>For the best cropping and resizing experience, especially the interactive controls, please open this site in a <strong>Desktop Browser</strong> or switch your mobile browser to <strong>Desktop Site</strong> mode.</p>
+            <p style="margin-top: 20px; font-weight: 600;">Interaction is disabled on smaller screens for precision reasons.</p>
+        </div>
+    </div>
     <header>
         <h1>GOVT. Exams Photo & Signature ReSizer</h1>
     </header>
@@ -917,7 +968,7 @@
             
             
             const isUnderLimit = adjustedFileSizeKB <= targetKB; 
-            const status = isUnderLimit ? '✅ **UNDER LIMIT**' : '❌ **OVER LIMIT**';
+            const status = isUnderLimit ? '✅ <strong>UNDER LIMIT</strong>' : '❌ <strong>OVER LIMIT</strong>';
             const statusClass = isUnderLimit ? 'info info-success' : 'info info-error';
             
             
@@ -983,4 +1034,3 @@
     </script>
 </body>
 </html>
-
