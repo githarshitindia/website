@@ -3,634 +3,567 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Profit & Loss Quiz — Mobile App UI</title>
+<title>Profit & Loss Practice Test — Mobile App UI</title>
 <style>
-  :root{
-    /* Color Palette based on the image */
-    --main-bg:#f0f4f8; 
-    --card-bg:#ffffff;
-    --text-dark:#1e293b;
-    --text-muted:#64748b;
-    --accent-red:#ef4444; /* Active pill */
-    --accent-yellow:#facc15; /* Unanswered pill (Placeholder) */
-    --accent-primary:#0ea5e9; /* For selection/buttons */
-    --border:#e2e8f0;
-    --success:#10b981;
-    --danger:#ef4444;
-    --shadow: 0 1px 3px rgba(0,0,0,0.05);
-  }
-  
-  /* Base Styles & Layout */
-  body{
-    margin:0; font-family:'Segoe UI',Roboto,Helvetica,Arial,sans-serif;
-    background:var(--main-bg);
-    color:var(--text-dark);
-    /* Critical: Reserve space for the fixed elements */
-    padding-top: 135px; /* Space for the fixed header/pills */
-    padding-bottom: 70px; /* Space for the fixed footer */
-  }
-  .container{
-    max-width:600px; /* Constrain width to mimic a phone screen */
-    margin:0 auto; 
-    padding: 0 15px;
-  }
-  
-  /* --- HEADER (Fixed Top Bar) --- */
-  .header-fixed{
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    background: var(--card-bg);
-    box-shadow: var(--shadow);
-    z-index: 1000;
-    border-bottom: 1px solid var(--border);
-  }
-  .header-title-bar{
-    max-width: 600px;
-    margin: 0 auto;
-    padding: 10px 15px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    font-size: 16px;
-    font-weight: 500;
-  }
-  .header-title-bar .back-btn{
-    font-size: 24px;
-    cursor: pointer;
-    margin-right: 15px;
-    color: var(--text-dark);
-  }
-  .header-title-bar .timer{
-    color: var(--accent-red);
-    display: flex;
-    align-items: center;
-  }
-  .header-title-bar .timer span{ margin-left: 5px; }
+    /* ---------------------------------------------------- */
+    /* 1. Global Setup & Variables */
+    /* ---------------------------------------------------- */
+    :root {
+        --main-bg: #f0f4f8; /* Light gray background */
+        --card-bg: #ffffff;
+        --text-dark: #1e293b;
+        --text-muted: #64748b;
+        --accent-red: #ef4444; /* Active pill color */
+        --accent-primary: #0ea5e9; /* Option selection color */
+        --border: #e2e8f0;
+        --success: #10b981;
+        --shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    }
 
-  /* --- QUESTION PILLS (Navigation Bar) --- */
-  .pill-nav-container{
-    padding: 10px 15px;
-    max-width: 600px;
-    margin: 0 auto;
-    overflow-x: scroll; 
-    -webkit-overflow-scrolling: touch;
-  }
-  .pill-nav{
-    display: flex;
-    gap: 12px; /* Increased gap */
-    padding-bottom: 5px; 
-    width: max-content; /* Ensure pills are on one line */
-  }
-  .pill{
-    flex-shrink: 0;
-    width: 38px; /* Slightly larger pills */
-    height: 38px;
-    border-radius: 50%;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    font-size: 15px;
-    font-weight: 600;
-    cursor: pointer;
-    border: 1px solid var(--border);
-    background: #f8fafc;
-    color: var(--text-dark);
-    transition: all 0.2s;
-  }
-  .pill.answered{background: var(--success); color: var(--card-bg); border-color: var(--success);}
-  .pill.active{background: var(--accent-red); color: var(--card-bg); border-color: var(--accent-red);}
-  .pill.unanswered{background: var(--accent-yellow); color: var(--text-dark); border-color: var(--accent-yellow);}
-  /* Style for the 'All' button visible in the image */
-  .pill.all-btn{
-    width: auto; 
-    border-radius: 8px;
-    padding: 0 15px;
-  }
+    /* 2. Base Layout (Mobile First) */
+    body {
+        margin: 0;
+        font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+        background: var(--main-bg);
+        color: var(--text-dark);
+        /* Space for fixed header (2 lines) and footer */
+        padding-top: 135px;
+        padding-bottom: 70px;
+    }
+    .container {
+        /* Limits content width to look like a phone screen */
+        max-width: 600px; 
+        margin: 0 auto;
+        padding: 0 15px;
+    }
+    .quiz-content {
+        background: var(--card-bg);
+        border-radius: 12px;
+        box-shadow: var(--shadow);
+        padding: 20px;
+        margin-bottom: 15px;
+    }
+
+    /* ---------------------------------------------------- */
+    /* 3. Fixed Header and Navigation Bar */
+    /* ---------------------------------------------------- */
+    .header-fixed {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        background: var(--card-bg);
+        box-shadow: var(--shadow);
+        z-index: 1000;
+        border-bottom: 1px solid var(--border);
+    }
+    .header-title-bar {
+        max-width: 600px;
+        margin: 0 auto;
+        padding: 10px 15px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        font-size: 16px;
+        font-weight: 500;
+        color: var(--text-dark);
+    }
+    .header-title-bar .back-btn {
+        font-size: 24px;
+        cursor: pointer;
+        margin-right: 15px;
+        color: var(--text-dark);
+    }
+    
+    /* Timer Style */
+    .header-title-bar .timer{
+        color: var(--accent-red);
+        display: flex;
+        align-items: center;
+    }
+    .header-title-bar .timer span{ margin-left: 5px; }
 
 
-  /* --- Question View Container --- */
-  .quiz-content{
-    background:var(--card-bg);
-    border-radius:12px;
-    box-shadow:var(--shadow);
-    padding:20px;
-    margin-bottom: 15px;
-  }
-  .start-screen h2, .start-screen p{text-align: center;}
-  .start-screen .controls{text-align: center; margin-top: 30px;}
-  
-  .question-meta{
-    color: var(--text-muted);
-    font-size: 14px;
-    margin-bottom: 15px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    border-bottom: 1px dashed var(--border); /* Added dashed line */
-    padding-bottom: 10px;
-  }
-  .qtext{font-size: 18px; margin-bottom: 25px; font-weight: 500; line-height: 1.5;}
-  
-  /* Options Styling (Pill-shaped options) */
-  .options{display:flex;flex-direction:column;gap:10px;}
-  label.option{
-    display:flex; 
-    align-items:center; 
-    padding:12px 15px; 
-    border-radius:10px; /* Rounded corners */
-    border:1px solid var(--border); 
-    cursor:pointer; 
-    background:#f8fafc;
-    transition:background 0.1s, border-color 0.1s;
-    font-size: 16px;
-  }
-  label.option:hover{border-color:var(--accent-primary); background:#eff6ff;}
-  label.option.selected{border-color:var(--accent-primary); background:#e0f2fe; color:var(--text-dark); font-weight: 500;}
-  
-  /* Custom radio button style to match image aesthetics */
-  input[type=radio]{display:none;}
-  
-  /* Option Labels (A, B, C, D) inside the pill, matching the image */
-  .option-label{
-    width: 28px;
-    height: 28px;
-    border-radius: 50%;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    font-weight: 600;
-    margin-right: 10px;
-    border: 1px solid var(--text-muted);
-    color: var(--text-muted);
-    background: var(--card-bg);
-    transition: all 0.2s;
-  }
-  label.option.selected .option-label{
-    background: var(--accent-primary);
-    color: var(--card-bg);
-    border-color: var(--accent-primary);
-  }
+    /* Progress Pills Container (Second line of the header) */
+    .pill-nav-container {
+        padding: 10px 15px;
+        max-width: 600px;
+        margin: 0 auto;
+        overflow-x: scroll; 
+        -webkit-overflow-scrolling: touch;
+    }
+    .pill-nav {
+        display: flex;
+        gap: 8px;
+        padding-bottom: 5px; 
+        width: max-content; 
+    }
+    .pill {
+        flex-shrink: 0;
+        width: 38px;
+        height: 38px;
+        border-radius: 50%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        font-size: 15px;
+        font-weight: 600;
+        cursor: pointer;
+        border: 1px solid var(--border);
+        background: #f8fafc;
+        color: var(--text-dark);
+        transition: all 0.2s;
+    }
+    .pill.all-btn {
+        width: auto; 
+        border-radius: 8px;
+        padding: 0 15px;
+        background: var(--text-dark); /* Dark background for 'All' pill */
+        color: var(--card-bg);
+    }
+    .pill.answered {
+        background: var(--success);
+        color: var(--card-bg);
+        border-color: var(--success);
+    }
+    .pill.active {
+        background: var(--accent-red);
+        color: var(--card-bg);
+        border-color: var(--accent-red);
+    }
 
-  /* --- Hint & Report --- */
-  .action-bar{
-    display: flex;
-    justify-content: space-between;
-    margin-top: 20px;
-    font-size: 14px;
-  }
-  .hint-btn{color: var(--text-muted); cursor: pointer; border: none; background: none;}
-  .report-btn{color: var(--accent-red); cursor: pointer;}
-  .hint-area{
-    margin-top: 15px;
-    padding: 15px;
-    border-radius: 8px;
-    background: #f0fdf4;
-    border: 1px solid #dcfce7;
-    color: #065f46;
-    font-size: 14px;
-    display: none;
-  }
-  
-  /* --- FOOTER (Fixed Bottom Bar) --- */
-  .footer-fixed{
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    background: var(--card-bg);
-    border-top: 1px solid var(--border);
-  	z-index: 1000;
-  }
-  .footer-inner{
-    max-width: 600px;
-    margin: 0 auto;
-    padding: 10px 15px;
-    display: flex;
-    justify-content: space-between;
-    gap: 10px;
-  }
-  .btn{
-    background:var(--accent-primary); color:#fff; padding:12px 20px; border-radius:8px; border:none;
-    cursor:pointer; font-weight:600; transition:background 0.2s;
-  }
-  .btn:disabled{opacity:0.6;cursor:not-allowed;}
-  
-  /* --- Responsive / Mobile Focus --- */
-  @media(max-width:620px){
-    /* Ensure fixed elements span full width on small screens */
-    .header-fixed, .footer-fixed{left:0; right:0;}
-    .header-title-bar, .pill-nav-container, .footer-inner{max-width:100%;}
-  }
-  
-  .hidden{display:none !important;}
+    /* ---------------------------------------------------- */
+    /* 4. Question & Options Styling */
+    /* ---------------------------------------------------- */
+    .question-meta {
+        color: var(--text-muted);
+        font-size: 14px;
+        margin-bottom: 15px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-bottom: 1px dashed var(--border);
+        padding-bottom: 10px;
+    }
+    .qtext {
+        font-size: 18px;
+        margin-bottom: 25px;
+        font-weight: 500;
+        line-height: 1.5;
+    }
+    
+    .options {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+    }
+    label.option {
+        display: flex;
+        align-items: center;
+        padding: 12px 15px;
+        border-radius: 10px;
+        border: 1px solid var(--border);
+        cursor: pointer;
+        background: #f8fafc;
+        transition: background 0.1s, border-color 0.1s;
+        font-size: 16px;
+    }
+    /* Hide native radio button to use custom styling */
+    input[type=radio] {
+        display: none;
+    }
+    
+    /* Custom circular option label (A, B, C, D) */
+    .option-label {
+        width: 28px;
+        height: 28px;
+        border-radius: 50%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        font-weight: 600;
+        margin-right: 15px;
+        border: 1px solid var(--text-muted);
+        color: var(--text-muted);
+        background: var(--card-bg);
+        transition: all 0.2s;
+    }
+    /* Visual feedback on selection */
+    label.option.selected {
+        border-color: var(--accent-primary);
+        background: #e0f2fe;
+        font-weight: 500;
+    }
+    label.option.selected .option-label {
+        background: var(--accent-primary);
+        color: var(--card-bg);
+        border-color: var(--accent-primary);
+    }
+    
+    /* Hint and Report Styling */
+    .action-bar{
+        display: flex;
+        justify-content: space-between;
+        margin-top: 20px;
+        font-size: 14px;
+    }
+    .hint-btn{color: var(--text-muted); cursor: pointer; border: none; background: none; font-weight: 500;}
+    .report-btn { color: var(--accent-red); cursor: pointer; }
+    .hint-area{
+        margin-top: 15px;
+        padding: 15px;
+        border-radius: 8px;
+        background: #f0fdf4;
+        border: 1px solid #dcfce7;
+        color: #065f46;
+        font-size: 14px;
+    }
+
+    /* ---------------------------------------------------- */
+    /* 5. Fixed Footer and Buttons */
+    /* ---------------------------------------------------- */
+    .footer-fixed {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        background: var(--card-bg);
+        border-top: 1px solid var(--border);
+        z-index: 1000;
+    }
+    .footer-inner {
+        max-width: 600px;
+        margin: 0 auto;
+        padding: 10px 15px;
+        display: flex;
+        justify-content: space-between;
+        gap: 10px;
+    }
+    .btn {
+        background: var(--accent-primary);
+        color: #fff;
+        padding: 12px 20px;
+        border-radius: 8px;
+        border: none;
+        cursor: pointer;
+        font-weight: 600;
+        transition: background 0.2s;
+    }
+    .btn:disabled { opacity: 0.6; cursor: not-allowed; }
+    
+    .hidden { display: none !important; }
 </style>
 </head>
 <body>
-  
-    <div class="header-fixed">
-    <div class="header-title-bar">
-      <div style="display:flex; align-items:center;">
-        <span class="back-btn">⮜</span>
-        <span id="quizTitle">Rajasthan Police Free Test 03</span>
-      </div>
-      <span class="timer">⏱️ <span id="quizTimer">00:00:00</span></span>
-    </div>
-    
-        <div class="pill-nav-container hidden" id="pillNavContainer">
-      <div class="pill-nav" id="pillNav">
-              </div>
-    </div>
-  </div>
-    <div class="container" role="application">
-    
-        <div class="quiz-content start-screen" id="startScreen">
-      <h2>Welcome to the Profit & Loss Practice Test</h2>
-      <p style="color:var(--text-muted);">This test contains **35** randomized questions. Use the navigation pills or buttons to move between questions.</p>
-      <div class="controls">
-        <button class="btn" id="startBtn">Start Quiz Now</button>
-      </div>
-    </div>
-    
-        <div id="quizArea" class="quiz-content hidden">
-          </div>
+    
+    <div class="header-fixed">
+        <div class="header-title-bar">
+            <div style="display:flex; align-items:center;">
+                <span class="back-btn">⮜</span>
+                <span id="quizTitle">Profit And Loss Practice Test</span>
+            </div>
+            <span class="timer">⏱️ <span id="quizTimer">00:00:00</span></span>
+        </div>
+        
+        <div class="pill-nav-container hidden" id="pillNavContainer">
+            <div class="pill-nav" id="pillNav">
+                <div class="pill all-btn">All</div>
+                </div>
+        </div>
+    </div>
+    <div class="container" role="application">
+        
+        <div class="quiz-content" id="startScreen">
+            <h2 style="text-align:center;">Welcome to the Profit & Loss Practice Test</h2>
+            <p style="color:var(--text-muted); text-align:center;">
+                This test contains **35** randomized questions. Click 'Start Quiz' to begin. The timer will start immediately.
+            </p>
+            <div style="text-align:center; margin-top:30px;">
+                <button class="btn" id="startBtn">Start Quiz Now</button>
+            </div>
+        </div>
+        
+        <div id="quizArea" class="quiz-content hidden">
+            </div>
 
-        <div id="resultArea" class="quiz-content hidden"></div>
-  </div>
+        <div id="resultArea" class="quiz-content hidden"></div>
+        
+    </div>
 
-    <div class="footer-fixed">
-    <div class="footer-inner">
-      <div style="display:flex; gap:10px;">
-        <button class="btn" id="prevBtn" disabled>◀ Prev</button>
-        <button class="btn" id="nextBtn" disabled>Next ▶</button>
-      </div>
-      <div>
-        <button class="btn" id="submitBtn" disabled>Submit Quiz</button>
-      </div>
-    </div>
-  </div>
-      <div id="utilControls" class="hidden">
-    <button id="restartBtn">Restart</button>
-    <button id="downloadCSV">Download</button>
-  </div>
+    <div class="footer-fixed">
+        <div class="footer-inner">
+            <div style="display:flex; gap:10px;">
+                <button class="btn" id="prevBtn" disabled>◀ Prev</button>
+                <button class="btn" id="nextBtn" disabled>Next ▶</button>
+            </div>
+            <div>
+                <button class="btn" id="submitBtn" disabled>Submit Quiz</button>
+            </div>
+        </div>
+    </div>
+    <script>
+        // --- DATA: ALL 35 QUESTIONS RESTORED ---
+        const QUESTIONS = [
+            { id:7, q:"If a book is sold at 25% loss, then ratio of cost price to the selling price is:", choices:["3 : 2","4 : 3","5 : 4","2 : 3"], answer:1, hint:"Basic CP:SP ratio (loss) — (100:75 or 4:3)"},
+            { id:8, q:"An article is sold at a profit of 250%. What is the ratio of its cost price to selling price?", choices:["2 : 5","5 : 2","2 : 7","7 : 2"], answer:2, hint:"Basic profit% → ratio (100:350 or 2:7)"},
+            { id:13, q:"A shopkeeper sold an article at 26 2/3% profit. If the selling price is ₹1600, find the cost price.", choices:["₹1200","₹1400","₹1500","None of these"], answer:1, hint:"Reverse percentage (SP → CP)"},
+            { id:14, q:"By selling a hair oil product for ₹336, the gain is 12%. If the gain is reduced to 9%, find the resultant selling price (₹).", choices:["₹330","₹300","₹327","₹339"], answer:2, hint:"Change in profit% — recompute SP"},
+            { id:16, q:"By selling an article for ₹19.50, a dealer makes a profit of 30%. By how much should he increase his selling price so as to make a profit of 40%?", choices:["₹3","₹1.75","₹2","₹1.50"], answer:3, hint:"Profit% on fixed CP → find CP, then new SP"},
+            { id:18, q:"A blanket is sold for ₹1,148, resulting in a loss of 30%. For how much should it be sold to gain 5%?", choices:["₹1,423","₹1,734","₹1,543","₹1,722"], answer:3, hint:"Loss → compute CP → desired SP for gain"},
+            { id:19, q:"When an article is sold for ₹480, there is a loss of 2 16/3 %. To gain 1 8/3 %, it should be sold for (₹):", choices:["₹620","₹624","₹605","₹750"], answer:1, hint:"Convert mixed % → find CP → new SP (Use fractions for exact CP)"},
+            { id:20, q:"By selling an article for ₹2,200, a profit of 10% is earned. If the same article is sold for ₹2,600, then what will be the gain percentage?", choices:["20%","15%","37%","30%"], answer:3, hint:"Compare SPs to CP → find % (CP=2000, Profit%=30%)"},
+            { id:22, q:"An article is sold for ₹2070 at a profit of 15%. If the article is sold for ₹1890, then what will be gain or loss percent ?", choices:["10% gain","10% loss","5% gain","5% loss"], answer:3, hint:"Two SP values → compare to CP"},
+            { id:23, q:"Manjeet bought a second-hand motorbike for ₹22,000 and spent ₹3,000 on overhaul. He then sold it with 12% profit. If he had sold it for ₹500 less, what would have been his profit percentage?", choices:["10%","10.5%","8%","5%"], answer:0, hint:"Profit on total cost (CP + expenses)"},
+            { id:24, q:"A retailer purchased a batch of goods for ₹5,000. 5% of the goods were damaged. If retailer wants 20% profit on remaining goods, at what total price should the undamaged goods be sold?", choices:["₹5,700","₹5,800","₹6,000","₹5,900"], answer:2, hint:"Effective selling price after shrinkage"},
+            { id:25, q:"The difference between cost price and selling price of an article is ₹1,800. If there is a profit of 20%, then the cost price of the article is:", choices:["₹9,000","₹8,000","₹11,000","₹7,000"], answer:0, hint:"Difference = SP−CP, use profit% to find CP"},
+            { id:27, q:"A shopkeeper sold an article at 26% profit. On selling it for ₹2,250 more, he would get 41% profit. If it is sold at 12% profit, then the selling price would be:", choices:["₹16,800","₹15,000","₹15,800","₹16,120"], answer:3, hint:"Solve two-SP linear system → find CP"},
+            { id:28, q:"A trader sells an article at 16% below cost. Had he sold it for ₹192.20 more, he would have gained 15%. The new selling price is (₹):", choices:["742","731","713","724"], answer:2, hint:"Relative SP adjustments → find original CP then new SP"},
+            { id:31, q:"When an article is sold for ₹768, profit% is x%. When sold for ₹896, profit% is (x+20)%. What is x?", choices:["20","15","25","30"], answer:0, hint:"Two SPs same CP → deduce x"},
+            { id:59, q:"A trader bought some oranges at 7 for ₹11. He sold all at 2 for ₹3. Thereby he loses ₹30. Find number of oranges sold.", choices:["420","400","210","280"], answer:0, hint:"Unit price → total loss → find quantity"},
+            { id:60, q:"A trader bought some apples at 15 for ₹8 and sold all at X for ₹2. Thereby he gains 25%. Find X (apples per ₹2).", choices:["2","3","4","5"], answer:2, hint:"Unit-rate & profit% → find X"},
+            { id:61, q:"A trader bought apples at 9 for ₹7. He sold at X for ₹2 and thereby lost 2 14/7%. Find X.", choices:["2","3","4","5"], answer:3, hint:"Find selling-rate for given loss%"},
+            { id:62, q:"Bought some articles at 11 for ₹10 and same number at 9 for ₹10. Sold all at 1 for ₹1. Find profit or loss %.", choices:["No profit no loss","20% profit","10% loss","1% loss"], answer:3, hint:"Weighted average cost → combined SP"},
+            { id:64, q:"Shopkeeper buys 60 oranges at 10 for ₹72 and same number at 12 for ₹90. Spends ₹118 extra. Total profit 26%. Selling price of 32 oranges is:", choices:["₹336","₹313.60","₹316.80","₹320"], answer:2, hint:"Combined CP + overheads → compute unit SP"},
+            { id:67, q:"Mukesh sells 80% of commodity at 20% profit and rest at 5% loss, earning total profit ₹9,300. What was the cost price?", choices:["₹61,000","₹58,000","₹62,000","₹60,000"], answer:0, hint:"Weighted-average profit → find total CP"},
+            { id:71, q:"A person sold 1/3 articles at 14%, 3/5 at 17.5% and rest at 20%. Find overall profit% (approx).", choices:["15.5%","16.5%","17.5%","18.5%"], answer:1, hint:"Weighted average of percentages (Approx 16.5%)"},
+            { id:73, q:"A medical store purchased medicines ₹18,000; sold 2/5 at 35% loss. At what gain should he sell rest to neither gain nor lose?", choices:["1/23%","2/20%","2/23%","1/20%"], answer:2, hint:"Balance losses with gains to zero total profit"},
+            { id:74, q:"If 2/3 articles sold at 25% profit, 20% at 20% loss and remaining at 20% profit, profit ₹3,312 is obtained. Find cost price.", choices:["₹18,600","₹21,400","₹21,600","₹20,000"], answer:3, hint:"Weighted profits across fractions"},
+            { id:76, q:"Bought apples for ₹3,600. Sold 1/5 at 10% loss, 1/4 of remainder at 5% loss, two-thirds of rest at 15% profit. At what price should he sell remaining to earn 27% overall?", choices:["₹1,548","₹1,584","₹1,845","₹1,864"], answer:1, hint:"Multi-stage fraction sales → compute required SP"},
+            { id:77, q:"Arbind has 650 kg wheat. Part he sells at 9% profit and rest at 19% profit to get 15% overall. Quantity sold at 9% profit (kg) is:", choices:["260","390","195","455"], answer:0, hint:"Mixture profit → weighted average → find part"},
+            { id:80, q:"Pradeep sells two fans at ₹480 each — gains 20% on one and loses 20% on the other. His loss on the whole (₹) is:", choices:["30","10","20","40"], answer:2, hint:"Same SP, differing % → compute absolute loss"},
+            { id:82, q:"Radha bought fridge + washing machine together for ₹57,300. She sold fridge at 15% profit and washing machine at 24% loss and both sold at same price. What is CP of washing machine?", choices:["₹22,800","₹28,650","₹34,500","₹24,500"], answer:1, hint:"Two-item CPs with equal SP → solve algebraically"},
+            { id:86, q:"Two articles sold for ₹3,000 each. No net loss/gain. If one sold at 25% profit, loss on second is:", choices:["10%","18 2/3%","16 2/3%","15 2/3%"], answer:2, hint:"Same SP pair → find complementary loss"},
+            { id:87, q:"Two articles sold for ₹2,400 each; overall no profit/no loss. If one sold at 20% profit, what loss was on the other (₹)?", choices:["₹600","₹400","₹380","₹240"], answer:1, hint:"Same-SP two-article balancing"},
+            { id:97, q:"A trader marks up 20% on CP and gives 10% discount on the marked price. Overall profit% is:", choices:["8%","10%","12%","6%"], answer:0, hint:"Markup & discount → effective profit%"},
+            { id:98, q:"A shopkeeper wants to gain 25% on CP. He should mark his goods at what percent above CP if he offers 20% discount on marked price?", choices:["56.25%","45%","31.25%","25%"], answer:2, hint:"Desired net profit with discount → compute markup"},
+            { id:99, q:"If CP of 5 items is equal to SP of 4 items, profit% is:", choices:["25%","20%","15%","10%"], answer:0, hint:"CP of X = SP of Y type"},
+            { id:100, q:"An article is sold at two successive discounts of 10% and 20% on MRP. Net discount percent is:", choices:["28%","30%","18%","32%"], answer:0, hint:"Successive discount calculation"},
+            { id:105, q:"A wholesaler gives 8% discount on CP and still earns 10% profit. If CP is ₹500, what is selling price?", choices:["₹540","₹594","₹550","₹540"], answer:2, hint:"Discount on CP + profit → compute SP"},
+        ];
+        
+        // App state
+        let state = {
+            order: QUESTIONS.map((_, i) => i), // Initial order
+            optOrders: [],
+            currentIndex: 0,
+            answers: Array(QUESTIONS.length).fill(null),
+            started: false,
+            submitted: false,
+            startTime: null,
+            timerInterval: null
+        };
 
-<script>
-// --- DATA (Same as before, ensuring randomization still works) ---
-const QUESTIONS = [
-  { id:7, q:"If a book is sold at 25% loss, then ratio of cost price to the selling price is:", choices:["3 : 2","4 : 3","5 : 4","2 : 3"], answer:1, hint:"Basic CP:SP ratio (loss) — (100:75 or 4:3)"},
-  { id:8, q:"An article is sold at a profit of 250%. What is the ratio of its cost price to selling price?", choices:["2 : 5","5 : 2","2 : 7","7 : 2"], answer:2, hint:"Basic profit% → ratio (100:350 or 2:7)"},
-  { id:13, q:"A shopkeeper sold an article at 26 2/3% profit. If the selling price is ₹1600, find the cost price.", choices:["₹1200","₹1400","₹1500","None of these"], answer:1, hint:"Reverse percentage (SP → CP)"},
-  { id:14, q:"By selling a hair oil product for ₹336, the gain is 12%. If the gain is reduced to 9%, find the resultant selling price (₹).", choices:["₹330","₹300","₹327","₹339"], answer:2, hint:"Change in profit% — recompute SP"},
-  { id:16, q:"By selling an article for ₹19.50, a dealer makes a profit of 30%. By how much should he increase his selling price so as to make a profit of 40%?", choices:["₹3","₹1.75","₹2","₹1.50"], answer:3, hint:"Profit% on fixed CP → find CP, then new SP"},
-  { id:18, q:"A blanket is sold for ₹1,148, resulting in a loss of 30%. For how much should it be sold to gain 5%?", choices:["₹1,423","₹1,734","₹1,543","₹1,722"], answer:3, hint:"Loss → compute CP → desired SP for gain"},
-  { id:19, q:"When an article is sold for ₹480, there is a loss of 2 16/3 %. To gain 1 8/3 %, it should be sold for (₹):", choices:["₹620","₹624","₹605","₹750"], answer:1, hint:"Convert mixed % → find CP → new SP (Use fractions for exact CP)"},
-  { id:20, q:"By selling an article for ₹2,200, a profit of 10% is earned. If the same article is sold for ₹2,600, then what will be the gain percentage?", choices:["20%","15%","37%","30%"], answer:3, hint:"Compare SPs to CP → find % (CP=2000, Profit%=30%)"},
-  { id:22, q:"An article is sold for ₹2070 at a profit of 15%. If the article is sold for ₹1890, then what will be gain or loss percent ?", choices:["10% gain","10% loss","5% gain","5% loss"], answer:3, hint:"Two SP values → compare to CP"},
-  { id:23, q:"Manjeet bought a second-hand motorbike for ₹22,000 and spent ₹3,000 on overhaul. He then sold it with 12% profit. If he had sold it for ₹500 less, what would have been his profit percentage?", choices:["10%","10.5%","8%","5%"], answer:0, hint:"Profit on total cost (CP + expenses)"},
-  { id:24, q:"A retailer purchased a batch of goods for ₹5,000. 5% of the goods were damaged. If retailer wants 20% profit on remaining goods, at what total price should the undamaged goods be sold?", choices:["₹5,700","₹5,800","₹6,000","₹5,900"], answer:2, hint:"Effective selling price after shrinkage"},
-  { id:25, q:"The difference between cost price and selling price of an article is ₹1,800. If there is a profit of 20%, then the cost price of the article is:", choices:["₹9,000","₹8,000","₹11,000","₹7,000"], answer:0, hint:"Difference = SP−CP, use profit% to find CP"},
-  { id:27, q:"A shopkeeper sold an article at 26% profit. On selling it for ₹2,250 more, he would get 41% profit. If it is sold at 12% profit, then the selling price would be:", choices:["₹16,800","₹15,000","₹15,800","₹16,120"], answer:3, hint:"Solve two-SP linear system → find CP"},
-  { id:28, q:"A trader sells an article at 16% below cost. Had he sold it for ₹192.20 more, he would have gained 15%. The new selling price is (₹):", choices:["742","731","713","724"], answer:2, hint:"Relative SP adjustments → find original CP then new SP"},
-  { id:31, q:"When an article is sold for ₹768, profit% is x%. When sold for ₹896, profit% is (x+20)%. What is x?", choices:["20","15","25","30"], answer:0, hint:"Two SPs same CP → deduce x"},
-  { id:59, q:"A trader bought some oranges at 7 for ₹11. He sold all at 2 for ₹3. Thereby he loses ₹30. Find number of oranges sold.", choices:["420","400","210","280"], answer:0, hint:"Unit price → total loss → find quantity"},
-  { id:60, q:"A trader bought some apples at 15 for ₹8 and sold all at X for ₹2. Thereby he gains 25%. Find X (apples per ₹2).", choices:["2","3","4","5"], answer:2, hint:"Unit-rate & profit% → find X"},
-  { id:61, q:"A trader bought apples at 9 for ₹7. He sold at X for ₹2 and thereby lost 2 14/7%. Find X.", choices:["2","3","4","5"], answer:3, hint:"Find selling-rate for given loss%"},
-  { id:62, q:"Bought some articles at 11 for ₹10 and same number at 9 for ₹10. Sold all at 1 for ₹1. Find profit or loss %.", choices:["No profit no loss","20% profit","10% loss","1% loss"], answer:3, hint:"Weighted average cost → combined SP"},
-  { id:64, q:"Shopkeeper buys 60 oranges at 10 for ₹72 and same number at 12 for ₹90. Spends ₹118 extra. Total profit 26%. Selling price of 32 oranges is:", choices:["₹336","₹313.60","₹316.80","₹320"], answer:2, hint:"Combined CP + overheads → compute unit SP"},
-  { id:67, q:"Mukesh sells 80% of commodity at 20% profit and rest at 5% loss, earning total profit ₹9,300. What was the cost price?", choices:["₹61,000","₹58,000","₹62,000","₹60,000"], answer:0, hint:"Weighted-average profit → find total CP"},
-  { id:71, q:"A person sold 1/3 articles at 14%, 3/5 at 17.5% and rest at 20%. Find overall profit% (approx).", choices:["15.5%","16.5%","17.5%","18.5%"], answer:1, hint:"Weighted average of percentages (Approx 16.5%)"},
-  { id:73, q:"A medical store purchased medicines ₹18,000; sold 2/5 at 35% loss. At what gain should he sell rest to neither gain nor lose?", choices:["1/23%","2/20%","2/23%","1/20%"], answer:2, hint:"Balance losses with gains to zero total profit"},
-  { id:74, q:"If 2/3 articles sold at 25% profit, 20% at 20% loss and remaining at 20% profit, profit ₹3,312 is obtained. Find cost price.", choices:["₹18,600","₹21,400","₹21,600","₹20,000"], answer:3, hint:"Weighted profits across fractions"},
-  { id:76, q:"Bought apples for ₹3,600. Sold 1/5 at 10% loss, 1/4 of remainder at 5% loss, two-thirds of rest at 15% profit. At what price should he sell remaining to earn 27% overall?", choices:["₹1,548","₹1,584","₹1,845","₹1,864"], answer:1, hint:"Multi-stage fraction sales → compute required SP"},
-  { id:77, q:"Arbind has 650 kg wheat. Part he sells at 9% profit and rest at 19% profit to get 15% overall. Quantity sold at 9% profit (kg) is:", choices:["260","390","195","455"], answer:0, hint:"Mixture profit → weighted average → find part"},
-  { id:80, q:"Pradeep sells two fans at ₹480 each — gains 20% on one and loses 20% on the other. His loss on the whole (₹) is:", choices:["30","10","20","40"], answer:2, hint:"Same SP, differing % → compute absolute loss"},
-  { id:82, q:"Radha bought fridge + washing machine together for ₹57,300. She sold fridge at 15% profit and washing machine at 24% loss and both sold at same price. What is CP of washing machine?", choices:["₹22,800","₹28,650","₹34,500","₹24,500"], answer:1, hint:"Two-item CPs with equal SP → solve algebraically"},
-  { id:86, q:"Two articles sold for ₹3,000 each. No net loss/gain. If one sold at 25% profit, loss on second is:", choices:["10%","18 2/3%","16 2/3%","15 2/3%"], answer:2, hint:"Same SP pair → find complementary loss"},
-  { id:87, q:"Two articles sold for ₹2,400 each; overall no profit/no loss. If one sold at 20% profit, what loss was on the other (₹)?", choices:["₹600","₹400","₹380","₹240"], answer:1, hint:"Same-SP two-article balancing"},
-  { id:97, q:"A trader marks up 20% on CP and gives 10% discount on the marked price. Overall profit% is:", choices:["8%","10%","12%","6%"], answer:0, hint:"Markup & discount → effective profit%"},
-  { id:98, q:"A shopkeeper wants to gain 25% on CP. He should mark his goods at what percent above CP if he offers 20% discount on marked price?", choices:["56.25%","45%","31.25%","25%"], answer:2, hint:"Desired net profit with discount → compute markup"},
-  { id:99, q:"If CP of 5 items is equal to SP of 4 items, profit% is:", choices:["25%","20%","15%","10%"], answer:0, hint:"CP of X = SP of Y type"},
-  { id:100, q:"An article is sold at two successive discounts of 10% and 20% on MRP. Net discount percent is:", choices:["28%","30%","18%","32%"], answer:0, hint:"Successive discount calculation"},
-  { id:105, q:"A wholesaler gives 8% discount on CP and still earns 10% profit. If CP is ₹500, what is selling price?", choices:["₹540","₹594","₹550","₹540"], answer:2, hint:"Discount on CP + profit → compute SP"},
-  { id:106, q:"A product's CP is ₹250. After some percent gain, SP is ₹312.5. What was the profit percent?", choices:["20%","25%","12.5%","18%"], answer:1, hint:"Find profit% from CP & SP"},
-  { id:113, q:"A man sold an article at 12% profit. If he had sold it for ₹120 more, profit would be 20%. Find CP.", choices:["₹1500","₹2000","₹1000","₹1200"], answer:0, hint:"Incremental SP → solve for CP"},
-  { id:116, q:"A shopkeeper sold an article at 8% loss. If he had sold it for ₹48 more, he would have gained 8%. Find the CP.", choices:["₹300","₹400","₹240","₹200"], answer:0, hint:"Loss to gain with extra amount → find CP"},
-  { id:117, q:"A trader mixes two varieties of rice costing ₹20/kg and ₹30/kg in ratio 3:2 and sells mixture at ₹27/kg. Profit% is:", choices:["10%","5%","8%","12%"], answer:1, hint:"Weighted-cost mixture and profit"},
-  { id:122, q:"A retailer bought 50 items for ₹5000. He sold at price that gives 30% profit in total. What is SP per item?", choices:["₹130","₹150","₹120","₹110"], answer:0, hint:"Total profit distributed per unit"},
-  { id:126, q:"If a trader uses two successive discounts of 20% and 25%, the overall discount is:", choices:["40%","44%","45%","35%"], answer:1, hint:"Successive discounts — multiplicative"},
-  { id:128, q:"A seller gains 12% by selling for ₹2240. Find CP.", choices:["₹2000","₹1888","₹2250","₹1980"], answer:0, hint:"Back-calculate CP from SP and gain%"},
-  { id:132, q:"A shopkeeper wants a gain of 20% but allows 10% discount on marked price. By what percent should he mark above CP?", choices:["33.33%","30%","25%","40%"], answer:0, hint:"Marked price required for given net gain after discount"},
-  { id:133, q:"A commodity is sold at 12% profit. Its price is reduced by 12% and new price equals the original CP. What was the profit% on CP if price had not been reduced?", choices:["12%","13.6%","14.4%","16%"], answer:2, hint:"Percent decrease/increase relationships"}
-];
+        const qcount = QUESTIONS.length; 
+        const [startBtn, startScreen, quizArea, prevBtn, nextBtn, submitBtn] = 
+            ['startBtn', 'startScreen', 'quizArea', 'prevBtn', 'nextBtn', 'submitBtn'].map(id => document.getElementById(id));
+        const [pillNavContainer, pillNav] = 
+            ['pillNavContainer', 'pillNav'].map(id => document.getElementById(id));
+        const quizTimer = document.getElementById('quizTimer');
+        
+        function shuffleArray(a){
+            for(let i=a.length-1;i>0;i--){
+                const j=Math.floor(Math.random()*(i+1));
+                [a[i],a[j]]=[a[j],a[i]];
+            }
+        }
 
-// App state
-let state = {
-  order: [],
-  optOrders: [],
-  currentIndex: 0,
-  answers: [], 
-  started: false,
-  submitted: false,
-  startTime: null,
-  timerInterval: null
-};
+        // --- Timer Functions ---
+        function formatTime(totalSeconds) {
+            const hours = String(Math.floor(totalSeconds / 3600)).padStart(2, '0');
+            const minutes = String(Math.floor((totalSeconds % 3600) / 60)).padStart(2, '0');
+            const seconds = String(totalSeconds % 60).padStart(2, '0');
+            return `${hours}:${minutes}:${seconds}`;
+        }
 
-// DOM Elements
-const startBtn = document.getElementById('startBtn');
-const startScreen = document.getElementById('startScreen');
-const quizArea = document.getElementById('quizArea');
-const prevBtn = document.getElementById('prevBtn');
-const nextBtn = document.getElementById('nextBtn');
-const submitBtn = document.getElementById('submitBtn');
-const resultArea = document.getElementById('resultArea');
-const quizTimer = document.getElementById('quizTimer');
-const pillNavContainer = document.getElementById('pillNavContainer');
-const pillNav = document.getElementById('pillNav');
-const backBtn = document.querySelector('.back-btn');
+        function startTimer() {
+            state.startTime = Date.now();
+            
+            if (state.timerInterval) clearInterval(state.timerInterval);
+            
+            state.timerInterval = setInterval(() => {
+                const elapsedSeconds = Math.floor((Date.now() - state.startTime) / 1000);
+                quizTimer.textContent = formatTime(elapsedSeconds);
+            }, 1000);
+        }
 
-const qcount = QUESTIONS.length;
-const originalIndices = QUESTIONS.map((_,i)=>i);
+        
+        function initializeOptionOrders() {
+            state.optOrders = [];
+            QUESTIONS.forEach(() => {
+                const optionsIndices = [0, 1, 2, 3];
+                shuffleArray(optionsIndices);
+                state.optOrders.push(optionsIndices);
+            });
+        }
+        initializeOptionOrders(); 
 
-function shuffleArray(a){
-  for(let i=a.length-1;i>0;i--){
-    const j=Math.floor(Math.random()*(i+1));
-    [a[i],a[j]]=[a[j],a[i]];
-  }
-}
+        function generatePills() {
+            pillNav.querySelectorAll('.pill:not(.all-btn)').forEach(p => p.remove());
+            state.order.forEach((_, idx) => {
+                const pill = document.createElement('div');
+                pill.className = 'pill';
+                pill.textContent = idx + 1;
+                pill.setAttribute('data-index', idx);
+                pill.onclick = () => navigateToQuestion(idx);
+                pillNav.appendChild(pill);
+            });
+        }
 
-function resetState(){
-  state.order = [...originalIndices];
-  state.currentIndex = 0;
-  state.answers = Array(qcount).fill(null);
-  state.optOrders = [];
-  
-  QUESTIONS.forEach(() => {
-    const optionsIndices = [0, 1, 2, 3];
-    shuffleArray(optionsIndices);
-    state.optOrders.push(optionsIndices);
-  });
+        function updatePillStatus() {
+            const pills = pillNav.querySelectorAll('.pill:not(.all-btn)');
+            pills.forEach((pill, idx) => {
+                const qIdx = state.order[idx];
+                pill.classList.remove('active', 'answered');
 
-  state.started = false;
-  state.submitted = false;
+                if (idx === state.currentIndex) {
+                    pill.classList.add('active');
+                } else if (state.answers[qIdx] !== null) {
+                    pill.classList.add('answered');
+                }
+                
+                // Scroll to active pill
+                if (idx === state.currentIndex) {
+                    const scrollLeft = pill.offsetLeft - pillNavContainer.clientWidth / 2 + pill.clientWidth / 2;
+                    pillNavContainer.scrollLeft = scrollLeft;
+                }
+            });
+        }
 
-  if (state.timerInterval) {
-    clearInterval(state.timerInterval);
-    state.timerInterval = null;
-  }
-  quizTimer.textContent = '00:00:00';
-}
-resetState();
+        function renderQuestion(idx) {
+            const qIdx = state.order[idx];
+            const item = QUESTIONS[qIdx];
+            const chosenOriginalIndex = state.answers[qIdx];
+            const optOrder = state.optOrders[qIdx];
 
-// --- Timer Functions ---
-function formatTime(totalSeconds) {
-  const hours = String(Math.floor(totalSeconds / 3600)).padStart(2, '0');
-  const minutes = String(Math.floor((totalSeconds % 3600) / 60)).padStart(2, '0');
-  const seconds = String(totalSeconds % 60).padStart(2, '0');
-  return `${hours}:${minutes}:${seconds}`;
-}
+            quizArea.innerHTML = '';
+            
+            // 1. Question Meta (e.g., "2 of 35")
+            const meta = document.createElement('div');
+            meta.className = 'question-meta';
+            meta.innerHTML = `<span>**${idx + 1}** of ${qcount}</span><span class="report-btn">Report 🚩</span>`;
+            quizArea.appendChild(meta);
 
-function startTimer() {
-  state.startTime = Date.now();
-  
-  if (state.timerInterval) clearInterval(state.timerInterval);
-  
-  state.timerInterval = setInterval(() => {
-    const elapsedSeconds = Math.floor((Date.now() - state.startTime) / 1000);
-    quizTimer.textContent = formatTime(elapsedSeconds);
-  }, 1000);
-}
+            // 2. Question Text
+            const qtext = document.createElement('div');
+            qtext.className = 'qtext';
+            qtext.innerHTML = item.q;
+            quizArea.appendChild(qtext);
 
-// --- Render Functions ---
+            // 3. Options Area
+            const opts = document.createElement('div');
+            opts.className = 'options';
+            
+            optOrder.forEach((originalCi, shuffledCi) => {
+                const ch = item.choices[originalCi];
+                const isChosen = chosenOriginalIndex === originalCi;
+                const label = document.createElement('label');
+                label.className = `option ${isChosen ? 'selected' : ''}`;
+                label.setAttribute('data-original-index', originalCi);
+                
+                const optionLabel = String.fromCharCode(65 + shuffledCi); // A, B, C, D
+                
+                label.innerHTML = `
+                    <input type="radio" name="q${qIdx}" value="${originalCi}" ${isChosen ? 'checked' : ''}> 
+                    <span class="option-label">${optionLabel}</span> 
+                    <span>${ch}</span>
+                `;
+                
+                label.onclick = () => {
+                    const selectedOriginalIndex = parseInt(label.getAttribute('data-original-index'));
+                    state.answers[qIdx] = selectedOriginalIndex;
+                    
+                    // Visual update for selected option
+                    Array.from(opts.querySelectorAll('label')).forEach(l => l.classList.remove('selected'));
+                    label.classList.add('selected');
+                    
+                    updateNavAndSubmit();
+                    updatePillStatus();
+                };
+                opts.appendChild(label);
+            });
+            quizArea.appendChild(opts);
 
-function generatePills() {
-  pillNav.innerHTML = '';
-  
-  // Add the "All" button
-  const allPill = document.createElement('div');
-  allPill.className = 'pill all-btn';
-  allPill.textContent = 'All';
-  allPill.onclick = () => alert('Showing all questions is not implemented in this version.');
-  pillNav.appendChild(allPill);
+            // 4. Hint Control
+            const actionBar = document.createElement('div');
+            actionBar.className = 'action-bar';
+            actionBar.innerHTML = `<button class="hint-btn" id="hintToggle">Show Hint / Explanation</button>`;
+            quizArea.appendChild(actionBar);
+            
+            // 5. Hidden Hint Box
+            const hintBox = document.createElement('div');
+            hintBox.className='hint-area hidden'; // Start hidden
+            hintBox.id = 'hintBox';
+            hintBox.innerHTML = `**Hint/Explanation:** ${item.hint}`;
+            quizArea.appendChild(hintBox);
 
-  // Add the numbered pills
-  state.order.forEach((_, idx) => {
-    const pill = document.createElement('div');
-    pill.className = 'pill';
-    pill.textContent = idx + 1;
-    pill.setAttribute('data-index', idx);
-    pill.onclick = () => navigateToQuestion(idx);
-    pillNav.appendChild(pill);
-  });
-}
-
-function updatePillStatus() {
-  const pills = pillNav.querySelectorAll('.pill:not(.all-btn)');
-  pills.forEach((pill, idx) => {
-    const qIdx = state.order[idx];
-    pill.classList.remove('active', 'answered', 'unanswered');
-
-    if (idx === state.currentIndex) {
-      pill.classList.add('active');
-    } else if (state.answers[qIdx] !== null) {
-      pill.classList.add('answered');
-    } 
-    // Optional: Use unanswered pill style for untouched questions
-    else {
-      pill.classList.add('unanswered');
-    }
-
-    // Scroll to active pill
-    if (idx === state.currentIndex) {
-      // Adjusted scroll position to account for the 'All' button and padding
-      const scrollLeft = pill.offsetLeft - pillNavContainer.clientWidth / 2 + pill.clientWidth / 2;
-      pillNavContainer.scrollLeft = scrollLeft;
-    }
-  });
-}
+            document.getElementById('hintToggle').onclick = (e)=>{
+                e.preventDefault();
+                const isHidden = hintBox.classList.toggle('hidden');
+                e.target.textContent = isHidden ? 'Show Hint / Explanation' : 'Hide Hint / Explanation';
+            };
 
 
-function renderQuestion(idx){
-  const qIdx = state.order[idx];
-  const item = QUESTIONS[qIdx];
-  const chosenOriginalIndex = state.answers[qIdx];
-  const optOrder = state.optOrders[qIdx];
+            updateNavAndSubmit();
+            updatePillStatus();
+        }
 
-  quizArea.innerHTML = '';
-  
-  // 1. Question Meta (e.g., "2 of 150")
-  const meta = document.createElement('div');
-  meta.className='question-meta';
-  meta.innerHTML = `<span>**${idx+1}** of ${qcount}</span><span class="report-btn">Report ⚠️</span>`;
-  quizArea.appendChild(meta);
+        function navigateToQuestion(idx) {
+            if (idx >= 0 && idx < qcount) {
+                state.currentIndex = idx;
+                renderQuestion(idx);
+            }
+        }
 
-  // 2. Question Text
-  const qtext = document.createElement('div');
-  qtext.className='qtext';
-  qtext.innerHTML = item.q;
-  quizArea.appendChild(qtext);
+        function updateNavAndSubmit() {
+            const answeredCount = state.answers.filter(a => a !== null).length;
+            const allAnswered = answeredCount === qcount;
 
-  // 3. Options Area
-  const opts = document.createElement('div');
-  opts.className='options';
-  
-  optOrder.forEach((originalCi, shuffledCi)=>{
-    const ch = item.choices[originalCi];
-    const isChosen = chosenOriginalIndex === originalCi;
-    const label = document.createElement('label');
-    label.className=`option ${isChosen ? 'selected' : ''}`;
-    label.setAttribute('data-original-index', originalCi);
-    
-    const optionLabel = String.fromCharCode(65 + shuffledCi); 
-    
-    label.innerHTML = `
-      <input type="radio" name="q${qIdx}" value="${originalCi}" ${isChosen ? 'checked':''}> 
-      <span class="option-label">${optionLabel}</span> 
-      <span>${ch}</span>
-    `;
-    
-    label.onclick = ()=>{
-      const selectedOriginalIndex = parseInt(label.getAttribute('data-original-index'));
-      state.answers[qIdx] = selectedOriginalIndex;
-      
-      // Visual update for selected option
-      Array.from(opts.querySelectorAll('label')).forEach(l=> l.classList.remove('selected'));
-      label.classList.add('selected');
-      
-      updateNavAndSubmit();
-      updatePillStatus();
-    };
-    opts.appendChild(label);
-  });
-  quizArea.appendChild(opts);
+            submitBtn.disabled = !allAnswered;
+            prevBtn.disabled = state.currentIndex === 0;
+            nextBtn.disabled = state.currentIndex === qcount - 1;
+        }
 
-  // 4. Hint Control
-  const actionBar = document.createElement('div');
-  actionBar.className = 'action-bar';
-  actionBar.innerHTML = `<button class="hint-btn" id="hintToggle">Show Hint / Explanation</button>`;
-  quizArea.appendChild(actionBar);
-  
-  // 5. Hidden Hint Box
-  const hintBox = document.createElement('div');
-  hintBox.className='hint-area';
-  hintBox.style.display = 'none';
-  hintBox.innerHTML = `**Type/Concept:** ${item.hint}`;
-  quizArea.appendChild(hintBox);
+        // --- Event Listeners ---
+        startBtn.addEventListener('click', () => {
+            shuffleArray(state.order); 
+            state.started = true;
+            startScreen.classList.add('hidden');
+            quizArea.classList.remove('hidden');
+            pillNavContainer.classList.remove('hidden');
 
-  document.getElementById('hintToggle').onclick = (e)=>{
-    e.preventDefault();
-    const isHidden = hintBox.style.display === 'none' || !hintBox.style.display;
-    hintBox.style.display = isHidden ? 'block' : 'none';
-    e.target.textContent = isHidden ? 'Hide Hint / Explanation' : 'Show Hint / Explanation';
-  };
+            generatePills();
+            startTimer(); // Start the timer!
+            navigateToQuestion(state.currentIndex);
+        });
 
-  // Update UI status
-  updateNavAndSubmit();
-  updatePillStatus();
-}
+        prevBtn.addEventListener('click', () => navigateToQuestion(state.currentIndex - 1));
+        nextBtn.addEventListener('click', () => navigateToQuestion(state.currentIndex + 1));
+        
+        submitBtn.addEventListener('click', () => {
+            if (confirm('Are you sure you want to submit the quiz?')) {
+                state.submitted = true;
+                clearInterval(state.timerInterval); // Stop the timer
+                
+                quizArea.classList.add('hidden');
+                document.getElementById('resultArea').classList.remove('hidden');
+                
+                let correctCount = 0;
+                QUESTIONS.forEach((q, i) => { if (state.answers[i] === q.answer) correctCount++; });
+                
+                document.getElementById('resultArea').innerHTML = `
+                    <h2>Quiz Submitted!</h2>
+                    <h3>Score: **${correctCount} / ${qcount}**</h3>
+                    <p>Time Taken: ${quizTimer.textContent}</p>
+                    <p style="text-align:center; margin-top: 15px;">Thanks for completing the test.</p>
+                `;
+                
+                prevBtn.disabled = true; nextBtn.disabled = true; submitBtn.disabled = true;
+            }
+        });
 
-// --- Navigation Functions ---
-
-function navigateToQuestion(idx){
-  if (idx >= 0 && idx < qcount) {
-    state.currentIndex = idx;
-    renderQuestion(idx);
-  }
-}
-
-function updateNavAndSubmit(){
-  const answeredCount = state.answers.filter(a => a !== null).length;
-  const allAnswered = answeredCount === qcount;
-
-  submitBtn.disabled = !allAnswered;
-  prevBtn.disabled = state.currentIndex === 0;
-  nextBtn.disabled = state.currentIndex === qcount - 1;
-}
-
-// --- Event Handlers ---
-
-startBtn.addEventListener('click', ()=>{
-  resetState();
-  shuffleArray(state.order);
-  
-  state.started = true;
-  startScreen.classList.add('hidden');
-  quizArea.classList.remove('hidden');
-  pillNavContainer.classList.remove('hidden');
-  resultArea.classList.add('hidden');
-
-  generatePills();
-  startTimer();
-  renderQuestion(state.currentIndex);
-});
-
-backBtn.addEventListener('click', ()=>{
-  if (state.started && !state.submitted) {
-    if (confirm('Are you sure you want to exit? Your progress will be lost.')) {
-      document.getElementById('restartBtn').click();
-    }
-  } else {
-    document.getElementById('restartBtn').click();
-  }
-});
-
-document.getElementById('restartBtn').addEventListener('click', ()=>{
-  resetState();
-  startScreen.classList.remove('hidden');
-  quizArea.classList.add('hidden');
-  pillNavContainer.classList.add('hidden');
-  resultArea.classList.add('hidden');
-  updateNavAndSubmit();
-});
-
-prevBtn.addEventListener('click', ()=>{
-  navigateToQuestion(state.currentIndex - 1);
-});
-
-nextBtn.addEventListener('click', ()=>{
-  navigateToQuestion(state.currentIndex + 1);
-});
-
-submitBtn.addEventListener('click', ()=>{
-  if (!confirm('Are you sure you want to submit the quiz? You cannot change answers after submission.')) return;
-
-  state.submitted = true;
-  clearInterval(state.timerInterval);
-  
-  // ... (Submission and Result Display Logic remains the same) ...
-  
-  // Example results structure:
-  const total = qcount;
-  let correctCount = 0;
-  QUESTIONS.forEach((q, i) => { if (state.answers[i] === q.answer) correctCount++; });
-  const percent = Math.round((correctCount/total)*10000)/100;
-  const timeTaken = quizTimer.textContent;
-
-  quizArea.classList.add('hidden');
-  resultArea.classList.remove('hidden');
-  resultArea.innerHTML = `
-    <h2>Quiz Submitted!</h2>
-    <p>Time Taken: ${timeTaken}</p>
-    <h3>Final Score: **${correctCount} / ${total}** (**${percent}%**)</h3>
-    <div style="margin-top: 20px;">
-      <h4>Detailed Review:</h4>
-      <p style="color: var(--text-muted);">*Review is truncated for this example. Full implementation would show every question/answer.*</p>
-    </div>
-    <div style="display:flex; gap:10px; margin-top:20px;">
-      <button class="btn" onclick="document.getElementById('restartBtn').click()">Start New Quiz</button>
-      <button class="btn" style="background:#5a67d8;" onclick="downloadResults()">Download Results</button>
-    </div>
-  `;
-  
-  // Disable footer navigation after submission
-  prevBtn.disabled=true; nextBtn.disabled=true; submitBtn.disabled=true;
-});
-
-function downloadResults(){
-  // Implementation is included in the previous response's script
-  alert('Download function triggered! (Implementation is available in the script)');
-}
-
-</script>
+        document.querySelector('.back-btn').addEventListener('click', () => {
+             alert('Back action triggered! This would normally exit the test.');
+        });
+    </script>
 </body>
 </html>
