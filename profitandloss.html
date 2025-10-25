@@ -91,62 +91,53 @@
   </div>
 
 <script>
-/*
-  Single-file quiz app
-  - Questions array below: each {id, q, choices:[...], answerIndex, hint}
-  - The 'id' is the original question number you asked for (e.g., 7,8,13,...).
-  - Some later ids were generated as extra practice questions.
-*/
-
-// QUESTIONS: mixture of user-requested IDs + added random questions.
-// For clarity each question includes a 'type' hint (small textual label).
 const QUESTIONS = [
-  { id:7, q:"If a book is sold at 25% loss, then ratio of cost price to the selling price is:", choices:["3 : 2","4 : 3","5 : 4","2 : 3"], answer:0, hint:"Type: Basic CP:SP ratio (loss)"},
-  { id:8, q:"An article is sold at a profit of 250%. What is the ratio of its cost price to selling price?", choices:["2 : 5","5 : 2","2 : 7","7 : 2"], answer:0, hint:"Type: Basic profit% → ratio"},
-  { id:13, q:"A shopkeeper sold an article at 26 2/3% profit. If the selling price is ₹1600, find the cost price.", choices:["₹1200","₹1400","₹1500","None of these"], answer:0, hint:"Type: Reverse percentage (SP → CP)"},
-  { id:14, q:"By selling a hair oil product for ₹336, the gain is 12%. If the gain is reduced to 9%, find the resultant selling price (₹).", choices:["₹330","₹300","₹327","₹339"], answer:2, hint:"Type: Change in profit% — recompute SP"},
-  { id:16, q:"By selling an article for ₹19.50, a dealer makes a profit of 30%. By how much should he increase his selling price so as to make a profit of 40%?", choices:["₹3","₹1.75","₹2","₹1.50"], answer:2, hint:"Type: Profit% on fixed CP → find CP, then new SP"},
-  { id:18, q:"A blanket is sold for ₹1,148, resulting in a loss of 30%. For how much should it be sold to gain 5%?", choices:["₹1,423","₹1,734","₹1,543","₹1,722"], answer:0, hint:"Type: Loss → compute CP → desired SP for gain"},
-  { id:19, q:"When an article is sold for ₹480, there is a loss of 2 16/3 %. To gain 1 8/3 %, it should be sold for (₹):", choices:["₹620","₹624","₹605","₹750"], answer:1, hint:"Type: Convert mixed % → find CP → new SP"},
-  { id:20, q:"By selling an article for ₹2,200, a profit of 10% is earned. If the same article is sold for ₹2,600, then what will be the gain percentage?", choices:["20%","15%","37%","30%"], answer:0, hint:"Type: Compare SPs to CP → find %"},
-  { id:22, q:"An article is sold for ₹2070 at a profit of 15%. If the article is sold for ₹1890, then what will be gain or loss percent ?", choices:["10% gain","10% loss","5% gain","5% loss"], answer:3, hint:"Type: Two SP values → compare to CP"},
-  { id:23, q:"Manjeet bought a second-hand motorbike for ₹22,000 and spent ₹3,000 on overhaul. He then sold it with 12% profit. If he had sold it for ₹500 less, what would have been his profit percentage?", choices:["10%","10.5%","8%","5%"], answer:0, hint:"Type: Profit on total cost (CP + expenses)"},
-  { id:24, q:"A retailer purchased a batch of goods for ₹5,000. 5% of the goods were damaged. If retailer wants 20% profit on remaining goods, at what total price should the undamaged goods be sold?", choices:["₹5,700","₹5,800","₹6,000","₹5,900"], answer:2, hint:"Type: Effective selling price after shrinkage"},
-  { id:25, q:"The difference between cost price and selling price of an article is ₹1,800. If there is a profit of 20%, then the cost price of the article is:", choices:["₹9,000","₹8,000","₹11,000","₹7,000"], answer:0, hint:"Type: Difference = SP−CP, use profit% to find CP"},
-  { id:27, q:"A shopkeeper sold an article at 26% profit. On selling it for ₹2,250 more, he would get 41% profit. If it is sold at 12% profit, then the selling price would be:", choices:["₹16,800","₹15,000","₹15,800","₹16,120"], answer:1, hint:"Type: Solve two-SP linear system → find CP"},
-  { id:28, q:"A trader sells an article at 16% below cost. Had he sold it for ₹192.20 more, he would have gained 15%. The new selling price is (₹):", choices:["742","731","713","724"], answer:3, hint:"Type: Relative SP adjustments → find original CP then new SP"},
-  { id:31, q:"When an article is sold for ₹768, profit% is x%. When sold for ₹896, profit% is (x+20)%. What is x?", choices:["20","15","25","30"], answer:0, hint:"Type: Two SPs same CP → deduce x"},
+  { id:7, q:"If a book is sold at 25% loss, then ratio of cost price to the selling price is:", choices:["3 : 2","4 : 3","5 : 4","2 : 3"], answer:1, hint:"Type: Basic CP:SP ratio (loss) — (100:75 or 4:3)"},
+  { id:8, q:"An article is sold at a profit of 250%. What is the ratio of its cost price to selling price?", choices:["2 : 5","5 : 2","2 : 7","7 : 2"], answer:2, hint:"Type: Basic profit% → ratio — (100:350 or 2:7)"},
+  { id:13, q:"A shopkeeper sold an article at 26 2/3% profit. If the selling price is ₹1600, find the cost price.", choices:["₹1200","₹1400","₹1500","None of these"], answer:1, hint:"Type: Reverse percentage (SP → CP) — (1600 / 1.2667)"},
+  { id:14, q:"By selling a hair oil product for ₹336, the gain is 12%. If the gain is reduced to 9%, find the resultant selling price (₹).", choices:["₹330","₹300","₹327","₹339"], answer:2, hint:"Type: Change in profit% — recompute SP — (CP=300, New SP=327)"},
+  { id:16, q:"By selling an article for ₹19.50, a dealer makes a profit of 30%. By how much should he increase his selling price so as to make a profit of 40%?", choices:["₹3","₹1.75","₹2","₹1.50"], answer:1, hint:"Type: Profit% on fixed CP → find CP, then new SP — (CP=15, new SP=21, increase=1.50)"},
+  { id:18, q:"A blanket is sold for ₹1,148, resulting in a loss of 30%. For how much should it be sold to gain 5%?", choices:["₹1,423","₹1,734","₹1,543","₹1,722"], answer:3, hint:"Type: Loss → compute CP → desired SP for gain — (CP=1640, New SP=1722)"},
+  { id:19, q:"When an article is sold for ₹480, there is a loss of 2 16/3 %. To gain 1 8/3 %, it should be sold for (₹):", choices:["₹620","₹624","₹605","₹750"], answer:1, hint:"Type: Convert mixed % → find CP → new SP — (Use fractions for exact CP)"},
+  { id:20, q:"By selling an article for ₹2,200, a profit of 10% is earned. If the same article is sold for ₹2,600, then what will be the gain percentage?", choices:["20%","15%","37%","30%"], answer:2, hint:"Type: Compare SPs to CP → find % — (CP=2000, Profit%=30%)"},
+  { id:22, q:"An article is sold for ₹2070 at a profit of 15%. If the article is sold for ₹1890, then what will be gain or loss percent ?", choices:["10% gain","10% loss","5% gain","5% loss"], answer:3, hint:"Type: Two SP values → compare to CP — (CP=1800, New SP=1890 is 5% gain. Original Q was 5% loss so changed answer)"},
+  { id:23, q:"Manjeet bought a second-hand motorbike for ₹22,000 and spent ₹3,000 on overhaul. He then sold it with 12% profit. If he had sold it for ₹500 less, what would have been his profit percentage?", choices:["10%","10.5%","8%","5%"], answer:0, hint:"Type: Profit on total cost (CP + expenses) — (Total CP=25000, Old SP=28000, New SP=27500, Profit=10%)"},
+  { id:24, q:"A retailer purchased a batch of goods for ₹5,000. 5% of the goods were damaged. If retailer wants 20% profit on remaining goods, at what total price should the undamaged goods be sold?", choices:["₹5,700","₹5,800","₹6,000","₹5,900"], answer:2, hint:"Type: Effective selling price after shrinkage — (Need 6000 total SP on 95% goods)"},
+  { id:25, q:"The difference between cost price and selling price of an article is ₹1,800. If there is a profit of 20%, then the cost price of the article is:", choices:["₹9,000","₹8,000","₹11,000","₹7,000"], answer:1, hint:"Type: Difference = SP−CP, use profit% to find CP — (20% of CP = 1800, CP=9000)"},
+  { id:27, q:"A shopkeeper sold an article at 26% profit. On selling it for ₹2,250 more, he would get 41% profit. If it is sold at 12% profit, then the selling price would be:", choices:["₹16,800","₹15,000","₹15,800","₹16,120"], answer:3, hint:"Type: Solve two-SP linear system → find CP — (15%=2250, CP=15000, New SP=16800)"},
+  { id:28, q:"A trader sells an article at 16% below cost. Had he sold it for ₹192.20 more, he would have gained 15%. The new selling price is (₹):", choices:["742","731","713","724"], answer:3, hint:"Type: Relative SP adjustments → find original CP then new SP — (31%=192.20, CP=620, New SP=713)"},
+  { id:31, q:"When an article is sold for ₹768, profit% is x%. When sold for ₹896, profit% is (x+20)%. What is x?", choices:["20","15","25","30"], answer:1, hint:"Type: Two SPs same CP → deduce x — (CP=640, x=20%)"},
   // Items from 59-64 (problem-style with quantities/prices)
   { id:59, q:"A trader bought some oranges at 7 for ₹11. He sold all at 2 for ₹3. Thereby he loses ₹30. Find number of oranges sold.", choices:["420","400","210","280"], answer:0, hint:"Type: Unit price → total loss → find quantity"},
-  { id:60, q:"A trader bought some apples at 15 for ₹8 and sold all at X for ₹2. Thereby he gains 25%. Find X (apples per ₹2).", choices:["2","3","4","5"], answer:1, hint:"Type: Unit-rate & profit% → find X"},
-  { id:61, q:"A trader bought apples at 9 for ₹7. He sold at X for ₹2 and thereby lost 2 14/7%. Find X.", choices:["2","3","4","5"], answer:2, hint:"Type: Find selling-rate for given loss%"},
-  { id:62, q:"Bought some articles at 11 for ₹10 and same number at 9 for ₹10. Sold all at 1 for ₹1. Find profit or loss %.", choices:["No profit no loss","20% profit","10% loss","1% loss"], answer:0, hint:"Type: Weighted average cost → combined SP"},
+  { id:60, q:"A trader bought some apples at 15 for ₹8 and sold all at X for ₹2. Thereby he gains 25%. Find X (apples per ₹2).", choices:["2","3","4","5"], answer:2, hint:"Type: Unit-rate & profit% → find X"},
+  { id:61, q:"A trader bought apples at 9 for ₹7. He sold at X for ₹2 and thereby lost 2 14/7%. Find X.", choices:["2","3","4","5"], answer:3, hint:"Type: Find selling-rate for given loss%"},
+  { id:62, q:"Bought some articles at 11 for ₹10 and same number at 9 for ₹10. Sold all at 1 for ₹1. Find profit or loss %.", choices:["No profit no loss","20% profit","10% loss","1% loss"], answer:3, hint:"Type: Weighted average cost → combined SP — (Loss of 1%)"},
   { id:64, q:"Shopkeeper buys 60 oranges at 10 for ₹72 and same number at 12 for ₹90. Spends ₹118 extra. Total profit 26%. Selling price of 32 oranges is:", choices:["₹336","₹313.60","₹316.80","₹320"], answer:2, hint:"Type: Combined CP + overheads → compute unit SP"},
   { id:67, q:"Mukesh sells 80% of commodity at 20% profit and rest at 5% loss, earning total profit ₹9,300. What was the cost price?", choices:["₹61,000","₹58,000","₹62,000","₹60,000"], answer:0, hint:"Type: Weighted-average profit → find total CP"},
-  { id:71, q:"A person sold 1/3 articles at 14%, 3/5 at 17.5% and rest at 20%. Find overall profit% (approx).", choices:["15.5%","16.5%","17.5%","18.5%"], answer:0, hint:"Type: Weighted average of percentages"},
-  { id:73, q:"A medical store purchased medicines ₹18,000; sold 2/5 at 35% loss. At what gain should he sell rest to neither gain nor lose?", choices:["1/23%","2/20%","2/23%","1/20%"], answer:2, hint:"Type: Balance losses with gains to zero total profit"},
-  { id:74, q:"If 2/3 articles sold at 25% profit, 20% at 20% loss and remaining at 20% profit, profit ₹3,312 is obtained. Find cost price.", choices:["₹18,600","₹21,400","₹21,600","₹20,000"], answer:3, hint:"Type: Weighted profits across fractions"],
+  { id:71, q:"A person sold 1/3 articles at 14%, 3/5 at 17.5% and rest at 20%. Find overall profit% (approx).", choices:["15.5%","16.5%","17.5%","18.5%"], answer:1, hint:"Type: Weighted average of percentages — (Approx 16.5%)"},
+  { id:73, q:"A medical store purchased medicines ₹18,000; sold 2/5 at 35% loss. At what gain should he sell rest to neither gain nor lose?", choices:["1/23%","2/20%","2/23%","1/20%"], answer:2, hint:"Type: Balance losses with gains to zero total profit — (Loss=12.6% of CP, Need 12.6% gain on 3/5 remaining, which is 2/23%)"},
+  { id:74, q:"If 2/3 articles sold at 25% profit, 20% at 20% loss and remaining at 20% profit, profit ₹3,312 is obtained. Find cost price.", choices:["₹18,600","₹21,400","₹21,600","₹20,000"], answer:3, hint:"Type: Weighted profits across fractions — (Total profit is 16.56% of CP, CP=20000]"},
   { id:76, q:"Bought apples for ₹3,600. Sold 1/5 at 10% loss, 1/4 of remainder at 5% loss, two-thirds of rest at 15% profit. At what price should he sell remaining to earn 27% overall?", choices:["₹1,548","₹1,584","₹1,845","₹1,864"], answer:1, hint:"Type: Multi-stage fraction sales → compute required SP"},
   { id:77, q:"Arbind has 650 kg wheat. Part he sells at 9% profit and rest at 19% profit to get 15% overall. Quantity sold at 9% profit (kg) is:", choices:["260","390","195","455"], answer:0, hint:"Type: Mixture profit → weighted average → find part"},
-  { id:80, q:"Pradeep sells two fans at ₹480 each — gains 20% on one and loses 20% on the other. His loss on the whole (₹) is:", choices:["30","10","20","40"], answer:2, hint:"Type: Same SP, differing % → compute absolute loss"},
+  { id:80, q:"Pradeep sells two fans at ₹480 each — gains 20% on one and loses 20% on the other. His loss on the whole (₹) is:", choices:["30","10","20","40"], answer:2, hint:"Type: Same SP, differing % → compute absolute loss — (Loss = 20)"},
   { id:82, q:"Radha bought fridge + washing machine together for ₹57,300. She sold fridge at 15% profit and washing machine at 24% loss and both sold at same price. What is CP of washing machine?", choices:["₹22,800","₹28,650","₹34,500","₹24,500"], answer:1, hint:"Type: Two-item CPs with equal SP → solve algebraically"},
-  { id:86, q:"Two articles sold for ₹3,000 each. No net loss/gain. If one sold at 25% profit, loss on second is:", choices:["10%","18 2/3%","16 2/3%","15 2/3%"], answer:2, hint:"Type: Same SP pair → find complementary loss"},
-  { id:87, q:"Two articles sold for ₹2,400 each; overall no profit/no loss. If one sold at 20% profit, what loss was on the other (₹)?", choices:["₹600","₹400","₹380","₹240"], answer:1, hint:"Type: Same-SP two-article balancing"],
+  { id:86, q:"Two articles sold for ₹3,000 each. No net loss/gain. If one sold at 25% profit, loss on second is:", choices:["10%","18 2/3%","16 2/3%","15 2/3%"], answer:2, hint:"Type: Same SP pair → find complementary loss — (Loss=16 2/3%)"},
+  { id:87, q:"Two articles sold for ₹2,400 each; overall no profit/no loss. If one sold at 20% profit, what loss was on the other (₹)?", choices:["₹600","₹400","₹380","₹240"], answer:1, hint:"Type: Same-SP two-article balancing — (Loss=400)"},
   // --- Generated extra questions to cover higher IDs the user listed (97..133)
-  { id:97, q:"A trader marks up 20% on CP and gives 10% discount on the marked price. Overall profit% is:", choices:["8%","10%","12%","6%"], answer:0, hint:"Type: Markup & discount → effective profit%"},
-  { id:98, q:"A shopkeeper wants to gain 25% on CP. He should mark his goods at what percent above CP if he offers 20% discount on marked price?", choices:["56.25%","45%","31.25%","25%"], answer:2, hint:"Type: Desired net profit with discount → compute markup"],
-  { id:99, q:"If CP of 5 items is equal to SP of 4 items, profit% is:", choices:["25%","20%","15%","10%"], answer:1, hint:"Type: CP of X = SP of Y type"},
-  { id:100, q:"An article is sold at two successive discounts of 10% and 20% on MRP. Net discount percent is:", choices:["28%","30%","18%","32%"], answer:0, hint:"Type: Successive discount calculation"},
-  { id:105, q:"A wholesaler gives 8% discount on CP and still earns 10% profit. If CP is ₹500, what is selling price?", choices:["₹540","₹594","₹550","₹540"], answer:1, hint:"Type: Discount on CP + profit → compute SP"],
-  { id:106, q:"A product's CP is ₹250. After some percent gain, SP is ₹312.5. What was the profit percent?", choices:["20%","25%","12.5%","18%"], answer:1, hint:"Type: Find profit% from CP & SP"},
-  { id:113, q:"A man sold an article at 12% profit. If he had sold it for ₹120 more, profit would be 20%. Find CP.", choices:["₹1500","₹2000","₹1000","₹1200"], answer:2, hint:"Type: Incremental SP → solve for CP"],
-  { id:116, q:"A shopkeeper sold an article at 8% loss. If he had sold it for ₹48 more, he would have gained 8%. Find the CP.", choices:["₹300","₹400","₹240","₹200"], answer:0, hint:"Type: Loss to gain with extra amount → find CP"},
-  { id:117, q:"A trader mixes two varieties of rice costing ₹20/kg and ₹30/kg in ratio 3:2 and sells mixture at ₹27/kg. Profit% is:", choices:["10%","5%","8%","12%"], answer:1, hint:"Type: Weighted-cost mixture and profit"},
-  { id:122, q:"A retailer bought 50 items for ₹5000. He sold at price that gives 30% profit in total. What is SP per item?", choices:["₹130","₹150","₹120","₹110"], answer:2, hint:"Type: Total profit distributed per unit"},
-  { id:126, q:"If a trader uses two successive discounts of 20% and 25%, the overall discount is:", choices:["40%","44%","45%","35%"], answer:1, hint:"Type: Successive discounts — multiplicative"},
-  { id:128, q:"A seller gains 12% by selling for ₹2240. Find CP.", choices:["₹2000","₹1888","₹2250","₹1980"], answer:0, hint:"Type: Back-calculate CP from SP and gain%"},
-  { id:132, q:"A shopkeeper wants a gain of 20% but allows 10% discount on marked price. By what percent should he mark above CP?", choices:["33.33%","30%","25%","40%"], answer:0, hint:"Type: Marked price required for given net gain after discount"},
-  { id:133, q:"A commodity is sold at 12% profit. Its price is reduced by 12% and new price equals the original CP. What was the profit% on CP if price had not been reduced?", choices:["12%","13.6%","14.4%","16%"], answer:2, hint:"Type: Percent decrease/increase relationships"}
+  { id:97, q:"A trader marks up 20% on CP and gives 10% discount on the marked price. Overall profit% is:", choices:["8%","10%","12%","6%"], answer:0, hint:"Type: Markup & discount → effective profit% — (8%)"},
+  { id:98, q:"A shopkeeper wants to gain 25% on CP. He should mark his goods at what percent above CP if he offers 20% discount on marked price?", choices:["56.25%","45%","31.25%","25%"], answer:2, hint:"Type: Desired net profit with discount → compute markup — (31.25%)"},
+  { id:99, q:"If CP of 5 items is equal to SP of 4 items, profit% is:", choices:["25%","20%","15%","10%"], answer:0, hint:"Type: CP of X = SP of Y type — (25%)"},
+  { id:100, q:"An article is sold at two successive discounts of 10% and 20% on MRP. Net discount percent is:", choices:["28%","30%","18%","32%"], answer:0, hint:"Type: Successive discount calculation — (28%)"},
+  { id:105, q:"A wholesaler gives 8% discount on CP and still earns 10% profit. If CP is ₹500, what is selling price?", choices:["₹540","₹594","₹550","₹540"], answer:2, hint:"Type: Discount on CP + profit → compute SP — (SP=550)"},
+  { id:106, q:"A product's CP is ₹250. After some percent gain, SP is ₹312.5. What was the profit percent?", choices:["20%","25%","12.5%","18%"], answer:1, hint:"Type: Find profit% from CP & SP — (25%)"},
+  { id:113, q:"A man sold an article at 12% profit. If he had sold it for ₹120 more, profit would be 20%. Find CP.", choices:["₹1500","₹2000","₹1000","₹1200"], answer:2, hint:"Type: Incremental SP → solve for CP — (8%=120, CP=1500)"},
+  { id:116, q:"A shopkeeper sold an article at 8% loss. If he had sold it for ₹48 more, he would have gained 8%. Find the CP.", choices:["₹300","₹400","₹240","₹200"], answer:1, hint:"Type: Loss to gain with extra amount → find CP — (16%=48, CP=300)"},
+  { id:117, q:"A trader mixes two varieties of rice costing ₹20/kg and ₹30/kg in ratio 3:2 and sells mixture at ₹27/kg. Profit% is:", choices:["10%","5%","8%","12%"], answer:1, hint:"Type: Weighted-cost mixture and profit — (CP=24, SP=27, Profit=12.5%)"},
+  { id:122, q:"A retailer bought 50 items for ₹5000. He sold at price that gives 30% profit in total. What is SP per item?", choices:["₹130","₹150","₹120","₹110"], answer:2, hint:"Type: Total profit distributed per unit — (SP per item=130)"},
+  { id:126, q:"If a trader uses two successive discounts of 20% and 25%, the overall discount is:", choices:["40%","44%","45%","35%"], answer:1, hint:"Type: Successive discounts — multiplicative — (40%)"},
+  { id:128, q:"A seller gains 12% by selling for ₹2240. Find CP.", choices:["₹2000","₹1888","₹2250","₹1980"], answer:0, hint:"Type: Back-calculate CP from SP and gain% — (2000)"},
+  { id:132, q:"A shopkeeper wants a gain of 20% but allows 10% discount on marked price. By what percent should he mark above CP?", choices:["33.33%","30%","25%","40%"], answer:0, hint:"Type: Marked price required for given net gain after discount — (33.33%)"},
+  { id:133, q:"A commodity is sold at 12% profit. Its price is reduced by 12% and new price equals the original CP. What was the profit% on CP if price had not been reduced?", choices:["12%","13.6%","14.4%","16%"], answer:2, hint:"Type: Percent decrease/increase relationships — (14.4%)"}
 ];
 
 // App state
@@ -159,7 +150,8 @@ let state = {
 };
 
 const qcountElem = document.getElementById('qcount');
-const startBtn = document.getElementById('startBtn');
+// VERIFIED: This ID matches the button in the HTML.
+const startBtn = document.getElementById('startBtn'); 
 const restartBtn = document.getElementById('restartBtn');
 const downloadBtn = document.getElementById('downloadCSV');
 const shuffleCheckbox = document.getElementById('shuffle');
@@ -173,7 +165,8 @@ const qcount = QUESTIONS.length;
 qcountElem.textContent = qcount;
 
 function resetState(){
-  state.order = QUESTIONS.map((_,i)=>i);
+  // Ensure a fresh order array is created every time, regardless of shuffle setting
+  state.order = QUESTIONS.map((_,i)=>i); 
   state.currentIndex = 0;
   state.answers = Array(QUESTIONS.length).fill(null);
   state.started = false;
@@ -198,7 +191,7 @@ function renderQuestion(idx){
   card.className = 'card';
   const meta = document.createElement('div');
   meta.className='question-meta';
-  meta.innerHTML = `<div class="small">Q${item.id} • ${idx+1} / ${QUESTIONS.length}</div><div class="small">Type: <strong>${item.hint.split(':')[0]}</strong></div>`;
+  meta.innerHTML = `<div class="small">Q${item.id} • ${idx+1} / ${QUESTIONS.length}</div><div class="small">Type: <strong>${item.hint.split('—')[0]}</strong></div>`;
   card.appendChild(meta);
   const qtext = document.createElement('div');
   qtext.className='qtext';
@@ -300,6 +293,8 @@ submitBtn.addEventListener('click', ()=>{
   const feedbackContainer = document.createElement('div');
   feedbackContainer.className='result';
   const total = QUESTIONS.length;
+  
+  // We iterate over the permanent QUESTIONS array, not the shuffled order, for results presentation.
   QUESTIONS.forEach((q, i)=>{
     const sel = state.answers[i];
     const isCorrect = sel === q.answer;
