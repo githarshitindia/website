@@ -1,0 +1,376 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Profit & Loss Quiz — Single File</title>
+<style>
+  :root{
+    --bg:#0f1724; --card:#0b1220; --muted:#94a3b8; --accent:#06b6d4;
+    --success:#16a34a; --danger:#ef4444; --glass: rgba(255,255,255,0.04);
+  }
+  body{
+    margin:0; font-family:Inter,ui-sans-serif,system-ui,Segoe UI,Roboto,"Helvetica Neue",Arial;
+    background:linear-gradient(180deg,#071025 0%, #071b2a 60%);
+    color:#e6eef6;
+    -webkit-font-smoothing:antialiased;
+    -moz-osx-font-smoothing:grayscale;
+    padding:28px;
+  }
+  .container{max-width:980px;margin:0 auto;background:linear-gradient(180deg,var(--card),#071428);
+    border-radius:14px;padding:22px;box-shadow:0 8px 30px rgba(2,6,23,0.6);}
+  h1{margin:0 0 6px;font-size:20px}
+  p.lead{margin:0 0 18px;color:var(--muted)}
+  .controls{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:14px}
+  .btn{background:var(--accent);color:#032; padding:8px 12px;border-radius:8px;border:none;cursor:pointer;font-weight:600}
+  .btn.ghost{background:transparent;color:var(--accent);border:1px solid rgba(255,255,255,0.05)}
+  .row{display:flex;gap:12px}
+  .card{background:var(--glass);padding:14px;border-radius:12px;margin-bottom:12px}
+  .question-meta{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+  .qtext{font-size:16px;margin-bottom:8px}
+  .options{display:flex;flex-direction:column;gap:8px}
+  label.option{display:flex;gap:10px;align-items:center;padding:8px;border-radius:8px;border:1px solid rgba(255,255,255,0.03);cursor:pointer}
+  input[type=radio]{accent-color:var(--accent)}
+  .hint{background:#06212a;padding:10px;border-radius:8px;color:var(--muted);margin-top:8px;display:none}
+  .progress{height:10px;background:rgba(255,255,255,0.04);border-radius:999px;overflow:hidden;margin-bottom:10px}
+  .progress > i{display:block;height:100%;background:linear-gradient(90deg,var(--accent),#34d399);width:0%}
+  .footer{display:flex;justify-content:space-between;align-items:center;margin-top:12px;gap:8px}
+  .result{padding:14px;border-radius:10px;background:linear-gradient(90deg,#021018,#06202b);margin-top:10px}
+  .correct{background:rgba(22,163,74,0.12);border-left:4px solid var(--success);padding:8px;border-radius:6px}
+  .wrong{background:rgba(239,68,68,0.08);border-left:4px solid var(--danger);padding:8px;border-radius:6px}
+  .small{font-size:13px;color:var(--muted)}
+  .topbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;gap:10px}
+  .controls .toggle{display:inline-flex;align-items:center;gap:8px;color:var(--muted)}
+  .badge{background:rgba(255,255,255,0.04);padding:6px 8px;border-radius:8px;font-weight:600}
+  .hidden{display:none}
+  .center{display:flex;justify-content:center;align-items:center}
+  .download-btn{background:transparent;border:1px dashed rgba(255,255,255,0.06);color:var(--muted);padding:8px;border-radius:8px}
+  footer.small{margin-top:14px;color:var(--muted);text-align:center}
+  @media(max-width:640px){
+    .row{flex-direction:column}
+  }
+</style>
+</head>
+<body>
+  <div class="container" role="application" aria-labelledby="title">
+    <div class="topbar">
+      <div>
+        <h1 id="title">Profit & Loss — Quiz</h1>
+        <p class="lead">Multiple-choice quiz built from your selected questions. Each question includes a short hint showing the concept/type.</p>
+      </div>
+      <div class="badge">Questions: <span id="qcount">0</span></div>
+    </div>
+
+    <div class="controls">
+      <label class="toggle small"><input type="checkbox" id="shuffle"> Shuffle questions before start</label>
+      <button class="btn" id="startBtn">Start Quiz</button>
+      <button class="btn ghost" id="restartBtn" style="display:none">Restart</button>
+      <button class="btn ghost" id="downloadCSV" style="display:none">Download Results (CSV)</button>
+      <div style="flex:1"></div>
+      <div class="small">Tip: Use <strong>Show hint</strong> if stuck</div>
+    </div>
+
+    <div class="progress" aria-hidden="true"><i id="progBar"></i></div>
+
+    <div id="quizArea" class="hidden">
+      <!-- question card inserted here -->
+    </div>
+
+    <div class="footer">
+      <div>
+        <button class="btn ghost" id="prevBtn" disabled>◀ Prev</button>
+        <button class="btn ghost" id="nextBtn" disabled>Next ▶</button>
+      </div>
+      <div class="center">
+        <button class="btn" id="submitBtn" disabled>Submit Quiz</button>
+      </div>
+    </div>
+
+    <div id="resultArea" class="hidden"></div>
+
+    <footer class="small">Built with ♥ — single-file HTML quiz. Questions include hints naming the concept type.</footer>
+  </div>
+
+<script>
+/*
+  Single-file quiz app
+  - Questions array below: each {id, q, choices:[...], answerIndex, hint}
+  - The 'id' is the original question number you asked for (e.g., 7,8,13,...).
+  - Some later ids were generated as extra practice questions.
+*/
+
+// QUESTIONS: mixture of user-requested IDs + added random questions.
+// For clarity each question includes a 'type' hint (small textual label).
+const QUESTIONS = [
+  { id:7, q:"If a book is sold at 25% loss, then ratio of cost price to the selling price is:", choices:["3 : 2","4 : 3","5 : 4","2 : 3"], answer:0, hint:"Type: Basic CP:SP ratio (loss)"},
+  { id:8, q:"An article is sold at a profit of 250%. What is the ratio of its cost price to selling price?", choices:["2 : 5","5 : 2","2 : 7","7 : 2"], answer:0, hint:"Type: Basic profit% → ratio"},
+  { id:13, q:"A shopkeeper sold an article at 26 2/3% profit. If the selling price is ₹1600, find the cost price.", choices:["₹1200","₹1400","₹1500","None of these"], answer:0, hint:"Type: Reverse percentage (SP → CP)"},
+  { id:14, q:"By selling a hair oil product for ₹336, the gain is 12%. If the gain is reduced to 9%, find the resultant selling price (₹).", choices:["₹330","₹300","₹327","₹339"], answer:2, hint:"Type: Change in profit% — recompute SP"},
+  { id:16, q:"By selling an article for ₹19.50, a dealer makes a profit of 30%. By how much should he increase his selling price so as to make a profit of 40%?", choices:["₹3","₹1.75","₹2","₹1.50"], answer:2, hint:"Type: Profit% on fixed CP → find CP, then new SP"},
+  { id:18, q:"A blanket is sold for ₹1,148, resulting in a loss of 30%. For how much should it be sold to gain 5%?", choices:["₹1,423","₹1,734","₹1,543","₹1,722"], answer:0, hint:"Type: Loss → compute CP → desired SP for gain"},
+  { id:19, q:"When an article is sold for ₹480, there is a loss of 2 16/3 %. To gain 1 8/3 %, it should be sold for (₹):", choices:["₹620","₹624","₹605","₹750"], answer:1, hint:"Type: Convert mixed % → find CP → new SP"},
+  { id:20, q:"By selling an article for ₹2,200, a profit of 10% is earned. If the same article is sold for ₹2,600, then what will be the gain percentage?", choices:["20%","15%","37%","30%"], answer:0, hint:"Type: Compare SPs to CP → find %"},
+  { id:22, q:"An article is sold for ₹2070 at a profit of 15%. If the article is sold for ₹1890, then what will be gain or loss percent ?", choices:["10% gain","10% loss","5% gain","5% loss"], answer:3, hint:"Type: Two SP values → compare to CP"},
+  { id:23, q:"Manjeet bought a second-hand motorbike for ₹22,000 and spent ₹3,000 on overhaul. He then sold it with 12% profit. If he had sold it for ₹500 less, what would have been his profit percentage?", choices:["10%","10.5%","8%","5%"], answer:0, hint:"Type: Profit on total cost (CP + expenses)"},
+  { id:24, q:"A retailer purchased a batch of goods for ₹5,000. 5% of the goods were damaged. If retailer wants 20% profit on remaining goods, at what total price should the undamaged goods be sold?", choices:["₹5,700","₹5,800","₹6,000","₹5,900"], answer:2, hint:"Type: Effective selling price after shrinkage"},
+  { id:25, q:"The difference between cost price and selling price of an article is ₹1,800. If there is a profit of 20%, then the cost price of the article is:", choices:["₹9,000","₹8,000","₹11,000","₹7,000"], answer:0, hint:"Type: Difference = SP−CP, use profit% to find CP"},
+  { id:27, q:"A shopkeeper sold an article at 26% profit. On selling it for ₹2,250 more, he would get 41% profit. If it is sold at 12% profit, then the selling price would be:", choices:["₹16,800","₹15,000","₹15,800","₹16,120"], answer:1, hint:"Type: Solve two-SP linear system → find CP"},
+  { id:28, q:"A trader sells an article at 16% below cost. Had he sold it for ₹192.20 more, he would have gained 15%. The new selling price is (₹):", choices:["742","731","713","724"], answer:3, hint:"Type: Relative SP adjustments → find original CP then new SP"},
+  { id:31, q:"When an article is sold for ₹768, profit% is x%. When sold for ₹896, profit% is (x+20)%. What is x?", choices:["20","15","25","30"], answer:0, hint:"Type: Two SPs same CP → deduce x"},
+  // Items from 59-64 (problem-style with quantities/prices)
+  { id:59, q:"A trader bought some oranges at 7 for ₹11. He sold all at 2 for ₹3. Thereby he loses ₹30. Find number of oranges sold.", choices:["420","400","210","280"], answer:0, hint:"Type: Unit price → total loss → find quantity"},
+  { id:60, q:"A trader bought some apples at 15 for ₹8 and sold all at X for ₹2. Thereby he gains 25%. Find X (apples per ₹2).", choices:["2","3","4","5"], answer:1, hint:"Type: Unit-rate & profit% → find X"},
+  { id:61, q:"A trader bought apples at 9 for ₹7. He sold at X for ₹2 and thereby lost 2 14/7%. Find X.", choices:["2","3","4","5"], answer:2, hint:"Type: Find selling-rate for given loss%"},
+  { id:62, q:"Bought some articles at 11 for ₹10 and same number at 9 for ₹10. Sold all at 1 for ₹1. Find profit or loss %.", choices:["No profit no loss","20% profit","10% loss","1% loss"], answer:0, hint:"Type: Weighted average cost → combined SP"},
+  { id:64, q:"Shopkeeper buys 60 oranges at 10 for ₹72 and same number at 12 for ₹90. Spends ₹118 extra. Total profit 26%. Selling price of 32 oranges is:", choices:["₹336","₹313.60","₹316.80","₹320"], answer:2, hint:"Type: Combined CP + overheads → compute unit SP"},
+  { id:67, q:"Mukesh sells 80% of commodity at 20% profit and rest at 5% loss, earning total profit ₹9,300. What was the cost price?", choices:["₹61,000","₹58,000","₹62,000","₹60,000"], answer:0, hint:"Type: Weighted-average profit → find total CP"},
+  { id:71, q:"A person sold 1/3 articles at 14%, 3/5 at 17.5% and rest at 20%. Find overall profit% (approx).", choices:["15.5%","16.5%","17.5%","18.5%"], answer:0, hint:"Type: Weighted average of percentages"},
+  { id:73, q:"A medical store purchased medicines ₹18,000; sold 2/5 at 35% loss. At what gain should he sell rest to neither gain nor lose?", choices:["1/23%","2/20%","2/23%","1/20%"], answer:2, hint:"Type: Balance losses with gains to zero total profit"},
+  { id:74, q:"If 2/3 articles sold at 25% profit, 20% at 20% loss and remaining at 20% profit, profit ₹3,312 is obtained. Find cost price.", choices:["₹18,600","₹21,400","₹21,600","₹20,000"], answer:3, hint:"Type: Weighted profits across fractions"],
+  { id:76, q:"Bought apples for ₹3,600. Sold 1/5 at 10% loss, 1/4 of remainder at 5% loss, two-thirds of rest at 15% profit. At what price should he sell remaining to earn 27% overall?", choices:["₹1,548","₹1,584","₹1,845","₹1,864"], answer:1, hint:"Type: Multi-stage fraction sales → compute required SP"},
+  { id:77, q:"Arbind has 650 kg wheat. Part he sells at 9% profit and rest at 19% profit to get 15% overall. Quantity sold at 9% profit (kg) is:", choices:["260","390","195","455"], answer:0, hint:"Type: Mixture profit → weighted average → find part"},
+  { id:80, q:"Pradeep sells two fans at ₹480 each — gains 20% on one and loses 20% on the other. His loss on the whole (₹) is:", choices:["30","10","20","40"], answer:2, hint:"Type: Same SP, differing % → compute absolute loss"},
+  { id:82, q:"Radha bought fridge + washing machine together for ₹57,300. She sold fridge at 15% profit and washing machine at 24% loss and both sold at same price. What is CP of washing machine?", choices:["₹22,800","₹28,650","₹34,500","₹24,500"], answer:1, hint:"Type: Two-item CPs with equal SP → solve algebraically"},
+  { id:86, q:"Two articles sold for ₹3,000 each. No net loss/gain. If one sold at 25% profit, loss on second is:", choices:["10%","18 2/3%","16 2/3%","15 2/3%"], answer:2, hint:"Type: Same SP pair → find complementary loss"},
+  { id:87, q:"Two articles sold for ₹2,400 each; overall no profit/no loss. If one sold at 20% profit, what loss was on the other (₹)?", choices:["₹600","₹400","₹380","₹240"], answer:1, hint:"Type: Same-SP two-article balancing"],
+  // --- Generated extra questions to cover higher IDs the user listed (97..133)
+  { id:97, q:"A trader marks up 20% on CP and gives 10% discount on the marked price. Overall profit% is:", choices:["8%","10%","12%","6%"], answer:0, hint:"Type: Markup & discount → effective profit%"},
+  { id:98, q:"A shopkeeper wants to gain 25% on CP. He should mark his goods at what percent above CP if he offers 20% discount on marked price?", choices:["56.25%","45%","31.25%","25%"], answer:2, hint:"Type: Desired net profit with discount → compute markup"],
+  { id:99, q:"If CP of 5 items is equal to SP of 4 items, profit% is:", choices:["25%","20%","15%","10%"], answer:1, hint:"Type: CP of X = SP of Y type"],
+  { id:100, q:"An article is sold at two successive discounts of 10% and 20% on MRP. Net discount percent is:", choices:["28%","30%","18%","32%"], answer:0, hint:"Type: Successive discount calculation"},
+  { id:105, q:"A wholesaler gives 8% discount on CP and still earns 10% profit. If CP is ₹500, what is selling price?", choices:["₹540","₹594","₹550","₹540"], answer:1, hint:"Type: Discount on CP + profit → compute SP"],
+  { id:106, q:"A product's CP is ₹250. After some percent gain, SP is ₹312.5. What was the profit percent?", choices:["20%","25%","12.5%","18%"], answer:1, hint:"Type: Find profit% from CP & SP"},
+  { id:113, q:"A man sold an article at 12% profit. If he had sold it for ₹120 more, profit would be 20%. Find CP.", choices:["₹1500","₹2000","₹1000","₹1200"], answer:2, hint:"Type: Incremental SP → solve for CP"],
+  { id:116, q:"A shopkeeper sold an article at 8% loss. If he had sold it for ₹48 more, he would have gained 8%. Find the CP.", choices:["₹300","₹400","₹240","₹200"], answer:0, hint:"Type: Loss to gain with extra amount → find CP"},
+  { id:117, q:"A trader mixes two varieties of rice costing ₹20/kg and ₹30/kg in ratio 3:2 and sells mixture at ₹27/kg. Profit% is:", choices:["10%","5%","8%","12%"], answer:1, hint:"Type: Weighted-cost mixture and profit"},
+  { id:122, q:"A retailer bought 50 items for ₹5000. He sold at price that gives 30% profit in total. What is SP per item?", choices:["₹130","₹150","₹120","₹110"], answer:2, hint:"Type: Total profit distributed per unit"},
+  { id:126, q:"If a trader uses two successive discounts of 20% and 25%, the overall discount is:", choices:["40%","44%","45%","35%"], answer:1, hint:"Type: Successive discounts — multiplicative"},
+  { id:128, q:"A seller gains 12% by selling for ₹2240. Find CP.", choices:["₹2000","₹1888","₹2250","₹1980"], answer:0, hint:"Type: Back-calculate CP from SP and gain%"},
+  { id:132, q:"A shopkeeper wants a gain of 20% but allows 10% discount on marked price. By what percent should he mark above CP?", choices:["33.33%","30%","25%","40%"], answer:0, hint:"Type: Marked price required for given net gain after discount"},
+  { id:133, q:"A commodity is sold at 12% profit. Its price is reduced by 12% and new price equals the original CP. What was the profit% on CP if price had not been reduced?", choices:["12%","13.6%","14.4%","16%"], answer:2, hint:"Type: Percent decrease/increase relationships"}
+];
+
+// App state
+let state = {
+  order: [], // indices into QUESTIONS
+  currentIndex: 0,
+  answers: [], // user selected index or null
+  started: false,
+  submitted: false
+};
+
+const qcountElem = document.getElementById('qcount');
+const startBtn = document.getElementById('startBtn');
+const restartBtn = document.getElementById('restartBtn');
+const downloadBtn = document.getElementById('downloadCSV');
+const shuffleCheckbox = document.getElementById('shuffle');
+const quizArea = document.getElementById('quizArea');
+const prevBtn = document.getElementById('prevBtn');
+const nextBtn = document.getElementById('nextBtn');
+const submitBtn = document.getElementById('submitBtn');
+const progBar = document.getElementById('progBar');
+const resultArea = document.getElementById('resultArea');
+const qcount = QUESTIONS.length;
+qcountElem.textContent = qcount;
+
+function resetState(){
+  state.order = QUESTIONS.map((_,i)=>i);
+  state.currentIndex = 0;
+  state.answers = Array(QUESTIONS.length).fill(null);
+  state.started = false;
+  state.submitted = false;
+}
+
+resetState();
+
+function shuffleArray(a){
+  for(let i=a.length-1;i>0;i--){
+    const j=Math.floor(Math.random()*(i+1));
+    [a[i],a[j]]=[a[j],a[i]];
+  }
+}
+
+function renderQuestion(idx){
+  const qIdx = state.order[idx];
+  const item = QUESTIONS[qIdx];
+  const chosen = state.answers[qIdx];
+  quizArea.innerHTML = '';
+  const card = document.createElement('div');
+  card.className = 'card';
+  const meta = document.createElement('div');
+  meta.className='question-meta';
+  meta.innerHTML = `<div class="small">Q${item.id} • ${idx+1} / ${QUESTIONS.length}</div><div class="small">Type: <strong>${item.hint.split(':')[0]}</strong></div>`;
+  card.appendChild(meta);
+  const qtext = document.createElement('div');
+  qtext.className='qtext';
+  qtext.innerHTML = `<strong>${item.q}</strong>`;
+  card.appendChild(qtext);
+
+  const opts = document.createElement('div');
+  opts.className='options';
+  item.choices.forEach((ch,ci)=>{
+    const label = document.createElement('label');
+    label.className='option';
+    label.innerHTML = `<input type="radio" name="q" value="${ci}" ${chosen===ci?'checked':''}> <span>${String.fromCharCode(65+ci)}. ${ch}</span>`;
+    label.onclick = ()=>{
+      // update state
+      state.answers[qIdx] = ci;
+      updateNavAndSubmit();
+      // update label styles (visual)
+      Array.from(opts.querySelectorAll('label')).forEach(l=> l.style.borderWidth='1px');
+      label.style.borderWidth='2px';
+    };
+    opts.appendChild(label);
+  });
+  card.appendChild(opts);
+
+  const hintBox = document.createElement('div');
+  hintBox.className='hint';
+  hintBox.innerHTML = `<strong>Hint:</strong> ${item.hint}`;
+  card.appendChild(hintBox);
+
+  const hintBtn = document.createElement('button');
+  hintBtn.className='btn ghost';
+  hintBtn.textContent='Show hint';
+  hintBtn.onclick = ()=>{ hintBox.style.display = hintBox.style.display === 'none' || !hintBox.style.display ? 'block' : 'none'; hintBtn.textContent = hintBox.style.display==='block' ? 'Hide hint' : 'Show hint'; };
+  card.appendChild(hintBtn);
+
+  quizArea.appendChild(card);
+  // update progress
+  progBar.style.width = `${((idx)/QUESTIONS.length)*100}%`;
+  // enable/disable nav
+  prevBtn.disabled = idx===0;
+  nextBtn.disabled = idx===QUESTIONS.length-1;
+}
+
+function updateNavAndSubmit(){
+  // enable submit when all answered
+  const allAnswered = state.answers.every(a=> a!==null);
+  submitBtn.disabled = !allAnswered;
+  // show progress bar fully filled on last question selection?
+  progBar.style.width = `${((state.currentIndex+1)/QUESTIONS.length)*100}%`;
+}
+
+startBtn.addEventListener('click', ()=>{
+  resetState();
+  if (shuffleCheckbox.checked) shuffleArray(state.order);
+  state.started = true;
+  startBtn.style.display='none';
+  restartBtn.style.display='inline-block';
+  downloadBtn.style.display='none';
+  quizArea.classList.remove('hidden');
+  renderQuestion(state.currentIndex);
+  prevBtn.disabled=false;
+  nextBtn.disabled=false;
+  submitBtn.disabled=true;
+  resultArea.classList.add('hidden');
+});
+
+restartBtn.addEventListener('click', ()=>{
+  resetState();
+  startBtn.style.display='inline-block';
+  restartBtn.style.display='none';
+  downloadBtn.style.display='none';
+  quizArea.classList.add('hidden');
+  resultArea.classList.add('hidden');
+  progBar.style.width='0%';
+});
+
+prevBtn.addEventListener('click', ()=>{
+  if(state.currentIndex>0){
+    state.currentIndex--;
+    renderQuestion(state.currentIndex);
+  }
+});
+
+nextBtn.addEventListener('click', ()=>{
+  if(state.currentIndex < QUESTIONS.length-1){
+    state.currentIndex++;
+    renderQuestion(state.currentIndex);
+  }
+});
+
+submitBtn.addEventListener('click', ()=>{
+  // lock answers and show results
+  state.submitted = true;
+  let correctCount = 0;
+  resultArea.innerHTML = '';
+  resultArea.classList.remove('hidden');
+
+  // Build feedback
+  const feedbackContainer = document.createElement('div');
+  feedbackContainer.className='result';
+  const total = QUESTIONS.length;
+  QUESTIONS.forEach((q, i)=>{
+    const sel = state.answers[i];
+    const isCorrect = sel === q.answer;
+    if(isCorrect) correctCount++;
+    const block = document.createElement('div');
+    block.style.marginBottom='8px';
+    block.innerHTML = `<div style="display:flex;justify-content:space-between;align-items:center">
+      <div><strong>Q${q.id}.</strong> ${q.q}</div>
+      <div class="small">${isCorrect?'<strong style="color:#34d399">Correct</strong>':'<strong style="color:#ff7b7b">Wrong</strong>'}</div>
+    </div>`;
+    const chosenText = sel===null ? '<em>No answer</em>' : `${String.fromCharCode(65+sel)}. ${q.choices[sel]}`;
+    const correctText = `${String.fromCharCode(65+q.answer)}. ${q.choices[q.answer]}`;
+    const details = document.createElement('div');
+    details.className = isCorrect ? 'correct small' : 'wrong small';
+    details.style.marginTop='6px';
+    details.innerHTML = `<div><strong>Your answer:</strong> ${chosenText}</div>
+                         <div style="margin-top:4px"><strong>Correct answer:</strong> ${correctText}</div>
+                         <div style="margin-top:6px"><strong>Type/hint:</strong> ${q.hint}</div>`;
+    block.appendChild(details);
+    feedbackContainer.appendChild(block);
+  });
+
+  const scoreBox = document.createElement('div');
+  scoreBox.style.marginBottom='10px';
+  const percent = Math.round((correctCount/total)*10000)/100;
+  scoreBox.innerHTML = `<h3>Result: ${correctCount} / ${total} — ${percent}%</h3>
+    <div class="small">You can download your answers as CSV or restart the quiz.</div>`;
+  resultArea.appendChild(scoreBox);
+  resultArea.appendChild(feedbackContainer);
+  // show download
+  downloadBtn.style.display='inline-block';
+  // disable UI
+  quizArea.classList.add('hidden');
+  prevBtn.disabled=true; nextBtn.disabled=true; submitBtn.disabled=true;
+});
+
+downloadBtn.addEventListener('click', ()=>{
+  // build CSV of answers and results
+  const rows = [["QuestionID","Question","YourAnswer","CorrectAnswer","IsCorrect","TypeHint"]];
+  QUESTIONS.forEach((q,i)=>{
+    const sel = state.answers[i];
+    const row = [
+      q.id,
+      q.q.replace(/[\r\n]+/g,' '),
+      sel===null ? '' : `${String.fromCharCode(65+sel)}. ${q.choices[sel]}`,
+      `${String.fromCharCode(65+q.answer)}. ${q.choices[q.answer]}`,
+      sel===q.answer ? "TRUE":"FALSE",
+      q.hint
+    ];
+    rows.push(row.map(cell=> `"${String(cell).replace(/"/g,'""')}"`).join(','));
+  });
+  const csv = rows.map(r => Array.isArray(r) ? r.join(',') : r).join('\n');
+  const blob = new Blob([csv], {type:'text/csv'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'quiz_results.csv';
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(url);
+});
+
+// keyboard navigation
+document.addEventListener('keydown', (e)=>{
+  if(!state.started || state.submitted) return;
+  if(e.key === 'ArrowLeft') prevBtn.click();
+  if(e.key === 'ArrowRight') nextBtn.click();
+});
+
+</script>
+</body>
+</html>
