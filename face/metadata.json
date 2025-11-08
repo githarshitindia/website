@@ -1,0 +1,7 @@
+{
+  "name": "Face Recognition Attendance",
+  "description": "A web application for schools where teachers can mark their attendance by scanning their face. The app uses face-api.js for recognition and Firebase Realtime Database for data storage. It also includes an admin panel for teacher registration and an attendance dashboard.",
+  "requestFramePermissions": [
+    "camera"
+  ]
+}
